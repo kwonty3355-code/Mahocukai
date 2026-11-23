@@ -1,0 +1,437 @@
+<title>탐사와 마탑 기획</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: 한 줄로 읽어 내려가는 문서. 섹션마다 "요점 → 예시 → 추천", 어려운 말은 옆에 바로 풀이, 질문과 용어 풀이는 맨 끝 */
+:root{
+  --bg:#f5f4f8; --paper:#ffffff; --ink:#1d1a26; --muted:#615b70; --line:#dedae6;
+  --rune:#6b4fb3; --rune-soft:#ece6f8; --ember:#b5562c; --ember-soft:#f7e6dc; --ok:#2f7d55; --warn:#a1462e;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141219; --paper:#1c1924; --ink:#ebe7f2; --muted:#a39cb2; --line:#2f2a3a;
+  --rune:#a98ff0; --rune-soft:#2a2340; --ember:#e7905e; --ember-soft:#3a2820; --ok:#6cc495; --warn:#e48a72; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#141219; --paper:#1c1924; --ink:#ebe7f2; --muted:#a39cb2; --line:#2f2a3a;
+  --rune:#a98ff0; --rune-soft:#2a2340; --ember:#e7905e; --ember-soft:#3a2820; --ok:#6cc495; --warn:#e48a72; color-scheme:dark }
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--sans);font-size:16px;line-height:1.75}
+.wrap{max-width:760px;margin:0 auto;padding-block:36px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:44px}
+.tag{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--rune);margin:0}
+h1{font-size:clamp(28px,5vw,38px);line-height:1.25;margin:6px 0 12px;font-weight:700;text-wrap:balance}
+h2{font-size:24px;line-height:1.35;margin:0;font-weight:700;text-wrap:balance}
+h3{font-size:18px;margin:0;font-weight:700}
+p{margin:0}
+section{display:grid;gap:16px;min-width:0}
+.lead{font-size:18px}
+.muted{color:var(--muted)}
+.ex{color:var(--muted);font-size:.92em}
+.note{background:var(--rune-soft);border-radius:10px;padding:14px 16px;font-size:15px;display:grid;gap:6px}
+.note b{color:var(--rune)}
+.pick{border-left:4px solid var(--ember);background:var(--paper);padding:14px 16px;border-radius:0 10px 10px 0;display:grid;gap:6px}
+.pick .lbl{font-family:var(--mono);font-size:12px;color:var(--ember);letter-spacing:.1em}
+.changed{font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--rune-soft);color:var(--rune);white-space:nowrap}
+ul,ol{margin:0;padding-left:22px;display:grid;gap:6px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:520px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.engines{display:grid;gap:10px}
+.eng{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.eng .k{font-family:var(--mono);font-size:13px;color:var(--rune);grid-row:span 2;padding-top:3px;white-space:nowrap}
+.eng span{color:var(--muted);font-size:15px}
+.cands{display:grid;gap:12px}
+.cand{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px}
+.cand.rec{box-shadow:inset 0 0 0 2px var(--ember)}
+.cand header{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.chip{font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--ember-soft);color:var(--ember)}
+.pros{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:15px}
+@media (max-width:560px){.pros{grid-template-columns:1fr}}
+.pros div{min-width:0}
+.pros .g{color:var(--ok);font-weight:600}
+.pros .r{color:var(--warn);font-weight:600}
+.board-fig{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px}
+@media (max-width:560px){.board-fig{grid-template-columns:1fr}}
+.grid9{display:grid;grid-template-columns:repeat(9,22px);grid-auto-rows:22px;gap:2px;justify-content:start}
+.grid9 i{display:block;border-radius:3px;background:var(--bg);border:1px solid var(--line);font-style:normal;font-size:11px;line-height:20px;text-align:center;font-weight:700}
+.grid9 i.water{background:var(--rune-soft);border-color:var(--rune);color:var(--rune)}
+.grid9 i.fire{background:var(--ember-soft);border-color:var(--ember);color:var(--ember)}
+.grid9 i.wind{background:transparent;border:1px dashed var(--ember)}
+.grid9 i.me{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid9 i.foe{background:var(--warn);color:var(--paper);border-color:var(--warn)}
+.legend{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+.steps{counter-reset:s;list-style:none;padding:0;display:grid;gap:8px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.steps li::before{content:counter(s);font-family:var(--mono);font-size:13px;width:24px;height:24px;border-radius:50%;background:var(--ember-soft);color:var(--ember);display:grid;place-items:center;margin-top:3px}
+.qs{display:grid;gap:18px}
+.qg{display:grid;gap:8px}
+.qg h3{font-size:15px;color:var(--muted);font-weight:600}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px}
+.q .n{font-family:var(--mono);font-size:13px;color:var(--rune);padding-top:3px}
+.q p{font-size:15px}
+.q small{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+dl.gloss{display:grid;grid-template-columns:minmax(90px,auto) 1fr;gap:8px 16px;margin:0;font-size:15px}
+dl.gloss dt{font-weight:700}
+dl.gloss dd{margin:0;color:var(--muted)}
+@media (max-width:480px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:8px}}
+hr{border:0;border-top:1px solid var(--line);margin:0}
+.ans{grid-column:2;display:grid;gap:8px;margin-top:4px}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{font:inherit;font-size:14px;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opt[aria-pressed="true"]{background:var(--rune);border-color:var(--rune);color:var(--paper);font-weight:600}
+.opt:focus-visible,.ans textarea:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+.ans textarea{font:inherit;font-size:14px;width:100%;min-height:44px;resize:vertical;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);box-sizing:border-box}
+.ans textarea::placeholder{color:var(--muted)}
+.st{font-size:12px;color:var(--muted);min-height:1em}
+.st.ok{color:var(--ok)}
+.st.err{color:var(--warn)}
+.multi{font-size:12px;color:var(--muted)}
+.q.done{border-color:var(--rune)}
+.progress{display:grid;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px}
+.bar{height:6px;border-radius:3px;background:var(--bg);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--rune);transition:width .3s}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="tag">조사 2차 · 쉬운 버전</p>
+    <h1>탐사는 촉매로, 손 작업은 마탑으로</h1>
+    <p class="lead">조사해보니 "가볍다"의 원인은 <b>행동이 하나라서가 아니라, 결과가 매번 똑같아서</b>였어. 탭이 하나여도 결과가 매번 달라지면 가볍지 않고, 손 작업이 단순해도 그 노력이 어딘가에 쌓여 남으면 가볍지 않아.</p>
+  </header>
+
+  <div class="note">
+    <b>먼저 알아둘 것</b>
+    <p>이번에도 사이트 원문은 거의 못 열어서 검색 요약으로 조사했어. 숫자는 대부분 내 제안이고 직접 해보면서 맞출 거야. 원본 보고서(출처 링크 포함)는 GitHub의 <code>reports/반반 보상과 손 작업 동기 조사.md</code>에 있어.</p>
+    <p><b>본질 네 가지</b>를 기준으로 모든 후보를 쟀어. ① 애니 몰입이 먼저 ② 모든 콘텐츠는 마법진 조립과 집중 전투로 ③ 콘텐츠마다 꼭 해야 하는 이유 ④ 정통 마법, 완성도, AI풍 금지.</p>
+  </div>
+
+  <!-- ================= 반반 ================= -->
+  <section aria-labelledby="h-half">
+    <p class="tag">① 반반 모드 (유적 탐사)</p>
+    <h2 id="h-half">주력 보상은 "촉매"</h2>
+    <p><b>촉매</b>는 설계도에 끼워서 마법진을 내 식으로 바꾸는 마력 보석이야. 빛 색으로 등급이 보이고, 효과가 랜덤으로 붙어.</p>
+    <div class="pick"><span class="lbl">한 줄 요약</span><p><b>스크롤은 "할 수 있는 마법"을 늘리고, 촉매는 "이미 할 수 있는 마법을 나만의 방식으로 비틀어."</b> 그래서 집중 모드(스크롤)와 반반(촉매)이 서로 겹치지 않아.</p></div>
+
+    <h3>왜 다른 보상은 안 되냐면</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>후보</th><th>판정</th><th>이유</th></tr></thead>
+      <tbody>
+        <tr><td><b>촉매</b></td><td>주력으로 채택</td><td>본질 네 가지를 다 통과한 유일한 후보야</td></tr>
+        <tr><td>스크롤</td><td>제외</td><td>집중 모드 몫을 뺏고 스크롤이 넘쳐나</td></tr>
+        <tr><td>문양 조각</td><td>보조로 흡수</td><td>스크롤 뜯기랑 겹쳐. 대신 "촉매 배합법"으로 바꿔서 넣어</td></tr>
+        <tr><td>사역마 직접 획득</td><td>제외</td><td>뽑기랑 겹치고, "변성체는 뽑기에서만"이랑 부딪혀</td></tr>
+        <tr><td>뽑기 재화나 마나 위주</td><td>조금만</td><td>다른 모드에서도 나와서 반반만의 이유가 안 돼</td></tr>
+        <tr><td>이번 탐사에서만 쓰는 축복</td><td>탐사 중 변수로 채택</td><td>탐사를 매번 다르게 만드는 재료로 써</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted">비슷한 구조가 실제로 있어. 몬스터 헌터 월드는 장비를 몬스터 소재로 만들고, 스킬을 다듬는 장식주는 따로 얻어. 디아블로 3에서 경매장이 본 게임의 보상을 대신해버렸을 때는 감독이 "게임을 해쳤다"고 인정했어. 그래서 반반이 집중 모드의 보상을 절대 대신하면 안 돼.</p>
+
+    <h3>촉매 등급과 효과 예시 (제안)</h3>
+    <p>반쯤 보는 사람한테 "+5%"는 안 느껴져. 그래서 효과는 <b>전투 규칙 자체를 바꾸는 문장</b>으로 써.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>빛 (등급)</th><th>효과 줄 수</th><th>효과 예시</th></tr></thead>
+      <tbody>
+        <tr><td>회백 (평범)</td><td>고정 1줄</td><td>"불 문양: 범위 가장자리에 불씨 1칸"</td></tr>
+        <tr><td>청록 (드묾)</td><td>고정 1 + 랜덤 1</td><td>"앞당김: 마법진이 1턴 빨리 완성돼"</td></tr>
+        <tr><td>보라 (희귀)</td><td>고정 1 + 랜덤 2</td><td>"걸음 영창: 영창 중에 1칸 더 움직일 수 있어"</td></tr>
+        <tr><td>금 (전설)</td><td>고유 규칙 1 + 랜덤 1</td><td>"견딤: 영창 중 첫 피해 한 번은 영창이 안 끊겨"</td></tr>
+        <tr><td>별빛 (고대)</td><td>깊은 층에서만</td><td>같은 효과의 1.5배판. 찾아야만 나와</td></tr>
+        <tr><td>검붉은 일렁임 (저주)</td><td>강한 효과 + 대가</td><td>"위력이 크게 올라. 대신 영창 중에 못 움직여"</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>촉매를 재밌게 하는 다섯 가지 규칙</h3>
+    <ul>
+      <li><b>사람마다 다른 조합</b>: 효과 일부는 "물 사역마가 팀에 있으면 증기 범위 +1"처럼 사역마 조건이 붙어. 같은 촉매도 팀에 따라 가치가 달라져.</li>
+      <li><b>정리 노동 0</b>: 낮은 등급은 탐사가 끝나면 자동으로 "촉매 가루"가 돼. 비교 화면 대신 "‘물안개 창’ 설계도에 맞음 ▲" 표시를 띄워.</li>
+      <li><b>너무 짜지 않게</b>: 집중 전투는 중간 등급 촉매로 충분히 깰 수 있게 해. 최상급은 자랑거리야.</li>
+      <li><b>불운 보정이 보이게</b>: "봉인함 20개 열면 다음은 보라 이상 확정" 같은 게이지를 화면에 띄워.</li>
+      <li><b>포켓로그 그 순간</b>: 금빛 이상 봉인함을 열면 촉매 3개가 나란히 떠서 하나를 골라. 팀에 변성체가 많으면 등급이 한 단계 오를 확률이 조금 올라.</li>
+    </ul>
+
+    <h3>탭은 하나, 결과를 바꾸는 변수는 다섯 겹</h3>
+    <p>루프 히어로는 전투 중에 플레이어가 아무것도 안 하는데도 깊어. 깊이가 <b>출발 전 준비</b>와 <b>가끔 하는 큰 결정</b>에서 나오거든. 그 원리를 가져왔어.</p>
+    <ol class="steps">
+      <li><b>출발 전 팀 짜기</b>: 사역마마다 탐험 특성이 하나씩 있어. 예: 까마귀는 등급 빛을 한 걸음 먼저 보여주고, 고양이는 저주물의 대가를 미리 알려주고, 두꺼비는 미믹 상자를 무력화해.</li>
+      <li><b>더 갈까, 돌아갈까</b>: 걸을수록 결계(탐사 체력)가 줄고, 깊을수록 좋은 게 나와. 얻은 건 가방에 있다가 돌아와야 확정돼. 룬석에서 돌아오면 100%, 아무 데서나 80%, 쓰러지면 50%만 남아.</li>
+      <li><b>공명</b>: 제단에서 이번 탐사에만 쓰는 축복을 얻어. 같은 원소 3개를 모으면 탐사 규칙이 바뀌고(예: 물 3개면 숨은 길이 열림), 처음 공명하면 <b>촉매 배합법</b>(이 촉매 둘을 같이 끼우면 생기는 효과)이 도감에 영구 기록돼. 반반에서만 찾을 수 있는 지식이야.</li>
+      <li><b>지역 바뀜</b>: 몇 층마다 지역이 바뀌고, 지역마다 잘 나오는 원소와 몬스터가 달라.</li>
+      <li><b>대가가 붙은 선택</b>: 저주물처럼 열면 좋지만 대가가 있는 오브젝트가 섞여.</li>
+    </ol>
+
+    <h3>오브젝트마다 주는 것</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>오브젝트</th><th>빛·소리</th><th>주는 것</th></tr></thead>
+      <tbody>
+        <tr><td>봉인함</td><td>등급 빛. 보라 이상만 소리</td><td><b>촉매</b> (주력). 금 이상은 셋 중 하나 고르기</td></tr>
+        <tr><td>룬석</td><td>희미한 푸른빛</td><td>촉매 가루. <b>안전하게 돌아가는 지점</b></td></tr>
+        <tr><td>제단</td><td>원소 색</td><td>이번 탐사 축복 (공명 재료)</td></tr>
+        <tr><td>쓰러진 마법사의 가방</td><td>빛 없음 (까마귀가 있으면 보임)</td><td>회복, 또는 <b>스크롤 소문</b></td></tr>
+        <tr><td>저주물</td><td>검붉은 일렁임, 낮은 현악기 소리</td><td>저주 촉매 (강하지만 대가)</td></tr>
+        <tr><td>떠돌이 정령 상인</td><td>반딧불</td><td>가루와 촉매 교환, 갈림길 지도</td></tr>
+        <tr><td>몬스터</td><td>붉은 테두리</td><td>사역마 팀이 자동으로 싸움. 결계가 깎여</td></tr>
+        <tr><td>정예·수호자</td><td>큰 그림자, 북소리</td><td><b>봉인 표식</b> (집중 모드로 넘김)</td></tr>
+      </tbody>
+    </table></div>
+    <div class="pick"><span class="lbl">집중 모드랑 이어지는 두 줄</span>
+      <p><b>스크롤 소문</b>: 스크롤을 직접 주는 게 아니라 "다음 집중 판 2막 어느 방에 ‘서리 창’ 스크롤이 있다"는 정보를 줘. 반반은 집중을 예고만 하고 대신하지 않아.</p>
+      <p><b>봉인 표식</b>: 깊은 층의 정예는 반반에서 이기지 않고 기록만 해. 이게 집중 모드 지도에 특별 칸으로 올라가고, 거기서 이기면 반반의 더 깊은 층으로 가는 지름길이 열려. 반반이 집중을 부르고, 집중이 다시 반반을 열어.</p>
+    </div>
+
+    <h3>반쯤 보는 사람을 위한 신호</h3>
+    <ul>
+      <li>소리는 <b>보라 이상과 고를 때만</b>. 금빛은 종소리, 별빛은 고유 화음, 저주는 낮은 현악기라 귀로만 들어도 알아.</li>
+      <li>금 이상, 저주물, 정예, 결계 위험, 상인, 공명이 나오면 <b>자동으로 멈춰.</b> 그때만 화면을 보면 돼.</li>
+      <li>놓친 건 돌아올 때 결산 화면에 모아서 보여줘.</li>
+      <li>최상급은 <b>사역마가 반응하는 짧은 컷인</b>으로 보여줘.</li>
+      <li>화면을 아래쪽 띠나 작은 창으로 줄여서 방송을 가리지 않게 할 수 있어.</li>
+    </ul>
+
+    <h3>15분 탐사 예시</h3>
+    <ol class="steps">
+      <li>출발: 까마귀, 고양이, 두꺼비로 팀을 짜고, 마나 300을 등불에 부어. 오늘 지역은 "물안개 늪".</li>
+      <li>0~2분: 방송 보면서 엄지로 탭. 대부분 빈 걸음이고 회백 봉인함 몇 개.</li>
+      <li>2분: 청록 봉인함, 작은 소리. "물 · 앞당김" 촉매. "물안개 창에 맞음 ▲". 흘깃 보고 끝.</li>
+      <li>3분 반: 제단에서 자동으로 멈춰. 축복 셋 중 "물의 축복"을 골라.</li>
+      <li>6분 반: 저주물. 고양이가 대가를 미리 보여줘. "위력 크게 증가, 대신 영창 중 이동 불가". 열어.</li>
+      <li>8분: 지역이 "무너진 수도원"으로 바뀌고 몬스터가 강해져.</li>
+      <li>9분 반: 까마귀가 찾은 마법사의 가방. 회복 대신 스크롤 소문을 골라.</li>
+      <li>11분: 물 축복 3개째로 공명! 숨은 길이 열리고 배합법 "물 + 땅 = 진흙 늪"을 처음 발견.</li>
+      <li>12분 반: 종소리와 함께 금빛 봉인함. 촉매 3개 중 하나를 골라.</li>
+      <li>13분 반: 정예 골렘. 싸우지 않고 봉인 표식으로 기록.</li>
+      <li>14분: 결계 22%에서 경고, 마침 룬석이 나와서 귀환. 100% 확정.</li>
+    </ol>
+    <p class="muted">15분 동안 탭 말고 실제로 고른 건 다섯 번뿐이야. 그런데도 같은 탐사는 다시 안 나와. 팀, 공명, 지역, 선택이 매번 다르니까.</p>
+  </section>
+
+  <hr>
+
+  <!-- ================= 손 작업 ================= -->
+  <section aria-labelledby="h-hand">
+    <p class="tag">② 손 작업</p>
+    <h2 id="h-hand">마탑의 한 층 = 대의식 하나</h2>
+    <p>예전 후보들이 가벼웠던 이유가 나왔어. 돌리는 동작에는 반응이 있었지만, 잘 만든 사례들이 공통으로 가진 <b>세 가지</b>가 없었어.</p>
+    <ul>
+      <li><b>세션이 끝나도 남는 것</b>: 포켓몬 슬립은 잘수록 잠만보가 커져.</li>
+      <li><b>끝나고 나서 보는 공개</b>: 네코 아츠메는 앱을 껐다 켜야 고양이가 와 있어.</li>
+      <li><b>내가 만든 내 것</b>: 직접 만든 걸 더 아낀다는 연구가 있는데, <b>완성했을 때만</b> 그래. 그래서 몇 주짜리 목표 하나보다 작은 완성을 자주 줘야 해.</li>
+    </ul>
+    <p class="muted">"거의 다 차면 더 열심히 하게 되는" 쿠폰 도장 효과, "며칠 기다리는 것 자체가 즐거움"이라는 연구도 같은 방향이야. 반대로 애니 보면서 다른 데 신경 쓰면 몰입과 재미가 떨어진다는 연구도 있어서, <b>세션 중에는 아무 일도 없어야 해.</b></p>
+
+    <div class="pick"><span class="lbl">추천</span><p><b>애니를 보며 돌린 마나가 마탑 각 층의 의식 마법진에 새겨져.</b> 며칠에 걸쳐 의식이 다 차면 크게 발동하고, 탑이 한 층 올라가. 층마다 시설이 생겨서 다른 모드를 도와줘. 마나 나무는 옥상 정원으로, 사역마는 "보는 동안 놀러 와 있었다"로 흡수했어.</p></div>
+
+    <h3>애니 3화(약 72분) 한 세션</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>시점</th><th>일어나는 일</th></tr></thead>
+      <tbody>
+        <tr><td>시작 전 (3초)</td><td>마탑 단면과 지금 층(4층 "서고")의 의식 62%가 보여. "이번에 3화 보면 약 85%" 예고. 터치 한 번으로 시작</td></tr>
+        <tr><td>세션 중</td><td>어둑한 탑 방. 화면 가장자리의 각인선 하나만 몇 분에 걸쳐 아주 느리게 나아가. 숫자, 팝업, 소리 없음. 손이 멈춰도 아무 일 없음</td></tr>
+        <tr><td>끝 ①</td><td>이번에 모은 마나가 처음으로 한꺼번에 나와</td></tr>
+        <tr><td>끝 ②</td><td>의식이 62% → 85%로 차오르는 연출. 유일하게 화려한 순간이야</td></tr>
+        <tr><td>끝 ③</td><td>두근거리는 보너스 하나. 예: "백작급 까마귀가 와 있었다" (짧은 이야기가 열림)</td></tr>
+        <tr><td>끝 ④</td><td>"애니 3화" 기록 도장</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>몇 주 흐름 (제안)</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>주</th><th>일어나는 일</th><th>생기는 시설</th></tr></thead>
+      <tbody>
+        <tr><td>1주</td><td>4층 의식 완성 (애니 약 8화). 크게 발동</td><td><b>서고</b>: 스크롤 뜯을 때 문양이 하나 더 보여</td></tr>
+        <tr><td>2주</td><td>5층 의식은 15% 찬 상태로 시작해 (거의 다 찬 느낌을 일찍 주는 장치)</td><td><b>사역마 둥지</b>: 세션 끝에 방문자가 나타나</td></tr>
+        <tr><td>3주</td><td>6층 완공</td><td><b>잉크 공방</b>: 스크롤 그릴 때 마나가 덜 들고 잉크 색을 고를 수 있어</td></tr>
+        <tr><td>4주</td><td>7층 완공</td><td><b>별읽기 옥상 정원</b>: 탐사를 결계 +10으로 시작해</td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li><b>금지</b>: 매일 접속 보상, 안 하면 시드는 것, 호감도 감소, 세션 중 알림, 움직이는 캐릭터. 오래 쉬었다 오면 오히려 "탑이 기다렸다" 휴식 보너스를 줘.</li>
+      <li>시설은 <b>전투력을 직접 올리지 않아.</b> 뜯기, 그리기, 탐사를 편하게 해줄 뿐이야. 그래야 손 작업이 다른 모드를 잡아먹지 않아.</li>
+    </ul>
+  </section>
+
+  <hr>
+
+  <!-- ================= 경제 ================= -->
+  <section aria-labelledby="h-eco">
+    <p class="tag">③ 경제</p>
+    <h2 id="h-eco">모드 하나에 성장 축 하나, 공방이 전부 모아</h2>
+    <p>잘 굴러가는 게임은 활동마다 <b>"여기서만 나오는 것"</b>을 하나씩 줘. 원신이 비경마다 주는 재료를 나눈 것처럼. 그리고 그걸 <b>한 곳에서 전부 모아 써야</b> 해. 우리 게임에선 그곳이 공방이야.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>모드</th><th>여기서만 나오는 것</th><th>이 모드가 쓰는 것</th></tr></thead>
+      <tbody>
+        <tr><td>집중</td><td><b>스크롤</b>, 자격증 승급, 봉인 표식 풀기</td><td>그려둔 스크롤, 촉매, 사역마 팀</td></tr>
+        <tr><td>반반</td><td><b>촉매</b>, 배합법, 봉인 표식, 스크롤 소문</td><td>마나 (탐사 체력), 사역마 팀, 변성체</td></tr>
+        <tr><td>손 작업</td><td><b>마나</b>, 마탑 층과 시설</td><td>없음</td></tr>
+        <tr><td>공방</td><td>만들어내는 건 없어. <b>모든 게 모이는 곳</b></td><td>문양 + 촉매 + 마나 → 내 마법진</td></tr>
+        <tr><td>뽑기</td><td><b>사역마</b>, 변성체, 돌파</td><td>계약서</td></tr>
+      </tbody>
+    </table></div>
+    <p>화면에 항상 보이는 돈은 <b>마나, 계약서, 소환 인장</b> 세 개뿐이야. 촉매, 스크롤, 가루는 돈이 아니라 가방 속 물건이야.</p>
+
+    <h3>하루 13번 뽑기를 나누면 (제안)</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>어디서</th><th>비율</th><th>어떻게</th></tr></thead>
+      <tbody>
+        <tr><td>집중</td><td>40%</td><td>첫 클리어, 주간 목표, 도전 조건 달성</td></tr>
+        <tr><td>반반</td><td>25%</td><td>깊이 기록 갱신, 새 지역 첫 발견</td></tr>
+        <tr><td>손 작업</td><td>25%</td><td>의식 완성(층마다), 주간 누적 단계</td></tr>
+        <tr><td>한 번뿐인 보상</td><td>10%</td><td>자격증 승급, 도감, 시설 첫 완공</td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li><b>손 작업의 계약서는 시간이 아니라 의식 완성 같은 목표 달성에 묶어.</b> 마나는 돌린 시간만큼 정직하게 받지만, 계약서는 애니를 오래 본다고 무한히 늘지 않아. 안 그러면 손 작업만으로 뽑기를 다 해결하게 돼.</li>
+      <li>상한이 필요하면 <b>주간 단위로, 남으면 다음 주로 넘어가게</b> 해. 일일 숙제는 안 만들어.</li>
+      <li>한 모드만 하면 반드시 막히는 지점이 있어야 해. 그래야 모드마다 할 이유가 생겨.</li>
+    </ul>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-q">
+    <p class="tag">같이 정할 것</p>
+    <h2 id="h-q">질문 10개</h2>
+    <p class="muted">고르거나 적으면 자동으로 저장돼. 한 번에 다 안 해도 괜찮아.</p>
+    <div class="progress" id="progress"><span id="progText">답을 불러오는 중이야…</span><div class="bar"><i id="progBar"></i></div></div>
+    <div class="qs">
+      <div class="qg"><h3>반반 (탐사)</h3>
+        <div class="q" data-qid="r1"><span class="n">1</span><p>촉매를 설계도에 끼우는 <b>영구 장착</b>(뺐다 끼웠다 자유)으로 할까, 스크롤 그릴 때 <b>같이 소모되는 재료</b>로 할까?<small>영구형은 아까워서 못 쓰는 문제가 없고, 소모형은 계속 필요해서 탐사 수요가 안 마름.</small></p></div>
+        <div class="q" data-qid="r2"><span class="n">2</span><p>촉매 등급 빛 이름 (회백, 청록, 보라, 금, 별빛, 저주) 괜찮아?<small>사역마 등급(기사~왕)이랑 헷갈리면 다른 이름도 가능.</small></p></div>
+        <div class="q" data-qid="r3"><span class="n">3</span><p>촉매 끼우는 칸 수를 자격증 급수에 묶을까? (3급 1칸, 2급 2칸, 1급 3칸)</p></div>
+        <div class="q" data-qid="r4"><span class="n">4</span><p>귀환 규칙: 룬석 100%, 아무 데서나 80%, 쓰러지면 50%. 이 정도 빡빡함 괜찮아?</p></div>
+        <div class="q" data-qid="r5"><span class="n">5</span><p>봉인 표식 고리 넣을까? (반반 정예 → 집중 특별 칸 → 이기면 반반 지름길)</p></div>
+        <div class="q" data-qid="r6"><span class="n">6</span><p>탐험 특성은 모든 사역마에게 하나씩 줄까? 변성체가 촉매 등급을 올려주는 효과는 넣을까?</p></div>
+      </div>
+      <div class="qg"><h3>손 작업 · 경제</h3>
+        <div class="q" data-qid="r7"><span class="n">7</span><p>손 작업을 "마탑 한 층 = 대의식 하나"로 갈까? 세션 중 화면은 "어둑하지만 살아 있는 탑 방, 움직이는 건 각인선 하나"로 괜찮아?</p></div>
+        <div class="q" data-qid="r8"><span class="n">8</span><p>세션 끝 두근거리는 보너스에 뭘 넣을까?</p></div>
+        <div class="q" data-qid="r9"><span class="n">9</span><p>뽑기 재화를 집중 40%, 반반 25%, 손 작업 25%, 한 번뿐인 보상 10%로 나누고, 손 작업은 시간 대신 목표 달성으로 줄까?</p></div>
+        <div class="q" data-qid="r10"><span class="n">10</span><p>방치 모드는 따로 남길까, 손 작업과 마탑에 합칠까?</p></div>
+        <div class="q" data-qid="r11"><span class="n">+</span><p>그 밖에 하고 싶은 말이나 떠오른 아이디어</p></div>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-gloss">
+    <p class="tag">용어 풀이</p>
+    <h2 id="h-gloss">헷갈리는 말 정리</h2>
+    <dl class="gloss">
+      <dt>촉매</dt><dd>설계도에 끼워서 마법진의 성능과 규칙을 바꾸는 마력 보석. 반반에서만 나와.</dd>
+      <dt>결계 (등불)</dt><dd>탐사 체력. 마나를 등불에 부어서 채우고, 걸을수록 줄어들어.</dd>
+      <dt>룬석</dt><dd>탐사 중 안전하게 돌아갈 수 있는 지점.</dd>
+      <dt>공명</dt><dd>탐사 중 같은 원소 축복을 3개 모으면 탐사 규칙이 바뀌는 것.</dd>
+      <dt>배합법</dt><dd>"이 촉매 둘을 같이 끼우면 이런 효과"라는 조합 지식. 도감에 영구 기록돼.</dd>
+      <dt>스크롤 소문</dt><dd>다음 집중 판의 어디에 어떤 스크롤이 있는지 알려주는 정보.</dd>
+      <dt>봉인 표식</dt><dd>반반에서 만난 정예 몬스터의 기록. 집중 모드에서 싸울 수 있게 돼.</dd>
+      <dt>촉매 가루</dt><dd>낮은 등급 촉매를 분해한 재료. 촉매의 효과 한 줄을 다시 굴리는 데 써.</dd>
+      <dt>대의식</dt><dd>마탑 각 층의 의식 마법진. 손 작업 마나로 며칠에 걸쳐 차고, 다 차면 크게 발동해서 층이 올라가.</dd>
+      <dt>세션</dt><dd>손 작업을 한 번 시작해서 끝낼 때까지.</dd>
+    </dl>
+  </section>
+</div>
+
+<script>
+(() => {
+  const OPTS = {
+    r1: { o: ['영구 장착', '소모 재료', '섞어서 (일부는 영구, 일부는 소모)'] },
+    r2: { o: ['좋아', '다른 이름 원해'] },
+    r3: { o: ['묶자', '안 묶어'] },
+    r4: { o: ['좋아', '더 너그럽게', '더 빡빡하게'] },
+    r5: { o: ['넣자', '빼자'] },
+    r6: { o: ['모든 사역마에게 특성', '일부 사역마만', '변성체 등급 상승 효과 넣기'], multi: true },
+    r7: { o: ['그렇게 가자', '구조는 좋은데 화면은 다르게', '다른 구조 원해'] },
+    r8: { o: ['사역마 방문 이야기', '희귀 잉크 (그리기 겉모습)', '소환 인장 조금', '보너스 없이'], multi: true },
+    r9: { o: ['좋아', '비율 조정 원해'] },
+    r10: { o: ['따로 남기기', '손 작업·마탑에 합치기'] },
+    r11: { o: [] },
+  };
+  const state = {}, ui = {};
+  let db = null, writable = true;
+  const LS = 'mahocukai.plan3.draft';
+  const loadDraft = () => { try { return JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { return {}; } };
+  const saveDraft = () => { try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} };
+  const answered = s => s && ((s.choice && s.choice.length) || (s.note || '').trim());
+  function render(id){
+    const s = state[id] || { choice: [], note: '' }, u = ui[id];
+    u.btns.forEach(b => b.setAttribute('aria-pressed', String(s.choice.includes(b.dataset.v))));
+    if (document.activeElement !== u.ta) u.ta.value = s.note || '';
+    u.card.classList.toggle('done', !!answered(s));
+  }
+  function progress(){
+    const ids = Object.keys(OPTS), done = ids.filter(id => answered(state[id])).length;
+    document.getElementById('progBar').style.width = (done / ids.length * 100) + '%';
+    document.getElementById('progText').textContent = db
+      ? `${ids.length}개 중 ${done}개 답했어. 답은 자동으로 저장돼.`
+      : `${ids.length}개 중 ${done}개 답했어. 이 화면에서는 저장이 안 돼서 이 기기에만 남아. 다 쓰면 채팅으로 알려줘.`;
+  }
+  const busy = {}, again = {}, timers = {};
+  async function save(id){
+    saveDraft(); progress();
+    if (!db || !writable) return;
+    if (busy[id]) { again[id] = true; return; }
+    busy[id] = true; const u = ui[id];
+    u.st.className = 'st'; u.st.textContent = '저장 중…';
+    try {
+      const s = state[id];
+      await db.doc('answers/' + id).set({ q: id, choice: s.choice, note: s.note || '', updatedAt: new Date().toISOString() });
+      u.st.className = 'st ok'; u.st.textContent = '저장됨';
+    } catch (e) {
+      u.st.className = 'st err';
+      if (e && e.code === 'invalid_argument') { writable = false; u.st.textContent = '이 계정으로는 저장할 수 없어. 채팅으로 알려줘.'; }
+      else u.st.textContent = '저장이 안 됐어. 잠시 뒤에 다시 고르거나 적어줘.';
+    }
+    busy[id] = false;
+    if (again[id]) { again[id] = false; save(id); }
+  }
+  document.querySelectorAll('.q[data-qid]').forEach(card => {
+    const id = card.dataset.qid, cfg = OPTS[id]; if (!cfg) return;
+    const box = document.createElement('div'); box.className = 'ans';
+    const opts = document.createElement('div'); opts.className = 'opts'; opts.setAttribute('role', 'group');
+    const btns = cfg.o.map((label, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.id = `${id}-o${i}`; b.dataset.v = label; b.textContent = label; b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => {
+        const s = state[id] || (state[id] = { choice: [], note: '' });
+        if (cfg.multi) s.choice = s.choice.includes(label) ? s.choice.filter(x => x !== label) : [...s.choice, label];
+        else s.choice = s.choice.includes(label) ? [] : [label];
+        render(id); save(id);
+      });
+      opts.appendChild(b); return b;
+    });
+    if (btns.length) box.appendChild(opts);
+    if (cfg.multi) { const m = document.createElement('span'); m.className = 'multi'; m.textContent = '여러 개 골라도 돼'; box.appendChild(m); }
+    const ta = document.createElement('textarea'); ta.id = `${id}-note`; ta.placeholder = '내 생각 (자유롭게)'; ta.rows = id === 'r11' ? 4 : 2;
+    ta.addEventListener('input', () => {
+      const s = state[id] || (state[id] = { choice: [], note: '' }); s.note = ta.value; render(id);
+      clearTimeout(timers[id]); timers[id] = setTimeout(() => { timers[id] = null; save(id); }, 900);
+    });
+    ta.addEventListener('blur', () => { if (timers[id]) { clearTimeout(timers[id]); timers[id] = null; save(id); } });
+    box.appendChild(ta);
+    const st = document.createElement('span'); st.className = 'st'; st.setAttribute('aria-live', 'polite'); box.appendChild(st);
+    card.appendChild(box);
+    ui[id] = { card, btns, ta, st };
+  });
+  Object.assign(state, loadDraft());
+  Object.keys(ui).forEach(render); progress();
+  (async () => {
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { progress(); return; }
+    const timer = setTimeout(() => { document.getElementById('progText').textContent = '저장된 답을 아직 못 불러왔어. 새로 고르면 그대로 저장돼.'; }, 10000);
+    db.collection('answers').onSnapshot(snap => {
+      if (!snap.metadata.fromCache) clearTimeout(timer);
+      snap.docs.forEach(d => {
+        const v = d.data(); if (!v) return; const id = d.id;
+        if (!ui[id] || busy[id] || timers[id]) return;
+        state[id] = { choice: Array.isArray(v.choice) ? v.choice : [], note: typeof v.note === 'string' ? v.note : '' };
+        render(id);
+      });
+      saveDraft(); progress();
+    }, () => { clearTimeout(timer); progress(); });
+  })();
+})();
+</script>
