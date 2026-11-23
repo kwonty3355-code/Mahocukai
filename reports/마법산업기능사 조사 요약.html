@@ -1,0 +1,389 @@
+<title>마법산업기능사 조사 요약</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: 회로도 도면 같은 한 줄 읽기 문서. 섹션마다 "요점 → 근거 → 예시" 순서, 결정할 질문은 맨 끝에 모음 */
+:root{
+  --bg:#f4f6f8; --paper:#ffffff; --ink:#18202b; --muted:#5d6876; --line:#d9dfe6;
+  --wire:#b8622c; --wire-soft:#f6e6da; --mana:#2f6db3; --mana-soft:#e3edf8; --ok:#2f7d55; --warn:#a1462e;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12161c; --paper:#1a2028; --ink:#e6eaef; --muted:#9aa5b2; --line:#2c3440;
+  --wire:#e08a52; --wire-soft:#3a2a20; --mana:#7fb2ec; --mana-soft:#1d2c3d; --ok:#6cc495; --warn:#e48a72; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#12161c; --paper:#1a2028; --ink:#e6eaef; --muted:#9aa5b2; --line:#2c3440;
+  --wire:#e08a52; --wire-soft:#3a2a20; --mana:#7fb2ec; --mana-soft:#1d2c3d; --ok:#6cc495; --warn:#e48a72; color-scheme:dark }
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--sans);font-size:16px;line-height:1.75}
+.wrap{max-width:760px;margin:0 auto;padding-block:36px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:44px}
+.tag{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--wire);margin:0;text-transform:uppercase}
+h1{font-size:clamp(28px,5vw,38px);line-height:1.25;margin:6px 0 12px;font-weight:700;text-wrap:balance}
+h2{font-size:24px;line-height:1.35;margin:0;font-weight:700;text-wrap:balance}
+h3{font-size:18px;margin:0;font-weight:700}
+p{margin:0}
+section{display:grid;gap:16px;min-width:0}
+.lead{font-size:18px;color:var(--ink)}
+.muted{color:var(--muted)}
+.note{background:var(--mana-soft);border-radius:10px;padding:14px 16px;font-size:15px;display:grid;gap:6px}
+.note b{color:var(--mana)}
+.pick{border-left:4px solid var(--wire);background:var(--paper);padding:14px 16px;border-radius:0 10px 10px 0;display:grid;gap:6px}
+.pick .lbl{font-family:var(--mono);font-size:12px;color:var(--wire);letter-spacing:.1em}
+ul,ol{margin:0;padding-left:22px;display:grid;gap:6px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:520px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.engines{display:grid;gap:10px}
+.eng{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.eng .k{font-family:var(--mono);font-size:13px;color:var(--wire);grid-row:span 2;padding-top:3px}
+.eng b{font-size:16px}
+.eng span{color:var(--muted);font-size:15px}
+.cands{display:grid;gap:12px}
+.cand{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px}
+.cand.rec{border-color:var(--wire);box-shadow:inset 0 0 0 1px var(--wire)}
+.cand header{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.chip{font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px;background:var(--wire-soft);color:var(--wire)}
+.pros{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:15px}
+@media (max-width:560px){.pros{grid-template-columns:1fr}}
+.pros div{min-width:0}
+.pros .g{color:var(--ok);font-weight:600}
+.pros .r{color:var(--warn);font-weight:600}
+.board-fig{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px}
+@media (max-width:560px){.board-fig{grid-template-columns:1fr}}
+.grid9{display:grid;grid-template-columns:repeat(9,22px);grid-auto-rows:22px;gap:2px;justify-content:start}
+.grid9 i{display:block;border-radius:3px;background:var(--bg);border:1px solid var(--line);font-style:normal;font-size:11px;line-height:20px;text-align:center;font-weight:700}
+.grid9 i.water{background:var(--mana-soft);border-color:var(--mana);color:var(--mana)}
+.grid9 i.fire{background:var(--wire-soft);border-color:var(--wire);color:var(--wire)}
+.grid9 i.wind{background:transparent;border:1px dashed var(--wire)}
+.grid9 i.me{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid9 i.foe{background:var(--warn);color:var(--paper);border-color:var(--warn)}
+.legend{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+.steps{counter-reset:s;list-style:none;padding:0;display:grid;gap:8px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.steps li::before{content:counter(s);font-family:var(--mono);font-size:13px;width:24px;height:24px;border-radius:50%;background:var(--wire-soft);color:var(--wire);display:grid;place-items:center;margin-top:3px}
+.qs{display:grid;gap:18px}
+.qg{display:grid;gap:8px}
+.qg h3{font-size:15px;color:var(--muted);font-weight:600}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px}
+.q .n{font-family:var(--mono);font-size:13px;color:var(--wire);padding-top:3px}
+.q p{font-size:15px}
+.q small{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+hr{border:0;border-top:1px solid var(--line);margin:0}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="tag">게임 디자인 조사 · 쉬운 버전</p>
+    <h1>조사해보니 이런 게 나왔어</h1>
+    <p class="lead">한 줄로 줄이면, 사람들은 화려함 그 자체보다 <b>"내가 짠 게 눈앞에서 쌓이다가 터지는 순간"</b>에 열광해. 그래서 모든 시스템을 <b>"보이게"</b> 만드는 쪽으로 제안했어.</p>
+  </header>
+
+  <div class="note">
+    <b>먼저 알아둘 것</b>
+    <p>네트워크 제한 때문에 원문 페이지는 거의 못 열고, 검색 요약으로 조사했어. 디시나 루리웹 같은 한국 커뮤니티 자료는 특히 적어. 그래서 아래 내용은 정답이 아니라 <b>시제품으로 확인해볼 가설</b>로 봐줘. 원본 보고서에는 출처 링크랑 [검증 필요] 표시가 다 들어 있어.</p>
+  </div>
+
+  <section aria-labelledby="h-eng">
+    <h2 id="h-eng">사람들이 열광하는 다섯 가지</h2>
+    <div class="engines">
+      <div class="eng"><span class="k">발견</span><b>내가 직접 찾아낸 사기 조합</b><span>"게임을 부쉈다"는 느낌. 대신 드물게 완성되고, 부순 뒤에도 시험받아야 재밌어. 우리 게임에선 큰 마법진의 영창 턴이 그 시험대야.</span></div>
+      <div class="eng"><span class="k">쌓임</span><b>숫자가 쌓이다가 곱해지며 터지는 걸 보는 것</b><span>발라트로처럼 더하기와 곱하기를 색으로 구분해서 보여줘.</span></div>
+      <div class="eng"><span class="k">명료함</span><b>결과를 미리 보여주면 오히려 빨라져</b><span>Into the Breach가 증명했어. 반대로 XCOM은 행동 사이 멈춤 때문에 느리다는 소리를 들었어.</span></div>
+      <div class="eng"><span class="k">기대</span><b>기대 → 정적 → 펑</b><span>보상이 공개되기 직전에 긴장이 제일 높아. 단, 스킵 못 하는 긴 연출을 반복하면 "세금"이 돼.</span></div>
+      <div class="eng"><span class="k">채움</span><b>져도 뭔가 남고, 반복이 뭔가를 채워</b><span>하데스는 죽음을 이야기 보상으로 바꿨고, 도주런의 진짜 재미도 다음 판 팀을 채우는 거야.</span></div>
+    </div>
+    <p class="muted">반대로 재미를 죽이는 건 이것들이야: 규칙이 안 보이는 조합(노이타), 스킵 불가 연출 반복, 행동 사이 멈춤, 아까워서 못 쓰는 소모품.</p>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-battle">
+    <p class="tag">기둥 ① + ②</p>
+    <h2 id="h-battle">집중 전투: 후보 세 개</h2>
+    <p>셋 다 같은 장르야. <b>재미의 무게중심</b>만 달라.</p>
+    <div class="cands">
+      <div class="cand">
+        <header><h3>A. 전류 회로형</h3><span class="muted">마법진 안쪽을 프로그래밍하는 재미</span></header>
+        <p>마법진 칸이 회로 소자야. 전류가 중심(원소) → 고리(수식) → 바깥(형태)으로 흐르면서 숫자가 쌓이고, 마지막 곱셈 문양에서 펑 터져.</p>
+        <div class="pros"><div><span class="g">좋은 점</span> 조립이 제일 깊어. 회로도 유머가 제일 잘 살아.</div><div><span class="r">아쉬운 점</span> 규칙이 회로 안에 숨어서 "딱 보이는 전략"이랑 충돌해. 밸런스 잡기가 제일 어려워.</div></div>
+      </div>
+      <div class="cand rec">
+        <header><h3>B. 전장 배선형</h3><span class="chip">추천 뼈대</span><span class="muted">내가 그린 모양이 그대로 판에 찍힘</span></header>
+        <p>공방에서 짠 칸 배치가 9×9 판에 도장처럼 찍혀. 찍힌 칸에 원소가 남고, 그 원소를 따라 불이 전선처럼 번지면서 도미노가 넘어가.</p>
+        <div class="pros"><div><span class="g">좋은 점</span> 전략이 한눈에 보여. 원소 연쇄를 제일 잘 살려. 공방에서 그린 모양 = 전장 모양이라 두 기둥이 하나로 붙어.</div><div><span class="r">아쉬운 점</span> 판이 복잡해질 수 있어. "결과 미리보기"를 꼭 만들어야 해서 개발이 어려워.</div></div>
+      </div>
+      <div class="cand">
+        <header><h3>C. 영창 타이머형</h3><span class="muted">언제 터뜨리느냐의 리듬</span></header>
+        <p>마법사한테 영창 칸이 3개 있어. 마법진을 넣으면 3, 2, 1 카운트다운. 두 개를 같은 턴에 맞춰 터뜨리면 합동 폭발.</p>
+        <div class="pros"><div><span class="g">좋은 점</span> 제일 빨라. 매 턴 기대감이 있어. 밸런스 위험이 낮아.</div><div><span class="r">아쉬운 점</span> 9×9 격자가 배경으로 밀려나. 타이머가 짜증으로 넘어가기 쉬워.</div></div>
+      </div>
+    </div>
+
+    <div class="board-fig" aria-label="B안 한 턴 예시 그림">
+      <div class="grid9" id="g9"></div>
+      <div class="legend">
+        <b style="color:var(--ink)">B안 한 턴 예시</b>
+        <span>파란 칸은 지난 턴에 남은 <b>물</b>이야.</span>
+        <span>사역마가 물 옆에 <b>불</b>을 붙이면, 불과 물이 만나서 <b>증기</b>가 생기고 적의 시야가 끊겨.</span>
+        <span>마법사가 <b>바람 3칸 도장</b>을 찍으면 불이 바람을 타고 3칸 번져서 멀리 있는 적까지 태워.</span>
+        <span>커밋 전에 이 결과가 전부 미리 색칠돼 보여.</span>
+      </div>
+    </div>
+
+    <div class="pick">
+      <span class="lbl">추천</span>
+      <p><b>B를 뼈대로 하고, A의 "더하다 곱해지는" 숫자 폭발과 C의 카운트다운 숫자를 얹자.</b> 첫 시제품은 "B만"이랑 "B + 카운트다운"을 나란히 만들어서 체감 속도를 비교하는 걸 추천해.</p>
+    </div>
+
+    <h3>어느 후보든 깔아야 할 "빠릿빠릿" 규칙</h3>
+    <ul>
+      <li><b>한 번에 몰아서</b>: 내 턴(마법사와 사역마, 순서 자유) → 원소 반응 → 적 턴. 복잡한 행동 순서표는 안 써.</li>
+      <li><b>결과 미리보기</b>: 피해, 반응, 적 사망 여부를 커밋 전에 전부 보여줘.</li>
+      <li><b>생각은 공짜</b>: 커밋 전에는 무제한 되돌리기. 커밋 후 되감기는 전투당 1번.</li>
+      <li><b>멈춤 0</b>: 행동 사이 대기 없음, 카메라 고정, 적 턴은 배속이나 스킵 가능.</li>
+      <li><b>칸마다 원소 하나</b>: 바닥 원소 1개와 공기층 1개만. 반응은 확률 없이 바로 일어나.</li>
+      <li><b>정직한 예고</b>: 보여준 공격 대상은 안 바뀌어. 바뀌는 건 내 행동 때문일 때뿐이야.</li>
+      <li><b>영창 범위 고정</b>: 큰 마법진은 시작할 때 범위를 고정해서 보여줘. 방해받으면 취소가 아니라 위력이 한 단계 떨어져.</li>
+    </ul>
+
+    <h3>원소 반응표 초안</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>조합</th><th>결과</th><th>효과</th></tr></thead>
+      <tbody>
+        <tr><td>불 + 바람</td><td><b>번짐</b></td><td>바람 칸이 불을 다음 칸으로 옮겨</td></tr>
+        <tr><td>불 + 물</td><td><b>증기</b></td><td>공기층에 생겨서 시야를 가리고 적의 예고선을 끊어</td></tr>
+        <tr><td>물 + 땅</td><td><b>진흙</b></td><td>이동 -1</td></tr>
+        <tr><td>땅 + 불</td><td><b>용암</b></td><td>밟으면 계속 피해</td></tr>
+        <tr><td>바람 + 물</td><td><b>파도</b></td><td>칸 위 유닛을 1칸 밀어</td></tr>
+        <tr><td>땅 + 바람</td><td><b>모래벽</b></td><td>벽이 바람 방향으로 1칸 움직여</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted">네가 말한 "바람이 불 퍼뜨림, 물+땅 진흙, 불+물 증기, 땅은 벽"은 다 들어갔어. 파도랑 모래벽은 "밀기" 전략을 만들려고 추가한 제안이야.</p>
+
+    <h3>한 판 25분은 3막으로</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>구간</th><th>구성</th><th>흐름</th></tr></thead>
+      <tbody>
+        <tr><td>1막 · 약 7분</td><td>일반 2, 이벤트 1, 엘리트나 휴식, 보스</td><td>첫 전투 보상으로 "연쇄" 문양을 확정으로 줘. 망한 판은 7분 안에 끝나서 다시 시작하기 부담 없어.</td></tr>
+        <tr><td>2막 · 약 8분</td><td>일반 2, 상점, 엘리트, 이벤트, 보스</td><td>엘리트는 들고 온 스크롤을 "써야 할 자리"로 설계해.</td></tr>
+        <tr><td>3막 · 약 8분</td><td>일반 1~2, 휴식이나 상점, 최종 보스</td><td>최종 보스는 3~4턴짜리 대마법진을 지켜내는 싸움. 마지막 일격에 컷신.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted">전투가 끝날 때마다 임시 문양 3개 중 1개를 골라. 전투 횟수는 시제품에서 재보고 정하자.</p>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-half">
+    <p class="tag">반반 모드</p>
+    <h2 id="h-half">"검수 라인": 잡는 게 아니라 내 도면의 빈칸을 채워</h2>
+    <p>도주런이 재밌는 이유는 <b>누르고 → 0.5초 만에 "아니네" → 다음</b>이라는 리듬이야. 그런데 사역마로 바꾸면 그냥 베낀 거고 뽑기랑도 겹쳐. 그래서 공장 품질검사원 컨셉으로 바꿨어.</p>
+    <ul>
+      <li>공방에 저장한 마법진 도면의 <b>빈칸</b>이 자동으로 "발주서"가 돼. 예: "확산(불) 2개, 결계(땅) 1개".</li>
+      <li>탭할 때마다 문양 부품이 공장 라인처럼 들어와. 대부분은 회색으로 소리 없이 지나가.</li>
+      <li>비슷한 게 오면 작은 칩 소리. 딱 맞는 게 오면 <b>라인이 멈추고 화면 색이 바뀌어.</b></li>
+      <li>버린 부품은 부스러기가 돼서, 모으면 원하는 부품이랑 바꿀 수 있어. 운이 나빠도 언젠가는 채워져.</li>
+      <li>방금 지나간 10개를 다시 볼 수 있어서 놓칠 걱정 없이 진짜로 눈을 뗄 수 있어.</li>
+      <li>약 50번마다 "시운전"이 있어. 방금 채운 마법진이 시험 판에서 한 번 터지면서 연출을 보여줘.</li>
+    </ul>
+    <h3>방송 보면서 15분 예시</h3>
+    <ol class="steps">
+      <li>시작하면 발주서가 떠. 전부 내 도면 빈칸에서 자동으로 만들어진 거야.</li>
+      <li>방송 보면서 엄지로 계속 탭. 회색이 무음으로 지나가.</li>
+      <li>칩 소리에 곁눈질. "확산인데 물이네, 아니네."</li>
+      <li>120번째에 라인이 멈추고 색이 바뀌어. 확산(불)이야! 탭 한 번으로 채워.</li>
+      <li>150번째 시운전. 완성된 마법진이 한 번 터져.</li>
+      <li>오늘 할당량 300번을 채우면 끝. 채운 칸, 부스러기가 요약으로 나와.</li>
+    </ol>
+    <div class="pick"><span class="lbl">덤</span><p>"팀 맞추는" 느낌도 넣으려고, 내 사역마 팀에 없는 원소나 역할도 발주서에 섞자고 제안했어. 그리고 팀에 변성체가 있으면 희귀 부품 확률이 조금 올라가게 하면 뽑기랑도 이어져.</p></div>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-hand">
+    <p class="tag">손 작업</p>
+    <h2 id="h-hand">"크랭크 발전기": 손이 돌리는 한 전기는 끝나지 않아</h2>
+    <p>조사해보니 이 모드가 주는 감정은 "집중력 향상"이 아니라 <b>"보는 시간이 헛되지 않았다"는 생산감</b>이야. 뜨개질하면서 TV 보는 사람들이 딱 그렇게 말했대. 그리고 화면에 눈길을 끄는 게 있으면 안 돼. 피젯 스피너가 오히려 집중을 깼다는 연구도 있어.</p>
+    <ul>
+      <li>아이패드 원 그리기, 컨트롤러 스틱, 마우스 휠이 전부 <b>크랭크 한 바퀴</b>야.</li>
+      <li>"전기기능사는 사실 마법사" 유머랑 정면으로 맞아. 단위가 mAh → Wh → kWh로 올라가.</li>
+      <li>전력의 가장 큰 쓸모는 <b>스크롤 복사 인쇄</b>야. 한 번 그린 도안을 여러 장 찍어서 부담 없이 쓰게 해줘.</li>
+    </ul>
+    <h3>애니 3화(약 72분) 예시</h3>
+    <ol class="steps">
+      <li>"발전 시작"을 눌러. 결정할 건 이거 하나야.</li>
+      <li>손가락으로 원을 그려. 원하면 한 바퀴마다 아주 작은 "딸깍" 소리가 나.</li>
+      <li>화면에선 배터리 하나가 몇 분에 걸쳐 천천히 차오르고, 다 차면 조용히 선반으로 옮겨져. 숫자도 팝업도 없어.</li>
+      <li>감정 장면에서 손이 멈춰도 아무 일도 안 일어나. 손해도 경고도 없어.</li>
+      <li>끝내면 그때 처음으로 숫자가 나와. "72분, 4,320바퀴, 배터리 36개 = 스크롤 12장 인쇄분, 작은 마을 가로등 하룻밤."</li>
+    </ol>
+    <p class="muted">랜덤 보너스, 크리티컬, 연속 접속 보상은 전부 금지야. 돌린 만큼 정확히 받아.</p>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-lose">
+    <p class="tag">패배 리스크</p>
+    <h2 id="h-lose">"지면 잃는다" 대신 "걸면 번다"</h2>
+    <p>지금 안(지면 들고 간 스크롤을 다 잃음)은 문제가 네 가지야.</p>
+    <ul>
+      <li>정성 들여 그린 걸 잃는 게 너무 아파.</li>
+      <li>아까워서 안 들고 가거나, 들고 가도 안 써.</li>
+      <li>질 것 같을 때 몰아 쓰는 게 최선이 돼버려.</li>
+      <li>못하는 사람이 더 약해지는 악순환이 생겨.</li>
+    </ul>
+    <div class="pick">
+      <span class="lbl">추천</span>
+      <p><b>쓴 것만 소모</b> + <b>진행한 만큼 돌려받기</b> + 원하는 사람만 거는 <b>"서약 봉인"</b>. 서약 봉인은 출발 전에 스크롤을 걸고, 이기면 점수 배율이 오르고 지면 그 스크롤만 잃는 거야. 하데스 갓모드처럼 질수록 살짝 쉬워지는 "견습생 보정"은 끌 수 있는 옵션으로.</p>
+    </div>
+    <h3>2막 보스에서 졌을 때 예시</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>들고 간 것</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td>쓴 스크롤 1장</td><td>소모</td></tr>
+        <tr><td>안 쓴 스크롤 1장</td><td>돌아옴</td></tr>
+        <tr><td>서약에 건 스크롤 1장</td><td>잃음. 대신 판 내내 점수 ×1.3</td></tr>
+        <tr><td>런에서 얻은 임시 문양 5개</td><td>도달한 만큼 연구 포인트로 바뀜</td></tr>
+        <tr><td>덤</td><td>적 도감 2개, 보스 대사 1줄 해금</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted">제약 도전(사역마 1마리만, 단색 원소만, 턴 제한 등)도 서약 봉인이랑 같은 메뉴로 묶자고 제안했어. 보상은 강해지는 게 아니라 코스튬이나 새 도안 같은 걸로.</p>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-gacha">
+    <p class="tag">뽑기 · 사역마</p>
+    <h2 id="h-gacha">기대 → 정적 → 펑, 그리고 꽝마저 사랑받게</h2>
+    <h3>소환 연출 단계</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>단계</th><th>내용</th><th>회로 유머 예시 (시안 후보일 뿐)</th></tr></thead>
+      <tbody>
+        <tr><td>① 시작</td><td>내가 직접 당기거나 스와이프</td><td>차단기 레버 올리기</td></tr>
+        <tr><td>② 예고</td><td>색과 소리로 등급을 암시. 확정은 아니야</td><td>회로 불빛이 회색 → 주황 → 백열</td></tr>
+        <tr><td>③ 승급</td><td>낮은 색에서 높은 색으로. 신수 일부에서만 드물게</td><td>과부하 경보, 계기 바늘이 튐</td></tr>
+        <tr><td>④ 정적</td><td>0.3~0.8초 고요</td><td>"탁" 하고 전원이 나감</td></tr>
+        <tr><td>⑤ 폭발</td><td>섬광, 등급별 음악, 사역마 공개</td><td>전류 폭발과 함께 등장</td></tr>
+        <tr><td>⑥ 변성체</td><td>다 끝난 줄 알았는데 한 번 더 반짝</td><td>2차 스파크</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted">좋은 예고가 꼭 확정이 아니고, 확정이 꼭 예고를 보여주지도 않아야 숙련자도 매번 긴장해. 이미 가진 사역마는 짧게, 새로운 애나 높은 등급만 풀 연출로.</p>
+
+    <h3>천장</h3>
+    <ul>
+      <li><b>반천장(50/50) 없음.</b> 한국 유저가 제일 화내는 게 연속 픽뚫이었어.</li>
+      <li><b>확정 천장</b>: 지금 시연값 60회, 또는 50~80회 사이.</li>
+      <li><b>교환형 천장</b>: 뽑을 때마다 "계약 도장"이 쌓이고, 모이면 원하는 신수랑 교환.</li>
+      <li><b>새 친구 보장</b>: 계속 중복만 나오면 다음엔 새 사역마를 우선으로.</li>
+      <li><b>뽑기 레벨 금지</b>: 신수도 첫 뽑기부터 나올 수 있어.</li>
+    </ul>
+
+    <h3>등급, 돌파, 변성체, 신수</h3>
+    <ul>
+      <li><b>돌파</b>: 처음 뽑은 사역마만으로 핵심 능력이 완성돼야 해. 돌파는 스탯 대신 새 동작, 외형, 편의를 줘. 다 돌파한 뒤의 중복은 계약 도장으로 바뀌어.</li>
+      <li><b>변성체</b>: 성능은 똑같고 외형과 도감만 달라. 그래야 강해지려고 강박적으로 뽑지 않아. "신수 변성체" 같은 이중 대박도 생겨.</li>
+      <li><b>신수</b>: 딜이 센 게 아니라 판도를 바꾸는 능력. 예를 들어 <b>불가사리</b>는 쇠를 먹을수록 커지고, <b>해태</b>는 증기 속 적의 예고를 드러내.</li>
+      <li><b>산업 사역마</b>: [동물] × [산업 공정] × [과장된 약점 하나]. 흔한 애가 또 나오면 장부에 "또 너냐" 도장.</li>
+      <li><b>등급 이름 아이디어</b>: 기능사급 → 산업기사급 → 기사급 → 기능장급, 그리고 신수는 <b>"자격 불요"</b>.</li>
+    </ul>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-fx">
+    <p class="tag">스킬 연출</p>
+    <h2 id="h-fx">크기만큼 길게, 반복할수록 짧게</h2>
+    <p>사람들은 화려함을 싫어하는 게 아니야. <b>스킵 못 하는 반복</b>을 싫어해. 그래서 연출 길이를 위력, 희귀도, 처음 쓰는지에 비례하게 하고, 언제든 탭 한 번으로 넘길 수 있게 하자.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>단계</th><th>대상</th><th>연출 (제안 수치)</th></tr></thead>
+      <tbody>
+        <tr><td>T0</td><td>3칸 즉발</td><td>컷인 없음, 0.4초 이내</td></tr>
+        <tr><td>T1</td><td>5칸</td><td>작은 흔들림, 0.6~1초</td></tr>
+        <tr><td>T2</td><td>9칸</td><td>짧은 컷인, 섬광, 충격파, 1.2~2초</td></tr>
+        <tr><td>T3</td><td>13칸 이상 (궁극)</td><td>예열 → 컷인 → 정지 포즈 → 해방 → 여운, 3~6초 (짧은 버전 1.5~2초)</td></tr>
+        <tr><td>T4</td><td>첫 시전, 보스 마무리 등</td><td>컷신급 6~12초. 아주 드물게</td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li><b>영창 턴이 곧 예열</b>이야. 턴마다 마법진 고리가 하나씩 더 그려지고 판이 떨리면서 기대가 쌓여.</li>
+      <li><b>애니 느낌은 멈춘 포즈에서</b> 나와. 길티기어처럼 인물은 뚝뚝 끊어 움직이고 빛은 부드럽게.</li>
+      <li><b>컷신급은 벌어서 봐.</b> 보스 막타나 큰 연쇄 같은 조건에서만.</li>
+      <li><b>섬광은 눈 보호 기준</b>(초당 3회 이하)을 지켜.</li>
+    </ul>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-map">
+    <h2 id="h-map">결국 전부 두 기둥으로 돌아와</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>시스템</th><th>마법진 조립으로</th><th>집중 전투로</th></tr></thead>
+      <tbody>
+        <tr><td>손 작업 (크랭크)</td><td>전력으로 스크롤 인쇄</td><td>싼 스크롤을 부담 없이 사용</td></tr>
+        <tr><td>반반 (검수 라인)</td><td>도면 빈칸 채우기</td><td>시운전, 채운 도면으로 전투</td></tr>
+        <tr><td>방치</td><td>연구 포인트 조금</td><td>보너스</td></tr>
+        <tr><td>뽑기 (사역마)</td><td>사역마가 빌드 방향을 바꿈</td><td>영창 보호, 정보, 원소 깔기</td></tr>
+        <tr><td>패배 (쓴 것만 소모 + 서약)</td><td>져도 도안과 도감 해금</td><td>스크롤을 아끼지 않게 됨</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <hr>
+
+  <section aria-labelledby="h-q">
+    <p class="tag">같이 정할 것</p>
+    <h2 id="h-q">질문 17개</h2>
+    <p class="muted">하나씩 같이 정하자. 번호로 대답해도 돼.</p>
+    <div class="qs">
+      <div class="qg"><h3>집중 전투</h3>
+        <div class="q"><span class="n">1</span><p>B안(전장 배선형)을 뼈대로 하고, 첫 시제품은 "B만" vs "B + 카운트다운"으로 비교할까?<small>A안처럼 회로 안쪽 깊이를 더 원하면 말해줘.</small></p></div>
+        <div class="q"><span class="n">2</span><p>적 예고를 "누굴 노리는지만" 그대로 둘까, 위험도(약·강·치명) 표시 하나를 더할까?<small>공격 종류는 정보형 사역마가 보여주는 구조로.</small></p></div>
+        <div class="q"><span class="n">3</span><p>영창 중에 방해받으면? 일정 이상 맞으면 위력 하락 / 이동하면 취소 / 방해 없음</p></div>
+        <div class="q"><span class="n">4</span><p>되돌리기는 "커밋 전 무제한 + 전투당 1번 되감기"로 갈까?</p></div>
+        <div class="q"><span class="n">5</span><p>그리기 완성도는 위력 배율로 할까, 덜 정확하면 일부 칸이 안 찍히는 "단선"으로 할까, 둘 다 할까?</p></div>
+        <div class="q"><span class="n">6</span><p>원소 반응 6쌍(번짐, 증기, 진흙, 용암, 파도, 모래벽) 괜찮아? 빼거나 바꿀 거 있어?</p></div>
+        <div class="q"><span class="n">17</span><p>한 판 전투 횟수는 시제품에서 재보고 정할까?</p></div>
+      </div>
+      <div class="qg"><h3>반반 · 손 작업 · 패배</h3>
+        <div class="q"><span class="n">7</span><p>반반 모드는 검수 라인으로 갈까? 사역마 팀의 빈자리도 발주서에 섞을까?</p></div>
+        <div class="q"><span class="n">8</span><p>변성체는 뽑기에서만 나올까, 반반에서도 "변성 부품"으로 나올까? 변성체가 반반 희귀 확률을 올리는 효과는 넣을까?</p></div>
+        <div class="q"><span class="n">9</span><p>손 작업은 크랭크 발전기로 갈까? 전력을 어디까지 쓸까? (스크롤 인쇄, 원소 변환, 뽑기 재화)</p></div>
+        <div class="q"><span class="n">10</span><p>패배는 "쓴 것만 소모 + 진행만큼 회수 + 서약 봉인"으로 바꿀까? 견습생 보정 옵션도 넣을까?</p></div>
+      </div>
+      <div class="qg"><h3>뽑기 · 사역마 · 연출</h3>
+        <div class="q"><span class="n">11</span><p>천장 횟수, 교환형 천장(계약 도장), 새 친구 보장, 노림수 배너(신수 UP, 변성 UP) 중 뭘 넣을까?</p></div>
+        <div class="q"><span class="n">12</span><p>돌파는 5단계 유지할까, 3~4단계로 줄일까? 보상은 새 동작·외형·편의 위주로 갈까?</p></div>
+        <div class="q"><span class="n">13</span><p>등급 이름: 자격증 유머(기능사급~기능장급, 신수는 "자격 불요") vs 평범한 이름?</p></div>
+        <div class="q"><span class="n">14</span><p>신수는 몇 마리? 불가사리, 해태 말고 삼족오, 구미호 같은 후보도 넣을까?</p></div>
+        <div class="q"><span class="n">15</span><p>컷신 기본값을 "마법진마다 처음 1번은 풀, 그다음부턴 짧게"로 할까?</p></div>
+        <div class="q"><span class="n">16</span><p>뽑기 재화는 어디서 얼마나 줄까? "손 작업 몇 시간 = 뽑기 몇 번"이 게임 경제 전체의 기준이 돼.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  // B안 예시 판: 행 0~8, 열 A~I. 물 F5, 불 E5, 바람 E4·D4·C4, 마법사 E8, 사역마 E6, 적 C4·F4·G6
+  const g = document.getElementById('g9');
+  const cell = {};
+  const set = (c, r, cls, t = '') => { cell[`${c},${r}`] = [cls, t]; };
+  const col = ch => 'ABCDEFGHI'.indexOf(ch);
+  set(col('F'), 4, 'water', '물');
+  set(col('E'), 4, 'fire', '불');
+  set(col('D'), 3, 'wind'); set(col('C'), 3, 'wind'); set(col('E'), 3, 'wind');
+  set(col('C'), 3, 'foe', '적'); set(col('F'), 3, 'foe', '적'); set(col('G'), 5, 'foe', '적');
+  set(col('E'), 7, 'me', '나'); set(col('E'), 5, 'me', '사');
+  for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) {
+    const i = document.createElement('i');
+    const v = cell[`${c},${r}`];
+    if (v) { i.className = v[0]; i.textContent = v[1]; }
+    g.appendChild(i);
+  }
+})();
+</script>
