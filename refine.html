@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#120d14">
+  <title>원석 정제 작업대</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="./src/refine/refine.css">
+</head>
+<body>
+  <div id="stage"></div>
+
+  <div class="hud" id="hud" hidden>
+    <button id="btnSound" class="hud-btn" aria-pressed="true">작업 소리 켜짐</button>
+    <button id="btnFinish" class="hud-btn">작업 마치기</button>
+  </div>
+  <p class="hint" id="hint" hidden>화면 아무 데나 빙글빙글 문질러 보세요</p>
+
+  <section class="panel" id="startPanel" aria-labelledby="startTitle">
+    <p class="eyebrow">공방 · 작업대</p>
+    <h1 id="startTitle">원석 정제</h1>
+    <p class="lead">원석을 넣고 맷돌을 돌려 재료를 정제해요. 화면 어디든 원을 그리듯 문지르면 돌아가요. 컨트롤러 스틱이나 버튼, 마우스 휠, 스페이스 키로도 돌릴 수 있어요.</p>
+    <fieldset class="bundles" id="bundles">
+      <legend>넣을 원석</legend>
+    </fieldset>
+    <label class="opt"><input type="checkbox" id="optSound" checked> 맷돌 가는 소리 (아주 작게)</label>
+    <button class="primary" id="btnStart">작업 시작</button>
+    <div class="stock" id="stock"></div>
+  </section>
+
+  <section class="panel" id="donePanel" aria-labelledby="doneTitle" hidden>
+    <p class="eyebrow">작업 정리</p>
+    <h1 id="doneTitle">오늘의 정제</h1>
+    <dl class="facts">
+      <div><dt>작업 시간</dt><dd id="doneTime">0분</dd></div>
+      <div><dt>정제한 원석</dt><dd id="doneOre">0개</dd></div>
+    </dl>
+    <ul class="gains" id="doneGains"></ul>
+    <button class="primary" id="btnAgain">작업대로 돌아가기</button>
+  </section>
+
+  <script type="module" src="./src/refine/main.ts"></script>
+</body>
+</html>

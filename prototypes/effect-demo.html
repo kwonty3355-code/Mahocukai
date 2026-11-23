@@ -1,0 +1,766 @@
+<title>마법진 이펙트 비교</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: 무대(캔버스) 하나를 중심에 두고, 아래로 조작 → 스타일 설명 → 컨트롤러 테스트를 쌓는 작업대 구성. 게임 화면이라 어두운 단일 테마로 고정. */
+:root{
+  --bg:#0c0e16; --panel:#151927; --panel2:#1d2236; --line:#2b3147;
+  --fg:#ece9f3; --muted:#9298b0; --fire:#ff8a3d; --fire-hi:#ffd27a; --mana:#7cc7ff;
+  --display:"Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:15px;line-height:1.6}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--fire);margin:0}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,44px);line-height:1.15;margin:4px 0 8px;text-wrap:balance}
+header p{color:var(--muted);margin:0;max-width:64ch}
+.stage{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#07080d}
+canvas{display:block;width:100%;aspect-ratio:16/9;max-width:100%;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.hint{position:absolute;left:12px;bottom:8px;font-size:12px;color:var(--muted);pointer-events:none}
+.controls{display:grid;grid-template-columns:1fr 1.25fr auto;gap:14px;align-items:end}
+@media (max-width:760px){.controls{grid-template-columns:1fr}}
+.group{display:grid;gap:6px;min-width:0}
+.label{font-size:12px;color:var(--muted);letter-spacing:.06em}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{flex:1;min-width:0;background:none;border:0;color:var(--fg);font:inherit;font-size:14px;padding:9px 6px;cursor:pointer;display:grid;gap:0;text-align:center;line-height:1.35}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button small{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.seg button[aria-pressed="true"]{background:var(--panel2);box-shadow:inset 0 -3px 0 var(--fire)}
+.cast{font-family:var(--display);font-size:20px;letter-spacing:.04em;background:var(--fire);color:#1a0d05;border:0;border-radius:8px;padding:12px 30px;cursor:pointer}
+.cast:active{transform:translateY(1px)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--mana);outline-offset:2px}
+.toggles{display:flex;flex-wrap:wrap;gap:18px;font-size:13px;color:var(--muted)}
+.toggles label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.info{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
+@media (max-width:760px){.info{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.card h2{font-family:var(--display);font-weight:400;font-size:21px;margin:0 0 6px;letter-spacing:.01em}
+.card p{margin:0 0 10px}
+.card ul{margin:0 0 10px;padding-left:18px;color:var(--muted)}
+.ref{font-size:13px;color:var(--fire-hi);margin:0}
+.pad{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.stick{width:84px;height:84px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);position:relative}
+.stick .ring{position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(var(--mana) var(--p,0deg),transparent 0);-webkit-mask:radial-gradient(circle,transparent 44px,#000 45px);mask:radial-gradient(circle,transparent 44px,#000 45px)}
+.stick .dot{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--mana);box-shadow:0 0 10px var(--mana)}
+.stick.tick{animation:tick .18s ease-out}
+@keyframes tick{from{box-shadow:0 0 0 0 rgba(124,199,255,.7)}to{box-shadow:0 0 0 14px rgba(124,199,255,0)}}
+.padtext{display:grid;gap:6px;min-width:0;font-size:14px}
+.padtext .status{color:var(--fg);overflow-wrap:anywhere}
+.padtext .muted{color:var(--muted);font-size:13px}
+.rot{font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums;color:var(--mana)}
+.ghost{background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;justify-self:start}
+kbd{font-family:inherit;font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel2)}
+.keys{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.stick.tick{animation:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">마법산업기능사 · 이펙트 스타일 테스트</p>
+    <h1>같은 불 마법, 세 가지 손맛</h1>
+    <p>스타일과 마법진 크기를 고르고 시전해 보세요. 같은 마법을 그래픽 방식만 바꿔서 보여줘요. 크기가 클수록 차징이 길고, 그만큼 세게 터져요.</p>
+  </header>
+
+  <div class="stage">
+    <canvas id="stage" aria-label="마법 시전 시연 화면. 클릭하면 시전"></canvas>
+    <div class="hint" id="hint">화면 클릭 · <kbd>Space</kbd> · 컨트롤러 A 버튼으로 시전</div>
+  </div>
+
+  <div class="controls">
+    <div class="group">
+      <span class="label" id="lblStyle">이펙트 스타일</span>
+      <div class="seg" role="group" aria-labelledby="lblStyle" id="styleSeg">
+        <button id="st-sakuga" data-style="sakuga" aria-pressed="true">2D 작화풍</button>
+        <button id="st-light" data-style="light" aria-pressed="false">3D 빛·파티클</button>
+        <button id="st-mixed" data-style="mixed" aria-pressed="false">혼합</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="label" id="lblSize">마법진 크기</span>
+      <div class="seg" role="group" aria-labelledby="lblSize" id="sizeSeg">
+        <button id="sz-0" data-size="0" aria-pressed="false">소형<small>차징 0.45초 · 위력 128</small></button>
+        <button id="sz-1" data-size="1" aria-pressed="true">중형<small>차징 1.0초 · 위력 412</small></button>
+        <button id="sz-2" data-size="2" aria-pressed="false">대형<small>차징 1.9초 · 위력 1,386</small></button>
+      </div>
+    </div>
+    <button class="cast" id="castBtn">시전</button>
+  </div>
+
+  <div class="toggles">
+    <label><input type="checkbox" id="optSound" checked> 효과음</label>
+    <label><input type="checkbox" id="optFlash"> 번쩍임 줄이기 (눈이 피로하면 켜세요)</label>
+  </div>
+
+  <div class="info">
+    <section class="card" id="styleCard" aria-live="polite">
+      <h2 id="styleTitle">2D 애니 작화풍</h2>
+      <p id="styleBody"></p>
+      <ul id="stylePoints"></ul>
+      <p class="ref" id="styleRef"></p>
+    </section>
+
+    <section class="card">
+      <h2>컨트롤러 테스트</h2>
+      <div class="pad">
+        <div class="stick" id="stick"><div class="ring" id="ring"></div><div class="dot" id="dot"></div></div>
+        <div class="padtext">
+          <div class="status" id="padStatus">컨트롤러가 아직 안 보여요. 연결한 뒤 아무 버튼이나 한 번 눌러주세요. 브라우저는 버튼이 눌려야 컨트롤러를 인식해요.</div>
+          <div><span class="rot" id="rotCount">0바퀴</span> <span class="muted">왼쪽 스틱을 빙글빙글 돌려보세요. 한 바퀴마다 짧게 진동해요. 시청 모드 맛보기예요.</span></div>
+          <button class="ghost" id="vibBtn">진동 테스트</button>
+          <div class="muted" id="vibResult">진동이 되는지 여기서 확인할 수 있어요.</div>
+          <div class="keys"><span>A 시전</span><span>LB·RB 크기</span><span>십자키 ←→ 스타일</span><span class="muted" id="lastBtn"></span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+const cv = document.getElementById('stage');
+const ctx = cv.getContext('2d');
+const VW = 960, VH = 540, GROUND = 432;
+let scale = 1;
+function resize(){
+  const w = cv.clientWidth || 960;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(w * dpr); cv.height = Math.round(w * 9 / 16 * dpr);
+  scale = cv.width / VW;
+}
+if ('ResizeObserver' in window) new ResizeObserver(resize).observe(cv); else addEventListener('resize', resize);
+resize();
+
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const TAU = Math.PI * 2;
+function mulberry(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+const SIZES = [
+  { r: 46,  charge: 0.45, dmg: 128,  shake: 6,  stop: 0.05, parts: 0.45 },
+  { r: 78,  charge: 1.0,  dmg: 412,  shake: 13, stop: 0.09, parts: 0.85 },
+  { r: 116, charge: 1.9,  dmg: 1386, shake: 24, stop: 0.16, parts: 1.45 },
+];
+const STYLES = {
+  sakuga: { step: 1/12, flat: true,  glow: false, outline: true,  persp: false, impactFrame: true,  speedLines: true,  onoma: true },
+  light:  { step: 0,    flat: false, glow: true,  outline: false, persp: true,  impactFrame: false, speedLines: false, onoma: false },
+  mixed:  { step: 0,    flat: false, glow: true,  outline: true,  persp: true,  impactFrame: true,  speedLines: true,  onoma: false },
+};
+const STYLE_TEXT = {
+  sakuga: { title: '2D 애니 작화풍', body: '평면 색과 굵은 검은 외곽선. 움직임이 초당 12장으로 뚝뚝 끊어져요. 맞는 순간 화면이 반전되는 임팩트 프레임, 집중선, 의성어가 들어가요.',
+    points: ['끊어지는 움직임이 오히려 손으로 그린 작화 느낌을 줘요', '개발 난이도는 낮은 편. 대신 그림체가 결과물을 좌우해요'],
+    ref: 'TV 애니 전투 작화나 2D 격투게임 필살기 연출에 가까워요.' },
+  light: { title: '3D 빛·파티클', body: '빛 번짐, 수백 개의 불꽃 파티클, 바닥에 깔리는 입체 마법진과 충격파. 60프레임으로 부드럽게 움직여요.',
+    points: ['화려함과 규모감이 강점이에요', '개발 난이도는 중간. 파티클이 많아지면 성능 관리가 필요해요'],
+    ref: '로스트아크나 디아블로 같은 3D 액션 RPG 스킬 연출에 가까워요.' },
+  mixed: { title: '혼합 (애니풍 3D)', body: '빛과 파티클은 3D처럼 부드럽게 흐르다가, 맞는 순간에만 2D 애니처럼 임팩트 프레임과 집중선으로 화면을 끊어요.',
+    points: ['두 방식의 장점을 섞지만 조율이 가장 까다로워요', '개발 난이도는 높은 편'],
+    ref: '원신이나 붕괴: 스타레일 같은 애니풍 3D 게임의 필살기 연출에 가까워요.' },
+};
+const ONOMA = ['팡!', '쾅!!', '콰과광!!'];
+const CASTER = { x: 150 };
+const DUMMY = { x: 775 };
+const HIT = { x: 775, y: GROUND - 108 };
+
+const S = {
+  style: 'sakuga', size: 1, phase: 'idle', t: 0, circle: null, cur: null, beamHead: 0, hitDone: false,
+  hitstop: 0, shake: 0, sx: 0, sy: 0, zoom: 0, flash: 0, light: 0, recoil: 0, impactT: 9, seed: 1, real: 0,
+  parts: [], nums: [], waves: [], bursts: [], dummy: { ang: 0, vel: 0, flash: 0 },
+  sound: true, reduceFlash: false, unlocked: false, auto: true, autoT: 0.6,
+};
+try { S.reduceFlash = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+document.getElementById('optFlash').checked = S.reduceFlash;
+
+/* ---------- 효과음 (WebAudio 합성) ---------- */
+let AC = null, master = null, nbuf = null;
+function audio(){
+  if (!S.sound || !S.unlocked) return null;
+  try {
+    if (!AC){
+      const C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+      AC = new C(); master = AC.createGain(); master.gain.value = 0.55;
+      const comp = AC.createDynamicsCompressor(); master.connect(comp); comp.connect(AC.destination);
+      nbuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+      const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (AC.state === 'suspended') AC.resume();
+  } catch (e) { return null; }
+  return AC;
+}
+function noise(t0, dur, type, f0, f1, g0){
+  const src = AC.createBufferSource(); src.buffer = nbuf; src.loop = true;
+  const f = AC.createBiquadFilter(); f.type = type;
+  f.frequency.setValueAtTime(f0, t0); f.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+  const g = AC.createGain(); g.gain.setValueAtTime(g0, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+  src.connect(f); f.connect(g); g.connect(master); src.start(t0); src.stop(t0 + dur + 0.05);
+}
+function sfxCharge(dur, idx){
+  const a = audio(); if (!a) return; const t = a.currentTime;
+  const o = a.createOscillator(); o.type = 'sawtooth';
+  o.frequency.setValueAtTime(60, t); o.frequency.exponentialRampToValueAtTime(150 + idx * 70, t + dur);
+  const o2 = a.createOscillator(); o2.type = 'sine';
+  o2.frequency.setValueAtTime(240, t); o2.frequency.exponentialRampToValueAtTime(620 + idx * 220, t + dur);
+  const f = a.createBiquadFilter(); f.type = 'lowpass';
+  f.frequency.setValueAtTime(300, t); f.frequency.exponentialRampToValueAtTime(2400, t + dur);
+  const g = a.createGain(); g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.12, t + dur * 0.9); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.06);
+  const g2 = a.createGain(); g2.gain.value = 0.25;
+  o.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(master);
+  o.start(t); o2.start(t); o.stop(t + dur + 0.1); o2.stop(t + dur + 0.1);
+}
+function sfxRelease(){ const a = audio(); if (!a) return; noise(a.currentTime, 0.22, 'bandpass', 3500, 700, 0.5); }
+function sfxImpact(s){
+  const a = audio(); if (!a) return; const t = a.currentTime;
+  const o = a.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(170, t); o.frequency.exponentialRampToValueAtTime(36, t + 0.4);
+  const g = a.createGain(); g.gain.setValueAtTime(0.9 * s, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.45 + 0.25 * s);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.85);
+  noise(t, 0.35 + 0.4 * s, 'lowpass', 2200, 180, 0.8 * s);
+  noise(t, 0.09, 'highpass', 3000, 6000, 0.35);
+}
+
+/* ---------- 컨트롤러 진동 ---------- */
+function currentPad(){
+  try { const gps = navigator.getGamepads ? navigator.getGamepads() : []; for (const g of gps) if (g && g.connected) return g; } catch (e) {}
+  return null;
+}
+function rumble(ms, strong, weak){
+  const gp = currentPad(); if (!gp) return false;
+  try {
+    if (gp.vibrationActuator && gp.vibrationActuator.playEffect){
+      gp.vibrationActuator.playEffect('dual-rumble', { startDelay: 0, duration: ms, strongMagnitude: strong, weakMagnitude: weak }).catch(() => {});
+      return true;
+    }
+    if (gp.hapticActuators && gp.hapticActuators[0] && gp.hapticActuators[0].pulse){ gp.hapticActuators[0].pulse(Math.max(strong, weak), ms); return true; }
+  } catch (e) {}
+  return false;
+}
+
+/* ---------- 시뮬레이션 ---------- */
+function addP(o){
+  const p = Object.assign({ x: 0, y: 0, vx: 0, vy: 0, life: 1, size: 2, k: 'spark', drag: 0, grav: 0, delay: 0, rot: Math.random() * TAU, vr: 0, grow: 0 }, o);
+  if (p.max == null) p.max = p.life;
+  S.parts.push(p);
+}
+function circleSpot(r){
+  const st = STYLES[S.style];
+  return st.persp ? { x: CASTER.x + 95, y: GROUND - 30 - r } : { x: CASTER.x + 70 + r, y: GROUND - 34 - r };
+}
+function cast(){
+  if (S.phase === 'charge' || S.phase === 'fire') return;
+  const z = SIZES[S.size];
+  S.cur = Object.assign({ idx: S.size }, z);
+  const pos = circleSpot(z.r);
+  S.circle = { x: pos.x, y: pos.y, r: z.r, prog: 0, rot: 0, alpha: 1, scale: 1 };
+  S.phase = 'charge'; S.t = 0; S.hitDone = false; S.beamHead = 0;
+  sfxCharge(z.charge, S.cur.idx);
+}
+function impact(){
+  const st = STYLES[S.style], z = S.cur, f = z.parts, flat = st.flat;
+  S.hitstop = z.stop; S.shake = z.shake; S.zoom = 0.02 + 0.025 * z.idx; S.flash = 1; S.light = 1.6; S.impactT = 0;
+  S.dummy.vel += 0.9 + 0.6 * z.idx; S.dummy.flash = 1;
+  S.nums.push({ v: z.dmg, t: 0, x: HIT.x + (Math.random() * 40 - 20), y: HIT.y - 92, big: z.idx });
+  S.waves.push({ t: 0, x: DUMMY.x, y: GROUND, max: 170 + 100 * z.idx });
+  if (st.outline) S.bursts.push({ t: 0, x: HIT.x, y: HIT.y, R: z.r * 1.15 + 34, seed: (Math.random() * 1e9) | 0, rot: Math.random() * TAU });
+  const nS = Math.round((flat ? 22 : 120) * f);
+  for (let i = 0; i < nS; i++){
+    const a = (Math.random() * 2 - 1) * Math.PI * 0.8 - 0.3;
+    const sp = 220 + Math.random() * 720 * (0.6 + 0.4 * f);
+    addP({ k: 'spark', x: HIT.x, y: HIT.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.3 + Math.random() * 0.5, size: 1.5 + Math.random() * 2.2, drag: 1.6, grav: 900 });
+  }
+  const nE = Math.round((flat ? 8 : 36) * f);
+  for (let i = 0; i < nE; i++) addP({ k: 'ember', x: HIT.x + (Math.random() - 0.5) * 60, y: HIT.y + (Math.random() - 0.5) * 60, vx: (Math.random() - 0.5) * 240, vy: -60 - Math.random() * 220, life: 1 + Math.random(), size: 1.5 + Math.random() * 2, drag: 0.8, grav: -30 });
+  const nM = flat ? 7 : 12;
+  for (let i = 0; i < nM; i++) addP({ k: 'smoke', x: HIT.x + (Math.random() - 0.5) * 70 * (0.6 + f * 0.4), y: HIT.y + (Math.random() - 0.5) * 60, vx: (Math.random() - 0.5) * 90, vy: -30 - Math.random() * 60, life: 0.9 + Math.random() * 0.7, size: (18 + Math.random() * 24) * (0.7 + 0.5 * f), grow: 22, drag: 1.2, delay: flat ? 0.17 : 0.04 });
+  if (flat) for (let i = 0; i < Math.round(10 * f); i++){
+    const a = (Math.random() * 2 - 1) * Math.PI * 0.7 - 0.4, sp = 300 + Math.random() * 500;
+    addP({ k: 'shard', x: HIT.x, y: HIT.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 0.45 + Math.random() * 0.3, size: 6 + Math.random() * 8, drag: 2.5, grav: 700, vr: (Math.random() - 0.5) * 20 });
+  }
+  rumble(110 + 90 * z.idx, 0.45 + 0.27 * z.idx, 0.9);
+  sfxImpact(0.55 + 0.25 * z.idx);
+}
+function tick(dt){
+  S.seed++; S.real += dt;
+  if (S.impactT < 9) S.impactT += dt;
+  for (const b of S.bursts) b.t += dt;
+  S.bursts = S.bursts.filter(b => b.t < 0.6);
+  if (S.hitstop > 0){
+    S.hitstop -= dt;
+    S.sx = (Math.random() * 2 - 1) * S.shake; S.sy = (Math.random() * 2 - 1) * S.shake * 0.7;
+    return;
+  }
+  S.shake *= Math.exp(-dt * 7); if (S.shake < 0.3) S.shake = 0;
+  S.sx = (Math.random() * 2 - 1) * S.shake; S.sy = (Math.random() * 2 - 1) * S.shake * 0.7;
+  sim(dt);
+}
+function sim(dt){
+  if (S.auto && !S.unlocked && S.phase === 'idle'){ S.autoT -= dt; if (S.autoT <= 0){ S.autoT = 2.4; cast(); } }
+  const st = STYLES[S.style], c = S.circle;
+  if (S.phase === 'charge'){
+    S.t += dt;
+    const k = S.t / S.cur.charge;
+    c.prog = Math.min(1, S.t / (S.cur.charge * 0.85));
+    c.rot += dt * (0.6 + 2.8 * k);
+    S.light = Math.max(S.light, 0.25 + 0.75 * k);
+    const rate = (st.flat ? 16 : 70) * S.cur.parts * (0.5 + k);
+    let n = rate * dt; while (n > 0){
+      if (n < 1 && Math.random() > n) break; n -= 1;
+      const a = Math.random() * TAU, R = c.r * 1.7 + Math.random() * 40, sx = st.persp ? 0.34 : 1;
+      const x = c.x + Math.cos(a) * R * sx, y = c.y + Math.sin(a) * R, life = 0.32;
+      addP({ k: 'conv', x, y, vx: (c.x - x) / life, vy: (c.y - y) / life, life, size: st.flat ? 3 : 1.6 });
+    }
+    if (S.t >= S.cur.charge){ S.phase = 'fire'; S.t = 0; S.recoil = 1; sfxRelease(); }
+  } else if (S.phase === 'fire'){
+    S.t += dt;
+    S.beamHead = Math.min(1, S.t / 0.09);
+    if (S.beamHead >= 1 && !S.hitDone){ S.hitDone = true; impact(); }
+    c.scale = 1 + 0.18 * easeOut(clamp(S.t / 0.5));
+    c.alpha = 1 - clamp((S.t - 0.15) / 0.45);
+    if (S.t > 0.65){ S.phase = 'after'; S.t = 0; S.circle = null; }
+  } else if (S.phase === 'after'){
+    S.t += dt; if (S.t > 1.0) S.phase = 'idle';
+  }
+  for (const p of S.parts){
+    if (p.delay > 0){ p.delay -= dt; continue; }
+    p.life -= dt;
+    const dr = Math.exp(-p.drag * dt); p.vx *= dr; p.vy *= dr; p.vy += p.grav * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; p.size += p.grow * dt;
+    if (p.k === 'spark' && p.y > GROUND){ p.y = GROUND; p.vy *= -0.35; p.vx *= 0.6; }
+  }
+  S.parts = S.parts.filter(p => p.life > 0);
+  for (const n of S.nums) n.t += dt; S.nums = S.nums.filter(n => n.t < 1.2);
+  for (const w of S.waves) w.t += dt; S.waves = S.waves.filter(w => w.t < 0.55);
+  const d = S.dummy; d.vel += (-60 * d.ang - 6 * d.vel) * dt; d.ang += d.vel * dt; d.flash = Math.max(0, d.flash - dt * 5);
+  S.flash *= Math.exp(-dt * 10); S.zoom *= Math.exp(-dt * 6); S.recoil *= Math.exp(-dt * 8);
+  S.light = Math.max(0, S.light - dt * (S.phase === 'charge' ? 0 : 2.2));
+}
+
+/* ---------- 그리기 ---------- */
+function applyCam(){
+  ctx.translate(S.sx, S.sy);
+  const z = 1 + S.zoom; ctx.translate(HIT.x, HIT.y); ctx.scale(z, z); ctx.translate(-HIT.x, -HIT.y);
+}
+function drawBG(st){
+  let g = ctx.createLinearGradient(0, 0, 0, GROUND);
+  g.addColorStop(0, '#080a12'); g.addColorStop(1, st.flat ? '#1b2036' : '#171c30');
+  ctx.fillStyle = g; ctx.fillRect(-80, -80, VW + 160, GROUND + 80);
+  g = ctx.createLinearGradient(0, GROUND, 0, VH);
+  g.addColorStop(0, st.flat ? '#2a3150' : '#20263c'); g.addColorStop(1, '#0b0e18');
+  ctx.fillStyle = g; ctx.fillRect(-80, GROUND, VW + 160, VH - GROUND + 80);
+  if (st.persp){
+    ctx.strokeStyle = 'rgba(124,199,255,0.07)'; ctx.lineWidth = 1; ctx.beginPath();
+    for (let i = -14; i <= 14; i++){ ctx.moveTo(480 + i * 26, GROUND); ctx.lineTo(480 + i * 150, VH + 40); }
+    for (let k = 1; k <= 7; k++){ const y = GROUND + (VH - GROUND + 40) * Math.pow(k / 7, 2); ctx.moveTo(-80, y); ctx.lineTo(VW + 80, y); }
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  } else {
+    ctx.fillStyle = '#232a45'; ctx.fillRect(-80, GROUND + 26, VW + 160, 3); ctx.fillRect(-80, GROUND + 62, VW + 160, 3);
+    ctx.strokeStyle = '#05060a';
+  }
+  ctx.lineWidth = st.flat ? 3 : 1; ctx.beginPath(); ctx.moveTo(-80, GROUND); ctx.lineTo(VW + 80, GROUND); ctx.stroke();
+}
+function groundGlow(x, inten, rad){
+  if (inten <= 0.01) return;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.translate(x, GROUND); ctx.scale(1, 0.22);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rad);
+  g.addColorStop(0, `rgba(255,140,60,${0.55 * Math.min(1, inten)})`); g.addColorStop(1, 'rgba(255,90,30,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rad, 0, TAU); ctx.fill(); ctx.restore();
+}
+function drawCaster(st){
+  const x = CASTER.x - S.recoil * 10, y = GROUND;
+  ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  // 그림자
+  ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(x, y + 2, 34, 6, 0, 0, TAU); ctx.fill();
+  const cloak = () => { ctx.beginPath(); ctx.moveTo(x - 30, y); ctx.quadraticCurveTo(x - 18, y - 70, x - 6, y - 112); ctx.lineTo(x + 8, y - 112); ctx.quadraticCurveTo(x + 20, y - 60, x + 30, y); ctx.closePath(); };
+  let fill = '#2d2545';
+  if (!st.flat){ const g = ctx.createLinearGradient(x - 30, 0, x + 30, 0); g.addColorStop(0, '#1d1830'); g.addColorStop(1, '#3d3360'); fill = g; }
+  cloak(); ctx.fillStyle = fill; ctx.fill();
+  if (st.flat){ ctx.save(); cloak(); ctx.clip(); ctx.fillStyle = '#3e3462'; ctx.fillRect(x + 2, y - 120, 40, 130); ctx.restore(); }
+  if (st.outline){ cloak(); ctx.lineWidth = 3; ctx.strokeStyle = '#05060a'; ctx.stroke(); }
+  ctx.beginPath(); ctx.arc(x + 1, y - 124, 17, 0, TAU); ctx.fillStyle = st.flat ? '#2d2545' : '#2a2342'; ctx.fill();
+  if (st.outline){ ctx.lineWidth = 3; ctx.strokeStyle = '#05060a'; ctx.stroke(); }
+  ctx.beginPath(); ctx.arc(x + 7, y - 122, 3, 0, TAU); ctx.fillStyle = '#ffd27a'; ctx.fill();
+  // 지팡이
+  if (st.outline){ ctx.strokeStyle = '#05060a'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x + 8, y - 80); ctx.lineTo(x + 60, y - 104); ctx.stroke(); }
+  ctx.strokeStyle = '#8a6a4a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x + 8, y - 80); ctx.lineTo(x + 60, y - 104); ctx.stroke();
+  const tip = S.phase === 'charge' ? S.light : 0;
+  if (st.glow){
+    ctx.globalCompositeOperation = 'lighter';
+    const r = 6 + 22 * tip, g = ctx.createRadialGradient(x + 60, y - 104, 0, x + 60, y - 104, r);
+    g.addColorStop(0, 'rgba(255,240,200,0.95)'); g.addColorStop(1, 'rgba(255,110,40,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x + 60, y - 104, r, 0, TAU); ctx.fill();
+    if (S.light > 0.05){ cloak(); ctx.lineWidth = 2; ctx.strokeStyle = `rgba(255,140,60,${0.45 * Math.min(1, S.light)})`; ctx.stroke(); }
+  } else {
+    ctx.beginPath(); ctx.arc(x + 60, y - 104, 4 + 4 * tip, 0, TAU); ctx.fillStyle = '#ffd34d'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#05060a'; ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawDummy(st, mono){
+  const d = S.dummy;
+  ctx.save(); ctx.translate(DUMMY.x, GROUND);
+  if (!mono){ ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(0, 2, 42, 7, 0, 0, TAU); ctx.fill(); }
+  ctx.rotate(d.ang);
+  const post = () => { ctx.beginPath(); ctx.rect(-6, -150, 12, 150); };
+  const body = () => { ctx.beginPath(); ctx.ellipse(0, -104, 36, 52, 0, 0, TAU); };
+  const head = () => { ctx.beginPath(); ctx.arc(0, -176, 21, 0, TAU); };
+  const ol = !mono && st.outline;
+  const fillP = (fn, col) => { fn(); ctx.fillStyle = col; ctx.fill(); if (ol){ ctx.lineWidth = 3; ctx.strokeStyle = '#07070c'; ctx.stroke(); } };
+  if (mono){ for (const fn of [post, body, head]){ fn(); ctx.fillStyle = mono; ctx.fill(); } ctx.restore(); return; }
+  fillP(post, '#6b4a2f');
+  const sack = (cx, cy, r) => { if (st.flat) return '#c9a36a'; const g = ctx.createRadialGradient(cx - r * 0.35, cy - r * 0.35, 2, cx, cy, r * 1.2); g.addColorStop(0, '#e6c891'); g.addColorStop(1, '#8a6a3e'); return g; };
+  fillP(body, sack(0, -104, 52));
+  if (st.flat){ ctx.save(); body(); ctx.clip(); ctx.beginPath(); ctx.ellipse(18, -98, 36, 54, 0, 0, TAU); ctx.fillStyle = '#9a7646'; ctx.fill(); ctx.restore(); body(); ctx.lineWidth = 3; ctx.strokeStyle = '#07070c'; ctx.stroke(); }
+  for (const [r, col] of [[20, '#e8e2d6'], [13, '#c23a2a'], [6, '#e8e2d6']]){ ctx.beginPath(); ctx.arc(0, -110, r, 0, TAU); ctx.fillStyle = col; ctx.fill(); }
+  if (ol){ ctx.beginPath(); ctx.arc(0, -110, 20, 0, TAU); ctx.lineWidth = 2; ctx.strokeStyle = '#07070c'; ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(-34, -66); ctx.quadraticCurveTo(0, -58, 34, -66); ctx.lineWidth = 3; ctx.strokeStyle = '#5a3d22'; ctx.stroke();
+  fillP(head, sack(0, -176, 21));
+  if (st.flat){ ctx.save(); head(); ctx.clip(); ctx.beginPath(); ctx.arc(9, -172, 21, 0, TAU); ctx.fillStyle = '#9a7646'; ctx.fill(); ctx.restore(); head(); ctx.lineWidth = 3; ctx.strokeStyle = '#07070c'; ctx.stroke(); }
+  const fl = st.flat ? (d.flash > 0.5 ? 1 : 0) : d.flash;
+  if (fl > 0){ ctx.globalAlpha = fl; for (const fn of [post, body, head]){ fn(); ctx.fillStyle = '#fff'; ctx.fill(); } ctx.globalAlpha = 1; }
+  if (st.glow && S.light > 0.05){ ctx.globalCompositeOperation = 'lighter'; body(); ctx.lineWidth = 3; ctx.strokeStyle = `rgba(255,140,60,${0.6 * Math.min(1, S.light)})`; ctx.stroke(); head(); ctx.stroke(); }
+  ctx.restore();
+}
+function circleGeom(r, p, rot, lw){
+  const p1 = clamp(p / 0.4), p2 = clamp((p - 0.12) / 0.4), p3 = clamp((p - 0.3) / 0.4), p4 = clamp((p - 0.5) / 0.3), p5 = clamp((p - 0.7) / 0.3);
+  const k = Math.max(0.8, r / 80);
+  if (p1 > 0){ ctx.lineWidth = 3 * k * lw; ctx.beginPath(); ctx.arc(0, 0, r, -Math.PI / 2, -Math.PI / 2 + TAU * p1); ctx.stroke(); }
+  if (p2 > 0){ ctx.lineWidth = 1.5 * k * lw; ctx.beginPath(); ctx.arc(0, 0, r * 0.9, Math.PI / 2, Math.PI / 2 - TAU * p2, true); ctx.stroke(); }
+  if (p3 > 0){
+    ctx.save(); ctx.rotate(rot); ctx.lineWidth = 1.6 * k * lw;
+    const N = 24;
+    for (let i = 0; i < N * p3; i++){
+      const a = i / N * TAU, rr = r * 0.8; ctx.save(); ctx.rotate(a); ctx.translate(rr, 0);
+      ctx.beginPath();
+      const s = r * 0.045;
+      if (i % 3 === 0){ ctx.moveTo(-s, 0); ctx.lineTo(s, 0); }
+      else if (i % 3 === 1){ ctx.arc(0, 0, s * 0.6, 0, TAU); }
+      else { ctx.moveTo(-s * 0.7, -s); ctx.lineTo(s * 0.7, 0); ctx.lineTo(-s * 0.7, s); }
+      ctx.stroke(); ctx.restore();
+    }
+    ctx.restore();
+  }
+  if (p4 > 0){
+    ctx.save(); ctx.rotate(-rot * 0.7); ctx.lineWidth = 2 * k * lw;
+    const R = r * 0.7, side = R * Math.sqrt(3), per = side * 3;
+    ctx.setLineDash([per * p4, per + 1]);
+    for (const off of [-Math.PI / 2, Math.PI / 2]){
+      ctx.beginPath();
+      for (let j = 0; j <= 3; j++){ const a = off + j * TAU / 3; const x = Math.cos(a) * R, y = Math.sin(a) * R; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.restore();
+  }
+  if (p5 > 0){
+    ctx.lineWidth = 2 * k * lw; ctx.beginPath(); ctx.arc(0, 0, r * 0.38, 0, TAU * p5); ctx.stroke();
+    const s = r * 0.26 * easeOut(p5);
+    ctx.beginPath(); ctx.moveTo(0, -s); ctx.bezierCurveTo(s * 0.7, -s * 0.3, s * 0.6, s * 0.55, 0, s * 0.62); ctx.bezierCurveTo(-s * 0.6, s * 0.55, -s * 0.7, -s * 0.3, 0, -s); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+  }
+}
+function drawCircleAt(st, x, y, r, p, rot, alpha, sx, sy, rnd){
+  ctx.save(); ctx.translate(x, y); ctx.scale(sx, sy); ctx.globalAlpha = alpha;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (st.outline){ ctx.strokeStyle = '#06060b'; ctx.fillStyle = '#06060b'; circleGeom(r, p, rot, 2.6); }
+  if (st.glow){
+    ctx.globalCompositeOperation = 'lighter';
+    const core = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 1.25);
+    core.addColorStop(0, `rgba(255,150,60,${0.35 * p})`); core.addColorStop(1, 'rgba(255,90,30,0)');
+    ctx.fillStyle = core; ctx.beginPath(); ctx.arc(0, 0, r * 1.25, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,110,40,0.28)'; ctx.fillStyle = 'rgba(255,110,40,0.2)'; circleGeom(r, p, rot, 4.5);
+    ctx.strokeStyle = '#ffd9a0'; ctx.fillStyle = 'rgba(255,220,160,0.5)'; circleGeom(r, p, rot, 1);
+  } else {
+    ctx.strokeStyle = '#ffb23d'; ctx.fillStyle = '#ff7a1f'; circleGeom(r, p, rot, 1);
+  }
+  ctx.restore();
+}
+function drawCircles(st, rnd){
+  const c = S.circle; if (!c) return;
+  let jx = 0, jy = 0;
+  if (S.phase === 'charge' && S.t / S.cur.charge > 0.72){ const m = st.flat ? 3 : 1.5; jx = (rnd() * 2 - 1) * m; jy = (rnd() * 2 - 1) * m; }
+  if (st.persp){
+    drawCircleAt(st, CASTER.x, GROUND, c.r * 0.95, c.prog, -c.rot * 0.6, c.alpha * 0.85, c.scale, 0.24 * c.scale, rnd);
+    drawCircleAt(st, c.x + jx, c.y + jy, c.r, c.prog, c.rot, c.alpha, 0.34 * c.scale, c.scale, rnd);
+  } else {
+    drawCircleAt(st, c.x + jx, c.y + jy, c.r, c.prog, c.rot, c.alpha, c.scale, c.scale, rnd);
+  }
+}
+function drawBeam(st, rnd){
+  if (S.phase !== 'fire' || !S.circle) return;
+  const c = S.circle, fade = clamp((S.t - 0.1) / 0.4); if (fade >= 1) return;
+  const x0 = c.x, y0 = c.y, x1 = lerp(x0, HIT.x, S.beamHead), y1 = lerp(y0, HIT.y, S.beamHead);
+  const L = Math.hypot(x1 - x0, y1 - y0); if (L < 2) return;
+  const w = S.cur.r * 0.55 * (1 - fade) * (0.94 + 0.12 * rnd());
+  ctx.save(); ctx.translate(x0, y0); ctx.rotate(Math.atan2(y1 - y0, x1 - x0));
+  if (st.outline){
+    const n = Math.max(2, Math.ceil(L / 34)), top = [], bot = [];
+    for (let i = 0; i <= n; i++){ const x = L * i / n, taper = 0.55 + 0.45 * Math.min(1, i / 2); top.push([x, -w * 0.5 * taper * (0.75 + 0.5 * rnd())]); bot.push([x, w * 0.5 * taper * (0.75 + 0.5 * rnd())]); }
+    const poly = (m) => { ctx.beginPath(); top.forEach(([x, y], i) => i ? ctx.lineTo(x, y * m) : ctx.moveTo(x, y * m)); ctx.arc(L, 0, w * 0.5 * m, -Math.PI / 2, Math.PI / 2); for (let i = bot.length - 1; i >= 0; i--) ctx.lineTo(bot[i][0], bot[i][1] * m); ctx.closePath(); };
+    poly(1); ctx.fillStyle = st.glow ? 'rgba(255,122,31,0.85)' : '#ff7a1f'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = '#07070c'; ctx.lineJoin = 'round'; ctx.stroke();
+    poly(0.5); ctx.fillStyle = '#ffd34d'; ctx.fill();
+    ctx.fillStyle = '#fffbe8'; ctx.fillRect(0, -w * 0.08, L, w * 0.16);
+  }
+  if (st.glow){
+    ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+    for (const [m, col] of [[1.7, 'rgba(255,80,20,0.22)'], [1.0, 'rgba(255,150,60,0.55)'], [0.4, 'rgba(255,248,225,1)']]){
+      ctx.strokeStyle = col; ctx.lineWidth = w * m * (st.outline ? 0.7 : 1); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(L, 0); ctx.stroke();
+    }
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 1.6); g.addColorStop(0, 'rgba(255,240,210,0.9)'); g.addColorStop(1, 'rgba(255,120,40,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, w * 1.6, 0, TAU); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawWaves(st){
+  for (const w of S.waves){
+    const k = w.t / 0.55, rx = w.max * easeOut(k), a = 1 - k;
+    ctx.save(); ctx.translate(w.x, w.y); ctx.scale(1, 0.22);
+    if (st.glow){
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = `rgba(255,160,80,${0.7 * a})`; ctx.lineWidth = 26 * a + 2; ctx.beginPath(); ctx.arc(0, 0, rx, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = `rgba(255,250,235,${a})`; ctx.lineWidth = 5; ctx.stroke();
+    } else {
+      ctx.strokeStyle = '#07070c'; ctx.lineWidth = 22; ctx.beginPath(); ctx.arc(0, 0, rx, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = '#fff6dc'; ctx.lineWidth = 12; ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+function drawCore(st){
+  if (!st.glow || S.impactT > 0.6 || !S.cur) return;
+  const it = S.impactT, a = 1 - it / 0.6, R = (70 + 230 * easeOut(clamp(it / 0.15))) * (0.55 + 0.35 * S.cur.idx);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const g = ctx.createRadialGradient(HIT.x, HIT.y, 0, HIT.x, HIT.y, R);
+  g.addColorStop(0, `rgba(255,255,245,${a})`); g.addColorStop(0.25, `rgba(255,210,120,${0.85 * a})`); g.addColorStop(0.6, `rgba(255,100,30,${0.45 * a})`); g.addColorStop(1, 'rgba(255,60,20,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(HIT.x, HIT.y, R, 0, TAU); ctx.fill();
+  ctx.strokeStyle = `rgba(255,230,190,${0.8 * a})`; ctx.lineWidth = 6 * a + 1; ctx.beginPath(); ctx.arc(HIT.x, HIT.y, R * 0.85, 0, TAU); ctx.stroke();
+  ctx.restore();
+}
+function starPath(b, R, jitter){
+  const n = 14; ctx.beginPath();
+  for (let i = 0; i < n * 2; i++){
+    const a = b.rot + i * Math.PI / n, rr = (i % 2 ? 0.5 : 1) * R * (0.78 + 0.44 * jitter());
+    const x = b.x + Math.cos(a) * rr, y = b.y + Math.sin(a) * rr; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.closePath();
+}
+function drawBursts(st, mono){
+  for (const b of S.bursts){
+    const t = b.t; if (t > 0.5) continue;
+    const grow = easeOut(clamp(t / 0.07)), shrink = t > 0.2 ? clamp(1 - (t - 0.2) / 0.3) : 1;
+    const R = b.R * (0.35 + 0.65 * grow) * (0.55 + 0.45 * shrink);
+    const seed = b.seed + (st.flat ? Math.floor(t * 12) : Math.floor(t * 30));
+    if (mono){ starPath(b, R, mulberry(seed)); ctx.fillStyle = mono; ctx.fill(); continue; }
+    ctx.save(); ctx.globalAlpha = st.flat ? (shrink > 0.15 ? 1 : 0) : shrink; ctx.lineJoin = 'round';
+    const layers = [[1, '#ff5a14'], [0.68, '#ffb02e'], [0.4, '#fff3c4']];
+    layers.forEach(([m, col], i) => { starPath(b, R * m, mulberry(seed + i)); ctx.fillStyle = col; ctx.fill(); if (i === 0){ ctx.lineWidth = 4; ctx.strokeStyle = '#07070c'; ctx.stroke(); } });
+    ctx.restore();
+  }
+}
+function drawParts(st, which){
+  const flat = st.flat;
+  for (const p of S.parts){
+    if (p.delay > 0) continue;
+    const isSmoke = p.k === 'smoke'; if ((which === 'smoke') !== isSmoke) continue;
+    const a = clamp(p.life / p.max);
+    if (p.k === 'spark' || p.k === 'conv'){
+      if (flat){
+        const sp = Math.hypot(p.vx, p.vy), len = Math.min(40, 6 + sp * 0.035);
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.atan2(p.vy, p.vx));
+        ctx.beginPath(); ctx.moveTo(len * 0.5, 0); ctx.lineTo(0, p.size * 1.3); ctx.lineTo(-len * 0.5, 0); ctx.lineTo(0, -p.size * 1.3); ctx.closePath();
+        ctx.fillStyle = a > 0.45 ? '#fff3b0' : '#ff9a2e'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#0a0a0f'; ctx.stroke(); ctx.restore();
+      } else {
+        ctx.globalCompositeOperation = 'lighter';
+        const tl = p.k === 'conv' ? 0.05 : 0.035;
+        ctx.strokeStyle = `rgba(255,${(150 + 100 * a) | 0},${(60 + 140 * a) | 0},${a})`; ctx.lineWidth = p.size * (0.5 + a); ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * tl, p.y - p.vy * tl); ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
+      }
+    } else if (p.k === 'ember'){
+      if (flat){ ctx.fillStyle = a > 0.5 ? '#ffd34d' : '#ff7a1f'; ctx.fillRect(p.x - 2.5, p.y - 2.5, 5, 5); }
+      else { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = `rgba(255,160,70,${0.8 * a})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 1.8, 0, TAU); ctx.fill(); ctx.fillStyle = `rgba(255,245,220,${a})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 0.6, 0, TAU); ctx.fill(); ctx.globalCompositeOperation = 'source-over'; }
+    } else if (p.k === 'smoke'){
+      if (flat){
+        const r = p.size * Math.min(1, a / 0.3);
+        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, TAU); ctx.fillStyle = '#3b2f45'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#0a0a0f'; ctx.stroke();
+        ctx.beginPath(); ctx.arc(p.x - r * 0.25, p.y - r * 0.25, r * 0.55, 0, TAU); ctx.fillStyle = '#5b4a68'; ctx.fill();
+      } else {
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+        g.addColorStop(0, `rgba(55,42,52,${0.5 * a})`); g.addColorStop(1, 'rgba(55,42,52,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, TAU); ctx.fill();
+      }
+    } else if (p.k === 'shard'){
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.beginPath();
+      ctx.moveTo(p.size, 0); ctx.lineTo(0, p.size * 0.45); ctx.lineTo(-p.size, 0); ctx.lineTo(0, -p.size * 0.45); ctx.closePath();
+      ctx.fillStyle = '#ff7a1f'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#0a0a0f'; ctx.stroke(); ctx.restore();
+    }
+  }
+}
+function drawNums(st){
+  for (const n of S.nums){
+    const t = n.t, s = t < 0.08 ? lerp(2.3, 1, t / 0.08) : 1, a = t > 0.8 ? 1 - (t - 0.8) / 0.4 : 1;
+    const size = 38 + 16 * n.big, txt = n.v.toLocaleString('ko-KR');
+    ctx.save(); ctx.translate(n.x, n.y - 46 * easeOut(clamp(t / 0.6))); ctx.scale(s, s); ctx.globalAlpha = a;
+    ctx.font = `${size}px "Black Han Sans", "IBM Plex Sans KR", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    if (st.outline){ ctx.lineWidth = 8; ctx.strokeStyle = '#0a0a0f'; ctx.strokeText(txt, 0, 0); }
+    if (st.glow){ ctx.shadowColor = '#ff8a3d'; ctx.shadowBlur = 18; }
+    ctx.fillStyle = st.flat ? '#ffe14d' : '#fffaf0'; ctx.fillText(txt, 0, 0);
+    ctx.restore();
+  }
+}
+function post(st, rnd){
+  const it = S.impactT;
+  // 임팩트 프레임
+  if (st.impactFrame && !S.reduceFlash && it < 0.1){
+    if (it < 0.05){
+      ctx.save(); ctx.globalCompositeOperation = 'difference'; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, VW, VH); ctx.restore();
+    } else {
+      ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, VW, VH);
+      ctx.save(); applyCam(); drawDummy(st, '#fffdf5'); drawBursts(st, '#fffdf5'); ctx.restore();
+    }
+  }
+  // 집중선
+  if (st.speedLines && it < 0.45){
+    const r2 = mulberry(st.flat ? S.seed : Math.floor(S.real * 30) + 7), a = 1 - it / 0.45;
+    ctx.save(); ctx.fillStyle = `rgba(255,246,228,${0.75 * a})`;
+    for (let i = 0; i < 70; i++){
+      const ang = r2() * TAU, r0 = 190 + r2() * 140, r1 = 1200, hw = (0.004 + r2() * 0.012);
+      ctx.beginPath(); ctx.moveTo(HIT.x + Math.cos(ang) * r0, HIT.y + Math.sin(ang) * r0);
+      ctx.lineTo(HIT.x + Math.cos(ang - hw) * r1, HIT.y + Math.sin(ang - hw) * r1);
+      ctx.lineTo(HIT.x + Math.cos(ang + hw) * r1, HIT.y + Math.sin(ang + hw) * r1); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+  // 의성어
+  if (st.onoma && it < 0.75 && S.cur){
+    const word = ONOMA[S.cur.idx], s = it < 0.08 ? lerp(1.8, 1, it / 0.08) : 1 + 0.06 * (it - 0.08);
+    const size = 70 + 26 * S.cur.idx, a = it > 0.55 ? 1 - (it - 0.55) / 0.2 : 1;
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(HIT.x - 250 + (rnd() * 2 - 1) * 3, HIT.y - 170 + (rnd() * 2 - 1) * 3); ctx.rotate(-0.16); ctx.scale(s, s);
+    ctx.font = `${size}px "Black Han Sans", "IBM Plex Sans KR", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    ctx.lineWidth = 14; ctx.strokeStyle = '#0a0a0f'; ctx.strokeText(word, 0, 0);
+    ctx.fillStyle = '#ffe14d'; ctx.fillText(word, 0, 0);
+    ctx.lineWidth = 3; ctx.strokeStyle = '#ff5a14'; ctx.strokeText(word, 0, 0);
+    ctx.restore();
+  }
+  // 섬광
+  if (S.flash > 0.02){
+    ctx.save(); ctx.globalCompositeOperation = st.glow ? 'lighter' : 'source-over';
+    ctx.fillStyle = `rgba(255,236,210,${S.flash * (S.reduceFlash ? 0.15 : (st.glow ? 0.32 : 0.3))})`; ctx.fillRect(0, 0, VW, VH); ctx.restore();
+  }
+  // 비네팅
+  const g = ctx.createRadialGradient(VW / 2, VH / 2, VH * 0.35, VW / 2, VH / 2, VH * 0.95);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.55)'); ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
+}
+function render(){
+  const st = STYLES[S.style], rnd = mulberry(S.seed * 9973);
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  ctx.fillStyle = '#07080d'; ctx.fillRect(0, 0, VW, VH);
+  ctx.save(); applyCam();
+  drawBG(st);
+  if (st.glow){ groundGlow(CASTER.x + 60, S.phase === 'charge' ? S.light : 0, 220 + (S.cur ? S.cur.r : 60) * 1.5); groundGlow(DUMMY.x, S.phase !== 'charge' ? S.light : 0, 360); }
+  drawCaster(st); drawDummy(st);
+  drawParts(st, 'smoke');
+  drawCircles(st, rnd); drawBeam(st, rnd); drawWaves(st); drawCore(st); drawBursts(st);
+  drawParts(st, 'other'); drawNums(st);
+  ctx.restore();
+  post(st, rnd);
+}
+
+/* ---------- 컨트롤러 ---------- */
+const pad = { idx: null, prev: [], lastAng: null, acc: 0, rot: 0, blocked: false };
+const elStatus = document.getElementById('padStatus'), elDot = document.getElementById('dot'), elRing = document.getElementById('ring'), elStick = document.getElementById('stick'), elRot = document.getElementById('rotCount'), elLast = document.getElementById('lastBtn');
+function pollPad(){
+  if (!navigator.getGamepads){ if (!pad.blocked){ pad.blocked = true; elStatus.textContent = '이 브라우저는 컨트롤러 기능을 지원하지 않아요.'; } return; }
+  let gps;
+  try { gps = navigator.getGamepads(); }
+  catch (e){ if (!pad.blocked){ pad.blocked = true; elStatus.textContent = '이 화면에서는 브라우저가 컨트롤러 접근을 막고 있어요. 페이지를 새 탭에서 직접 열면 될 수 있어요.'; } return; }
+  let gp = null; for (const g of gps) if (g && g.connected){ gp = g; break; }
+  if (!gp){
+    if (pad.idx !== null){ pad.idx = null; elStatus.textContent = '컨트롤러 연결이 끊겼어요. 다시 연결한 뒤 아무 버튼이나 눌러주세요.'; }
+    return;
+  }
+  if (pad.idx !== gp.index){
+    pad.idx = gp.index;
+    elStatus.textContent = `연결됨: ${gp.id} · ${gp.mapping === 'standard' ? '표준 배치로 인식' : '비표준 배치라 버튼 번호가 다를 수 있어요'}`;
+  }
+  const b = gp.buttons.map(x => x.pressed), edge = i => b[i] && !pad.prev[i];
+  b.forEach((v, i) => { if (v && !pad.prev[i]) elLast.textContent = `마지막 입력: 버튼 #${i}`; });
+  if (edge(0)){ unlock(); cast(); }
+  if (edge(4)) setSize(S.size - 1);
+  if (edge(5)) setSize(S.size + 1);
+  const keys = Object.keys(STYLES), si = keys.indexOf(S.style);
+  if (edge(14)) setStyle(keys[(si + keys.length - 1) % keys.length]);
+  if (edge(15)) setStyle(keys[(si + 1) % keys.length]);
+  pad.prev = b;
+  const ax = gp.axes[0] || 0, ay = gp.axes[1] || 0;
+  elDot.style.transform = `translate(${ax * 30}px, ${ay * 30}px)`;
+  if (Math.hypot(ax, ay) > 0.6){
+    const a = Math.atan2(ay, ax);
+    if (pad.lastAng != null){
+      let d = a - pad.lastAng; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU;
+      pad.acc += d;
+      if (Math.abs(pad.acc) >= TAU){
+        pad.acc -= Math.sign(pad.acc) * TAU; pad.rot++;
+        elRot.textContent = `${pad.rot}바퀴`;
+        elStick.classList.remove('tick'); void elStick.offsetWidth; elStick.classList.add('tick');
+        rumble(45, 0, 0.35);
+      }
+    }
+    pad.lastAng = a;
+  } else pad.lastAng = null;
+  elRing.style.setProperty('--p', `${Math.abs(pad.acc) / TAU * 360}deg`);
+}
+addEventListener('gamepadconnected', () => { pad.idx = null; });
+document.getElementById('vibBtn').addEventListener('click', () => {
+  const out = document.getElementById('vibResult'), gp = currentPad();
+  if (!gp){ out.textContent = '먼저 컨트롤러를 연결하고 아무 버튼이나 한 번 눌러주세요.'; return; }
+  const ok = rumble(400, 1, 1);
+  out.textContent = ok ? '진동 신호를 보냈어요. 손에 떨림이 느껴졌다면 진동 지원 OK예요.' : '이 브라우저와 컨트롤러 조합에서는 진동을 지원하지 않아요.';
+});
+
+/* ---------- UI ---------- */
+function setStyle(s){
+  if (!STYLES[s]) return;
+  S.style = s; S.parts = []; S.bursts = []; S.waves = []; S.nums = []; S.impactT = 9; S.flash = 0;
+  if (S.circle){ const pos = circleSpot(S.circle.r); S.circle.x = pos.x; S.circle.y = pos.y; }
+  document.querySelectorAll('#styleSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.style === s)));
+  const tx = STYLE_TEXT[s];
+  document.getElementById('styleTitle').textContent = tx.title;
+  document.getElementById('styleBody').textContent = tx.body;
+  document.getElementById('stylePoints').innerHTML = tx.points.map(p => `<li>${p}</li>`).join('');
+  document.getElementById('styleRef').textContent = tx.ref;
+}
+function setSize(i){
+  S.size = Math.max(0, Math.min(2, i));
+  document.querySelectorAll('#sizeSeg button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.size === S.size)));
+}
+function unlock(){ S.unlocked = true; S.auto = false; }
+document.querySelectorAll('#styleSeg button').forEach(b => b.addEventListener('click', () => { unlock(); setStyle(b.dataset.style); }));
+document.querySelectorAll('#sizeSeg button').forEach(b => b.addEventListener('click', () => { unlock(); setSize(+b.dataset.size); }));
+document.getElementById('castBtn').addEventListener('click', () => { unlock(); cast(); });
+cv.addEventListener('pointerdown', () => { unlock(); cast(); });
+addEventListener('keydown', e => {
+  if (e.code === 'Space' && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLInputElement)){ e.preventDefault(); unlock(); cast(); }
+});
+document.getElementById('optSound').addEventListener('change', e => { S.sound = e.target.checked; });
+document.getElementById('optFlash').addEventListener('change', e => { S.reduceFlash = e.target.checked; });
+setStyle('sakuga'); setSize(1);
+
+/* ---------- 루프 ---------- */
+let last = performance.now(), acc = 0;
+function frame(now){
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  pollPad();
+  const st = STYLES[S.style];
+  if (st.step){ acc += dt; let guard = 0; while (acc >= st.step && guard++ < 4){ tick(st.step); acc -= st.step; } }
+  else { acc = 0; tick(dt); }
+  render();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.__demo = { S, cast, setStyle, setSize, tick, render };
+})();
+</script>

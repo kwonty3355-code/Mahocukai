@@ -1,0 +1,58 @@
+:root {
+  --bg: #120d14;
+  --panel: rgba(28, 21, 30, 0.92);
+  --line: #3e3142;
+  --fg: #efe6dc;
+  --muted: #a89a9c;
+  --warm: #e9a35f;
+  --display: "Gowun Batang", "Apple SD Gothic Neo", serif;
+  --body: "IBM Plex Sans KR", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: var(--body); overflow: hidden; overscroll-behavior: none; }
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+[hidden] { display: none !important; }
+#stage, #stage canvas { position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; }
+
+.panel {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 24px 24px 20px; display: grid; gap: 14px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.eyebrow { margin: 0; font-size: 12px; letter-spacing: .14em; color: var(--warm); }
+h1 { margin: -6px 0 0; font-family: var(--display); font-weight: 700; font-size: 30px; }
+.lead { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.65; }
+.bundles { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bundles legend { font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: .06em; }
+.bundle { position: relative; display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; cursor: pointer; background: rgba(255,255,255,0.02); }
+.bundle input { position: absolute; opacity: 0; pointer-events: none; }
+.bundle b { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.bundle small { font-size: 12px; color: var(--muted); }
+.bundle:has(input:checked) { border-color: var(--warm); background: rgba(233,163,95,0.08); }
+.bundle:has(input:focus-visible) { outline: 2px solid var(--warm); outline-offset: 2px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); cursor: pointer; }
+.primary { font: inherit; font-weight: 600; font-size: 16px; padding: 12px; border-radius: 10px; border: 0; background: var(--warm); color: #2a1608; cursor: pointer; }
+.primary:focus-visible, .hud-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.stock { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stock:empty { display: none; }
+.stock span { display: inline-flex; align-items: center; gap: 5px; }
+
+.hud { position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); display: flex; gap: 8px; }
+.hud-btn { font: inherit; font-size: 12px; color: var(--fg); background: rgba(20,14,20,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 7px 11px; opacity: .45; cursor: pointer; transition: opacity .2s; }
+.hud-btn:hover, .hud-btn:focus-visible { opacity: .95; }
+.hint { position: fixed; left: 0; right: 0; bottom: max(28px, env(safe-area-inset-bottom)); text-align: center; margin: 0; font-size: 14px; color: rgba(239,230,220,0.55); pointer-events: none; transition: opacity 1.5s; }
+
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
+.facts div { border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; }
+.facts dt { font-size: 12px; color: var(--muted); }
+.facts dd { margin: 2px 0 0; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.gains { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.gains li { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 2px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.gains .name { font-size: 14px; }
+.gains .name small { display: block; font-size: 12px; color: var(--muted); }
+.gains .num { font-variant-numeric: tabular-nums; font-weight: 600; }
+.gains .empty { color: var(--muted); font-size: 14px; grid-template-columns: 1fr; }
+@media (prefers-reduced-motion: reduce) { .hint { transition: none; } }
