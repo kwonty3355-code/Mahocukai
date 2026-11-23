@@ -79,6 +79,22 @@ dl.gloss dt{font-weight:700}
 dl.gloss dd{margin:0;color:var(--muted)}
 @media (max-width:480px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:8px}}
 hr{border:0;border-top:1px solid var(--line);margin:0}
+.ans{grid-column:2;display:grid;gap:8px;margin-top:4px}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{font:inherit;font-size:14px;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opt[aria-pressed="true"]{background:var(--rune);border-color:var(--rune);color:var(--paper);font-weight:600}
+.opt:focus-visible,.ans textarea:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+.ans textarea{font:inherit;font-size:14px;width:100%;min-height:44px;resize:vertical;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);box-sizing:border-box}
+.ans textarea::placeholder{color:var(--muted)}
+.st{font-size:12px;color:var(--muted);min-height:1em}
+.st.ok{color:var(--ok)}
+.st.err{color:var(--warn)}
+.multi{font-size:12px;color:var(--muted)}
+.q.done{border-color:var(--rune)}
+.progress{display:grid;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px}
+.bar{height:6px;border-radius:3px;background:var(--bg);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--rune);transition:width .3s}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
 
 <div class="wrap">
@@ -351,7 +367,8 @@ hr{border:0;border-top:1px solid var(--line);margin:0}
   <section aria-labelledby="h-q">
     <p class="tag">같이 정할 것</p>
     <h2 id="h-q">질문 17개</h2>
-    <p class="muted">하나씩 같이 정하자. 번호로 대답해도 돼.</p>
+    <p class="muted">여기서 바로 답하면 자동으로 저장돼서 내가 읽을 수 있어. 고르기만 해도 되고, 아래 칸에 생각을 적어도 돼. 한 번에 다 안 해도 괜찮아.</p>
+    <div class="progress" id="progress"><span id="progText">답을 불러오는 중이야…</span><div class="bar"><i id="progBar"></i></div></div>
     <div class="qs">
       <div class="qg"><h3>집중 전투</h3>
         <div class="q"><span class="n">1</span><p>B안(마법진 각인형)을 뼈대로 하고, 첫 시제품은 "B만" vs "B + 카운트다운"으로 비교할까?<small>A안처럼 마법진 안쪽을 더 깊게 짜는 걸 원하면 말해줘.</small></p></div>
@@ -425,5 +442,115 @@ hr{border:0;border-top:1px solid var(--line);margin:0}
     if (v) { i.className = v[0]; i.textContent = v[1]; }
     g.appendChild(i);
   }
+})();
+
+/* 질문에 바로 답하기: 답은 이 페이지의 저장소(answers/q번호)에 저장돼서 Claude가 읽는다 */
+(() => {
+  const OPTS = {
+    1: { o: ['B만 vs B+카운트다운 비교로 가자', 'A처럼 마법진 안쪽 깊이도 더 원해'] },
+    2: { o: ['누굴 노리는지만', '위험도 표시도 추가'] },
+    3: { o: ['많이 맞으면 위력 하락', '움직이면 취소', '방해 없음'] },
+    4: { o: ['그렇게 가자', '더 자유롭게', '더 엄격하게'] },
+    5: { o: ['위력에 반영', '일부 칸이 안 새겨짐', '둘 다'] },
+    6: { o: ['6쌍 다 좋아', '바꾸고 싶은 게 있어'] },
+    7: { o: ['룬 건지기만', '룬 건지기 + 사역마 빈자리', '다른 방식 원해'] },
+    8: { o: ['뽑기에서만', '반반에서도 나옴', '반반에서도 + 희귀 조각 효과'] },
+    9: { o: ['마나 물레 좋아', '다른 컨셉 원해', '스크롤 필사', '원소 바꾸기', '뽑기 재화로 바꾸기'], multi: true },
+    10: { o: ['바꾸자', '바꾸자 + 견습생 보정', '원래 안 유지'] },
+    11: { o: ['확정 천장', '교환형 천장 (소환 인장)', '새 친구 보장', '노리는 대상 고르는 뽑기'], multi: true },
+    12: { o: ['5단계 유지', '3~4단계로 줄이기'] },
+    13: { o: ['견습 → 숙련 → 대가 → 전설 → 신수', '다른 이름 (아래 적을게)'] },
+    14: { o: ['해태, 불가사리만', '삼족오, 구미호도', '더 많이 (아래 적을게)'] },
+    15: { o: ['처음 1번만 끝까지', '항상 끝까지', '항상 짧게'] },
+    16: { o: ['너가 먼저 안을 짜와줘', '내 생각 적을게'] },
+    17: { o: ['만들어서 재보고 정하자', '지금 정하고 싶어'] },
+  };
+  const state = {};   // n -> {choice:[], note:''}
+  const ui = {};      // n -> {card, btns, ta, st}
+  let db = null, writable = true;
+  const LS = 'mahocukai.answers.draft';
+  const loadDraft = () => { try { return JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { return {}; } };
+  const saveDraft = () => { try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} };
+
+  function render(n){
+    const s = state[n] || { choice: [], note: '' }, u = ui[n];
+    u.btns.forEach(b => b.setAttribute('aria-pressed', String(s.choice.includes(b.dataset.v))));
+    if (document.activeElement !== u.ta) u.ta.value = s.note || '';
+    u.card.classList.toggle('done', s.choice.length > 0 || (s.note || '').trim().length > 0);
+  }
+  function progress(){
+    const total = Object.keys(OPTS).length;
+    const done = Object.keys(OPTS).filter(n => { const s = state[n]; return s && (s.choice.length || (s.note || '').trim()); }).length;
+    document.getElementById('progBar').style.width = (done / total * 100) + '%';
+    document.getElementById('progText').textContent = db
+      ? `${total}개 중 ${done}개 답했어. 답은 자동으로 저장돼.`
+      : `${total}개 중 ${done}개 답했어. 이 화면에서는 저장이 안 돼서 이 기기에만 남아. 다 쓰면 채팅으로 알려줘.`;
+  }
+  const busy = {}, again = {};
+  async function save(n){
+    saveDraft(); progress();
+    if (!db || !writable) return;
+    if (busy[n]) { again[n] = true; return; }
+    busy[n] = true; const u = ui[n];
+    u.st.className = 'st'; u.st.textContent = '저장 중…';
+    try {
+      const s = state[n];
+      await db.doc('answers/q' + n).set({ q: Number(n), choice: s.choice, note: s.note || '', updatedAt: new Date().toISOString() });
+      u.st.className = 'st ok'; u.st.textContent = '저장됨';
+    } catch (e) {
+      u.st.className = 'st err';
+      if (e && e.code === 'invalid_argument') { writable = false; u.st.textContent = '이 계정으로는 저장할 수 없어. 채팅으로 알려줘.'; }
+      else u.st.textContent = '저장이 안 됐어. 잠시 뒤에 다시 고르거나 적어줘.';
+    }
+    busy[n] = false;
+    if (again[n]) { again[n] = false; save(n); }
+  }
+  const timers = {};
+  document.querySelectorAll('.q').forEach(card => {
+    const n = card.querySelector('.n').textContent.trim(); const cfg = OPTS[n]; if (!cfg) return;
+    const box = document.createElement('div'); box.className = 'ans';
+    const opts = document.createElement('div'); opts.className = 'opts'; opts.setAttribute('role', 'group');
+    const btns = cfg.o.map((label, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.id = `q${n}-o${i}`; b.dataset.v = label; b.textContent = label; b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => {
+        const s = state[n] || (state[n] = { choice: [], note: '' });
+        if (cfg.multi) s.choice = s.choice.includes(label) ? s.choice.filter(x => x !== label) : [...s.choice, label];
+        else s.choice = s.choice.includes(label) ? [] : [label];
+        render(n); save(n);
+      });
+      opts.appendChild(b); return b;
+    });
+    box.appendChild(opts);
+    if (cfg.multi) { const m = document.createElement('span'); m.className = 'multi'; m.textContent = '여러 개 골라도 돼'; box.appendChild(m); }
+    const ta = document.createElement('textarea'); ta.id = `q${n}-note`; ta.placeholder = '내 생각 (자유롭게)'; ta.rows = 2;
+    ta.addEventListener('input', () => {
+      const s = state[n] || (state[n] = { choice: [], note: '' }); s.note = ta.value; render(n);
+      clearTimeout(timers[n]); timers[n] = setTimeout(() => save(n), 900);
+    });
+    ta.addEventListener('blur', () => { if (timers[n]) { clearTimeout(timers[n]); timers[n] = null; save(n); } });
+    box.appendChild(ta);
+    const st = document.createElement('span'); st.className = 'st'; st.setAttribute('aria-live', 'polite'); box.appendChild(st);
+    card.appendChild(box);
+    ui[n] = { card, btns, ta, st };
+  });
+  Object.assign(state, loadDraft());
+  Object.keys(ui).forEach(render); progress();
+
+  const start = async () => {
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { progress(); return; }
+    const timer = setTimeout(() => { document.getElementById('progText').textContent = '저장된 답을 아직 못 불러왔어. 새로 고르면 그대로 저장돼.'; }, 10000);
+    db.collection('answers').onSnapshot(snap => {
+      if (!snap.metadata.fromCache) clearTimeout(timer);
+      snap.docs.forEach(d => {
+        const v = d.data(); if (!v) return; const n = String(v.q || d.id.replace('q', ''));
+        if (!ui[n] || busy[n] || timers[n]) return;
+        state[n] = { choice: Array.isArray(v.choice) ? v.choice : [], note: typeof v.note === 'string' ? v.note : '' };
+        render(n);
+      });
+      saveDraft(); progress();
+    }, () => { clearTimeout(timer); progress(); });
+  };
+  start();
 })();
 </script>
