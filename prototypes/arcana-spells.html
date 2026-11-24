@@ -46,7 +46,7 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outl
 <div class="wrap">
   <header style="display:grid;gap:6px">
     <h1>대마법 시연</h1>
-    <p class="lead">마법진이 <b>한 바퀴 닦으며 나타나고</b>, 겹마다 돌면서 조립돼. 쏘는 마법은 내 발밑에, 내리꽂는 마법은 적 위 하늘에, 빨아들이는 마법은 적 발밑에 펼쳐져. 소리 꼭 켜.</p>
+    <p class="lead">마법진 겹이 하나씩 <b>슉 그려지고</b>(처음엔 확, 끝에서 스르륵), 다 그려지면 칭 하고 맞물려. 쏘는 마법은 내 발밑에, 내리꽂는 마법은 적 위 하늘에, 빨아들이는 마법은 적 발밑에 펼쳐져. 소리 꼭 켜.</p>
   </header>
   <div class="stage"><div class="cv" id="cv" role="button" tabindex="0" aria-label="전장 화면. 누르면 고른 마법 다시 쓰기"><span class="cap" id="cap"></span></div></div>
   <div class="spells" id="spells"></div>
@@ -102,6 +102,12 @@ const SFX = {
   inhale(d){ hiss('lowpass', 200, 2200, d, .5, .7, 0, d * .95); tone('sine', 40, 90, d, .4, 0, d * .9); },
   rumble(d){ tone('sine', 34, 30, d, .55, 0, .3); tone('sawtooth', 46, 40, d, .08, 0, .5); hiss('lowpass', 180, 120, d, .35, .5, 0, .4); },
   ring(){ tone('sine', 4200, 4200, 1.6, .035, 0, .3); },
+  swish(i){ hiss('bandpass', 2500 + i * 500, 9000, .22, .32, 1.8, 0, .01); tone('sine', 900 + i * 200, 2600 + i * 300, .18, .05); },
+  choir(freqs, d, v = .07){ const c = audio(); if (!c) return; const t = c.currentTime, lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(500, t); lp.frequency.linearRampToValueAtTime(2600, t + d * .7); lp.Q.value = .8; const g = c.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + d * .55); g.gain.setValueAtTime(v, t + d * .85); g.gain.exponentialRampToValueAtTime(.0001, t + d + .8); lp.connect(g); g.connect(AU.master);
+    freqs.forEach(f => [-7, 0, 6].forEach(ct => { const o = c.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f * Math.pow(2, ct / 1200); const vib = c.createOscillator(), vg = c.createGain(); vib.frequency.value = 5 + Math.random(); vg.gain.value = f * .004; vib.connect(vg); vg.connect(o.frequency); o.connect(lp); o.start(t); o.stop(t + d + .9); vib.start(t); vib.stop(t + d + .9); })); },
+  drone(d, f = 55){ tone('sawtooth', f, f * 1.01, d, .07, 0, d * .6); tone('sine', f / 2, f / 2, d, .3, 0, d * .5); },
+  hum(d){ tone('sine', 110, 112, d, .12, 0, .4); tone('sine', 220, 221, d, .06, 0, .5); tone('triangle', 330, 333, d, .03, 0, .6); },
+  taiko(v = 1){ tone('sine', 80, 40, .9, .9 * v); hiss('lowpass', 900, 100, .4, .4 * v); },
 };
 
 /* ================= 화면 (2D 장면 → WebGL 후처리) ================= */
@@ -191,16 +197,16 @@ function bolt(x0, y0, x1, y1, disp, col, w, a, seed, branches = 3, iters = 6){
 /* ================= 마법진: 한 바퀴 닦으며 나타나고, 겹마다 돌며 조립 ================= */
 function rune(rr){ const n = 2 + (rr() * 3 | 0), s = []; for (let i = 0; i < n; i++){ const a = [rr() * 2 - 1, rr() * 2 - 1], b = [rr() * 2 - 1, rr() * 2 - 1]; s.push([a, b]); } if (rr() < .4) s.push('o'); return s; }
 function makeCircle(o){
-  const c = Object.assign({ t0: S.T, sweep: .34, spin: .6, spinTo: .6, ang: 0, alpha: 1, flat: .5, tilt: 0, collapseAt: -1, dissolveAt: -1, charge: 0, seed: 7, assembledHook: null }, o);
+  const c = Object.assign({ t0: S.T, layerDur: .5, stagger: .17, spin: .25, spinTo: .25, ang: 0, alpha: 1, flat: .5, tilt: 0, collapseAt: -1, dissolveAt: -1, charge: 0, seed: 7, assembledHook: null, quiet: false }, o);
   c.layers = [
-    { r: 1, kind: 'outer', dir: 1, at: c.sweep - .02, rot0: -1.6, s0: 1.45 },
-    { r: .86, kind: 'runes', dir: -1, at: c.sweep + .08, rot0: 2, s0: .7 },
-    { r: .7, kind: 'star', dir: 1, at: c.sweep + .18, rot0: -2.4, s0: 1.3 },
-    { r: .5, kind: 'inner', dir: -1.5, at: c.sweep + .28, rot0: 2.6, s0: .55 },
-    { r: .26, kind: 'core', dir: 2, at: c.sweep + .38, rot0: -3.2, s0: 1.8 } ];
-  const rr = mulberry(c.seed); c.runes = Array.from({ length: 20 }, () => rune(rr));
-  c.layers.forEach((L, i) => { L.i = i; L.started = false; });
-  circles.push(c); SFX.sweep(); return c;
+    { r: 1, kind: 'outer', dir: 1, rot0: -.7 },
+    { r: .86, kind: 'runes', dir: -1, rot0: .9 },
+    { r: .7, kind: 'star', dir: 1, rot0: -1.1 },
+    { r: .5, kind: 'inner', dir: -1.5, rot0: 1.2 },
+    { r: .26, kind: 'core', dir: 2, rot0: -1.5 } ];
+  const rr = mulberry(c.seed); c.runes = Array.from({ length: 22 }, () => rune(rr));
+  c.layers.forEach((L, i) => { L.i = i; L.at = i * c.stagger; L.started = false; L.done = false; const R = c.r * L.r; L.len = { outer: TAU * R, runes: TAU * R, star: 13.8 * R, inner: 6.4 * R, core: 6.4 * R }[L.kind] + 4; });
+  circles.push(c); return c;
 }
 function layerPath(L, R, c){
   const r = L.r * R;
@@ -213,37 +219,34 @@ function layerPath(L, R, c){
   if (L.kind === 'core'){ x.moveTo(r, 0); x.arc(0, 0, r, 0, TAU); for (let i = 0; i <= 3; i++){ const a = -Math.PI / 2 + i * TAU / 3; i ? x.lineTo(Math.cos(a) * r * .9, Math.sin(a) * r * .9) : x.moveTo(Math.cos(a) * r * .9, Math.sin(a) * r * .9); } for (let i = 0; i <= 3; i++){ const a = Math.PI / 2 + i * TAU / 3; i ? x.lineTo(Math.cos(a) * r * .9, Math.sin(a) * r * .9) : x.moveTo(Math.cos(a) * r * .9, Math.sin(a) * r * .9); } x.moveTo(r * .2, 0); x.arc(0, 0, r * .2, 0, TAU); }
 }
 function drawCircle(c, dt){
-  const age = S.T - c.t0, R = c.r; c.spin = lerp(c.spin, c.spinTo, 1 - Math.exp(-dt * 3)); c.ang += dt * c.spin;
+  const age = S.T - c.t0, R = c.r; c.spin = lerp(c.spin, c.spinTo, 1 - Math.exp(-dt * 2)); c.ang += dt * c.spin;
   let gs = 1, ga = c.alpha;
-  if (c.collapseAt >= 0){ const k = clamp((S.T - c.collapseAt) / (c.collapseLen || .4)); gs = 1 - ein(k); c.spinTo = 30; if (k >= 1) ga = 0; }
-  let diss = 0; if (c.dissolveAt >= 0){ diss = clamp((S.T - c.dissolveAt) / .7); ga *= 1 - diss; }
-  if (ga <= .01){ c.dead = true; return; }
+  if (c.collapseAt >= 0){ const k = clamp((S.T - c.collapseAt) / (c.collapseLen || .4)); gs = 1 - ein(k); c.spinTo = 22; if (k >= 1) ga = 0; }
+  let diss = 0; if (c.dissolveAt >= 0){ diss = clamp((S.T - c.dissolveAt) / (c.dissolveLen || 1)); ga *= 1 - diss; }
+  if (ga <= .01 || age < 0){ if (ga <= .01) c.dead = true; return; }
   x.save(); x.translate(c.x, c.y); x.rotate(c.tilt); x.scale(gs, gs * c.flat);
-  const sw = clamp(age / c.sweep), a0 = -Math.PI / 2, col = c.col;
-  // 바닥 빛
-  if (age > c.sweep * .5){ const gg = x.createRadialGradient(0, 0, 0, 0, 0, R * 1.2); gg.addColorStop(0, c.glow || 'rgba(255,255,255,.12)'); gg.addColorStop(1, 'rgba(0,0,0,0)'); x.save(); x.globalCompositeOperation = 'lighter'; x.globalAlpha = ga * (.5 + c.charge * .8); x.fillStyle = gg; x.beginPath(); x.arc(0, 0, R * 1.2, 0, TAU); x.fill(); x.restore(); }
-  // 1) 한 바퀴 닦기: 지나간 자리에 설계도가 남음
-  if (age < c.sweep + .5){
-    const ghostA = ga * (age < c.sweep ? .55 : .55 * (1 - (age - c.sweep) / .5));
-    x.save(); x.beginPath(); x.moveTo(0, 0); x.arc(0, 0, R * 1.25, a0, a0 + TAU * sw); x.closePath(); x.clip();
-    c.layers.forEach(L => gl(() => layerPath(L, R, c), col, 1, ghostA * .7)); x.restore();
-    if (sw < 1){ const ea = a0 + TAU * sw;
-      for (let k = 0; k < 10; k++){ const aa = ea - k * .07; gl(() => { x.moveTo(0, 0); x.lineTo(Math.cos(aa) * R * 1.12, Math.sin(aa) * R * 1.12); }, col, 2.4 - k * .2, ga * (1 - k / 10) * .9); }
-      gl(() => { x.moveTo(0, 0); x.lineTo(Math.cos(ea) * R * 1.2, Math.sin(ea) * R * 1.2); }, '#ffffff', 3, ga);
-      for (let k = 0; k < 2; k++) P({ x: c.x + Math.cos(ea) * R * rand(.5, 1.1), y: c.y + Math.sin(ea) * R * rand(.5, 1.1) * c.flat, vx: rand(-40, 40), vy: rand(-80, -20), life: .5, r: 1.5, col }); }
-  }
-  // 2) 겹마다 돌면서 조립
+  const col = c.col;
+  if (age > .15){ const gg = x.createRadialGradient(0, 0, 0, 0, 0, R * 1.25); gg.addColorStop(0, c.glow || 'rgba(255,255,255,.12)'); gg.addColorStop(1, 'rgba(0,0,0,0)'); x.save(); x.globalCompositeOperation = 'lighter'; x.globalAlpha = ga * clamp((age - .15) / .6) * (.6 + c.charge * 1.1); x.fillStyle = gg; x.beginPath(); x.arc(0, 0, R * 1.25, 0, TAU); x.fill(); x.restore(); }
   c.layers.forEach(L => {
     const la = age - L.at; if (la < 0) return;
-    if (!L.started){ L.started = true; SFX.ching(L.i); S.trauma = Math.min(1, S.trauma + .05); for (let k = 0; k < 16; k++){ const an = rand(0, TAU); P({ x: c.x + Math.cos(an) * L.r * R, y: c.y + Math.sin(an) * L.r * R * c.flat, vx: Math.cos(an) * rand(40, 140), vy: Math.sin(an) * rand(40, 140) * c.flat - 30, life: .45, r: 1.6, col }); } }
-    const k = clamp(la / .26), e = back(k), rot = lerp(L.rot0, 0, e) + c.ang * L.dir, s = lerp(L.s0, 1, e) * (1 + diss * (.3 + L.i * .15));
-    const flash = la < .18 ? 1 - la / .18 : 0, a = ga * clamp(la / .06) * (.75 + c.charge * .4 + flash * .8);
-    x.save(); x.rotate(rot * (diss ? 1 + L.i : 1)); x.scale(s, s); gl(() => layerPath(L, R, c), col, L.kind === 'outer' ? 2 : 1.4, a); x.restore();
-    if (flash > 0) gl(() => x.arc(0, 0, L.r * R * (1 + (1 - flash) * .15), 0, TAU), '#ffffff', 2, flash);
+    if (!L.started){ L.started = true; if (!c.quiet) SFX.swish(L.i); }
+    const k = clamp(la / c.layerDur), p = 1 - Math.pow(1 - k, 4.5);
+    if (k >= 1 && !L.done){ L.done = true; L.doneT = S.T; if (!c.quiet) SFX.ching(L.i); S.trauma = Math.min(1, S.trauma + .04); for (let q = 0; q < 22; q++){ const an = rand(0, TAU); P({ x: c.x + Math.cos(an) * L.r * R * gs, y: c.y + Math.sin(an) * L.r * R * c.flat * gs, vx: Math.cos(an) * rand(30, 120), vy: Math.sin(an) * rand(30, 120) * c.flat - 40, life: .6, r: 1.6, col }); } }
+    const rot = L.rot0 * (1 - eout(k)) + c.ang * L.dir, s = 1 + diss * (.25 + L.i * .18);
+    const fl = L.done ? Math.max(0, 1 - (S.T - L.doneT) / .35) : 0, a = ga * (.8 + c.charge * .45 + fl * .9);
+    x.save(); x.rotate(rot * (diss ? 1 + L.i * .6 : 1)); x.scale(s, s);
+    if (!L.done){ x.setLineDash([L.len, L.len]); x.lineDashOffset = L.len * (1 - p); }
+    gl(() => layerPath(L, R, c), col, L.kind === 'outer' ? 2.2 : 1.5, a);
+    x.setLineDash([]);
+    if (!L.done && (L.kind === 'outer' || L.kind === 'runes' || L.kind === 'inner')){ const an = p * TAU, rr = L.r * R, hx = Math.cos(an) * rr, hy = Math.sin(an) * rr;
+      x.save(); x.globalCompositeOperation = 'lighter'; const g2 = x.createRadialGradient(hx, hy, 0, hx, hy, R * .14); g2.addColorStop(0, '#ffffff'); g2.addColorStop(.3, col); g2.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g2; x.beginPath(); x.arc(hx, hy, R * .14, 0, TAU); x.fill(); x.restore();
+      const cs = Math.cos(rot), sn = Math.sin(rot); P({ x: c.x + (hx * cs - hy * sn) * gs, y: c.y + (hx * sn + hy * cs) * c.flat * gs, vx: rand(-60, 60), vy: rand(-90, -10), life: .5, r: rand(1, 2), col: '#ffffff' }); }
+    x.restore();
+    if (fl > 0) gl(() => x.arc(0, 0, L.r * R * (1 + (1 - fl) * .12), 0, TAU), '#ffffff', 2.4, fl);
   });
-  if (c.charge > 0){ const pul = .5 + .5 * Math.sin(S.real * 18); gl(() => x.arc(0, 0, R * (1.03 + pul * .03), 0, TAU), col, 1.4, c.charge * ga * .8); }
+  if (c.charge > 0){ const pul = .5 + .5 * Math.sin(S.real * 14); gl(() => x.arc(0, 0, R * (1.04 + pul * .03), 0, TAU), col, 1.6, c.charge * ga * .85); }
   x.restore();
-  if (!c.assembled && age > c.layers[4].at + .26){ c.assembled = true; if (c.assembledHook) c.assembledHook(); }
+  if (!c.assembled && c.layers[4].done){ c.assembled = true; if (c.assembledHook) c.assembledHook(); }
 }
 /* 수렴 입자: 모으기 */
 function converge(c, n, col){ for (let i = 0; i < n; i++){ const a = rand(0, TAU), d = c.r * rand(1.4, 2.2); const sx = c.x + Math.cos(a) * d, sy = c.y + Math.sin(a) * d * c.flat; P({ x: sx, y: sy, vx: (c.x - sx) * 2.6, vy: (c.y - sy) * 2.6, life: .38, r: rand(1, 2), col, kind: 'streak' }); } }
@@ -294,16 +297,66 @@ function hit(f, w, col, o = {}){
   if (w === 'fin'){ S.slowUntil = S.real + .45 + G.stop; S.slowScale = .25; }
   if (!o.nonum){ const dmg = Math.round({ light: 380, mid: 980, heavy: 3100, fin: 9800 }[w] * rand(.9, 1.1)); nums.push({ x: hx + (o.nx || 0) + rand(-6, 6), y: hy - tw() * .35 + (o.ny || 0), v: dmg, t0: S.real, s: G.num, crit: w === 'fin' || (w === 'heavy' && Math.random() < .5) }); }
 }
+
+/* ================= 웅장함 장치: 카메라, 띠, 스킬명, 먹구름, 빛줄기, 바닥 빛, 떠오르는 돌, 빛의 검 ================= */
+S.cam = { z: 1, fx: null, fy: null }; S.camTw = null; S.letterTw = null; S.letterV = 0;
+function camTo(z, fx, fy, dur, ease = eio){ const c = S.cam; S.camTw = { from: { z: c.z, fx: c.fx ?? W / 2, fy: c.fy ?? H / 2 }, to: { z, fx: fx ?? W / 2, fy: fy ?? H / 2 }, t0: S.T, dur, ease }; }
+function letterTo(v, dur = .5){ S.letterTw = { from: S.letterV, to: v, t0: S.T, dur }; }
+function stepCam(){ const t = S.camTw; if (t){ const k = t.dur > 0 ? clamp((S.T - t.t0) / t.dur) : 1, e = t.ease(k); S.cam.z = lerp(t.from.z, t.to.z, e); S.cam.fx = lerp(t.from.fx, t.to.fx, e); S.cam.fy = lerp(t.from.fy, t.to.fy, e); if (k >= 1) S.camTw = null; }
+  const l = S.letterTw; if (l){ const k = clamp((S.T - l.t0) / l.dur); S.letterV = lerp(l.from, l.to, eio(k)); if (k >= 1) S.letterTw = null; } }
+S.clouds = 0; S.cloudFlash = 0; S.rays = 0; S.ground = 0; S.blade = null; S.tcard = null;
+function drawClouds(cx, cy, R){
+  if (S.clouds <= .01) return; const a = S.clouds;
+  for (let i = 0; i < 18; i++){ const th = i / 18 * TAU + S.real * (.06 + (i % 3) * .02), rr = R * (1.15 + (i % 4) * .18), px = cx + Math.cos(th) * rr, py = cy + Math.sin(th) * rr * .28 - R * .15, br = R * (.55 + (i % 5) * .08);
+    const g = x.createRadialGradient(px, py, 0, px, py, br); g.addColorStop(0, `rgba(30,24,44,${.92 * a})`); g.addColorStop(.6, `rgba(24,18,36,${.6 * a})`); g.addColorStop(1, 'rgba(20,16,30,0)'); x.fillStyle = g; x.beginPath(); x.ellipse(px, py, br * 1.4, br * .7, 0, 0, TAU); x.fill();
+    if (S.cloudFlash > .05 && (i * 7 + ((S.real * 9) | 0)) % 5 === 0) halo(px, py, br * 1.2, '#a8d8ff', S.cloudFlash * a * .9); }
+}
+function drawRays(cx, cy, len, col){
+  if (S.rays <= .01) return; x.save(); x.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 9; i++){ const a0 = (i - 4) * .11 + Math.sin(S.real * .4 + i) * .03, w0 = tw() * .12, w1 = tw() * (.5 + (i % 3) * .2), ex = cx + Math.sin(a0) * len, ey = cy + Math.cos(a0) * len;
+    const g = x.createLinearGradient(cx, cy, ex, ey); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); x.globalAlpha = S.rays * (.16 + .1 * Math.sin(S.real * 2 + i)); x.fillStyle = g;
+    x.beginPath(); x.moveTo(cx - w0, cy); x.lineTo(cx + w0, cy); x.lineTo(ex + w1, ey); x.lineTo(ex - w1, ey); x.closePath(); x.fill(); }
+  x.restore();
+}
+function drawGround(gc, gr, rad, col){
+  if (S.ground <= .01) return; const t = tw(), th = t / 2;
+  for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++){ if (SHAPE[r][c] === 'X') continue; const d = Math.hypot(c - gc, r - gr); if (d > rad) continue; const [px, py] = tc(c, r), a = S.ground * (1 - d / rad) * (.6 + .4 * Math.sin(S.real * 5 - d * 1.5));
+    gl(() => { x.moveTo(px, py - th / 2); x.lineTo(px + t / 2, py); x.lineTo(px, py + th / 2); x.lineTo(px - t / 2, py); x.closePath(); }, col, 1.1, a); }
+}
+function lift(gx, gy, rad, n, col = '#2a2238'){ for (let i = 0; i < n; i++){ const a = rand(0, TAU), d = rand(0, rad); P({ x: gx + Math.cos(a) * d, y: gy + Math.sin(a) * d * .5, vx: rand(-6, 6), vy: rand(-40, -14), g: -8, drag: .2, life: rand(1.5, 2.8), r: rand(1.5, 3.6), col, add: false, kind: 'rock', shrink: false, rot: rand(0, TAU) }); } }
+function drawBlade(){
+  const b = S.blade; if (!b || b.a <= .01) return; const [mx, my] = magePos(), Hh = tw() * 3.4 * b.grow, w = tw() * .2, gy = my - tw() * .2, sway = Math.sin(S.real * .9) * .02;
+  x.save(); x.translate(mx - tw() * .05, gy); x.rotate(sway + (b.rot || 0));
+  x.save(); x.beginPath(); x.rect(-w * 4, -Hh - 10, w * 8, Hh + tw() * .9); x.clip();
+  const shape = () => { x.moveTo(-w, 0); x.lineTo(-w * .82, -tw() * 3.1); x.lineTo(0, -tw() * 3.4); x.lineTo(w * .82, -tw() * 3.1); x.lineTo(w, 0); x.closePath(); };
+  const g = x.createLinearGradient(-w, 0, w, 0); g.addColorStop(0, 'rgba(190,220,255,.05)'); g.addColorStop(.5, `rgba(235,245,255,${.32 * b.a})`); g.addColorStop(1, 'rgba(190,220,255,.05)'); x.fillStyle = g; x.beginPath(); shape(); x.fill();
+  gl(shape, '#cfe6ff', 1.6, b.a * (1 + b.flash)); gl(() => { x.moveTo(0, -tw() * .1); x.lineTo(0, -tw() * 3.0); }, '#ffffff', 1, b.a * .7);
+  gl(() => { x.moveTo(-w * 3, 0); x.lineTo(w * 3, 0); x.moveTo(-w * 3, 0); x.lineTo(-w * 3.4, -w * .8); x.moveTo(w * 3, 0); x.lineTo(w * 3.4, -w * .8); x.rect(-w * .4, 2, w * .8, tw() * .5); x.moveTo(w * .6, tw() * .62); x.arc(0, tw() * .62, w * .6, 0, TAU); }, '#cfe6ff', 1.6, b.a);
+  x.restore();
+  if (b.grow < 1){ const ty = -Hh; halo(0, ty, tw() * .5, '#ffffff', b.a); }
+  halo(0, -tw() * 1.6, tw() * 2.4 * b.grow, 'rgba(160,200,255,.6)', b.a * (.35 + b.flash));
+  x.restore();
+}
+function drawTitle(){
+  const c = S.tcard; if (!c) return; const age = S.T - c.t0; if (age > c.hold + .6){ S.tcard = null; return; }
+  const a = age > c.hold ? 1 - (age - c.hold) / .6 : 1, rev = eout(clamp(age / .55)), bx = W * .05, by = H * (1 - .11 * S.letterV) - H * .05, size = Math.round(H * .085);
+  x.save(); x.globalAlpha = a; x.font = `900 ${size}px "Noto Serif KR", serif`; const tw2 = x.measureText(c.big).width;
+  x.beginPath(); x.rect(bx - 20, by - size * 1.3, (tw2 + size * 2.2) * rev + 20, size * 2); x.clip();
+  x.fillStyle = 'rgba(150,20,14,.85)'; x.beginPath(); x.moveTo(bx - 12, by - size * .95); for (let i = 0; i <= 20; i++){ const u = i / 20; x.lineTo(bx - 12 + (tw2 + size * 1.6) * u, by - size * .95 + Math.sin(u * 23) * 3); } x.lineTo(bx + tw2 + size * 1.7, by + size * .25); for (let i = 20; i >= 0; i--){ const u = i / 20; x.lineTo(bx - 12 + (tw2 + size * 1.6) * u, by + size * .22 + Math.cos(u * 19) * 3); } x.closePath(); x.fill();
+  x.fillStyle = '#fff6ea'; x.shadowColor = c.col || '#ffb070'; x.shadowBlur = 18; x.fillText(c.big, bx, by); x.shadowBlur = 0;
+  x.font = `700 ${Math.round(size * .3)}px "IBM Plex Sans KR", sans-serif`; x.fillStyle = '#ffd9b8'; x.fillText(c.small, bx + tw2 + size * .35, by - size * .05);
+  x.restore();
+}
 /* ================= 스킬 1: 천류뇌격 — 하늘 마법진에서 뇌룡이 나와 한 바퀴 돌고 포효, 내리꽂음 ================= */
 const DRAGON = { on: false, t0: 0, cx: 0, cy: 0, R: 0, f: .32, tx: 0, ty: 0, jaw: 0, roar: 0 };
-const DSEG = [[0, 1, .35, eout], [1, 3, 1.0, t => t], [3, 4, .3, eio], [4, 4.6, .55, eout], [4.6, 5, .16, ein], [5, 7.4, .32, t => t]];
+const DSEG = [[0, 1, .7, eout], [1, 3, 1.9, t => t], [3, 4, .55, eio], [4, 4.6, 1.25, eout], [4.6, 5, .24, ein], [5, 7.4, .4, t => t]];
 function dragonS(age){ let t = age; for (const [a, b, d, e] of DSEG){ if (t <= d) return a + (b - a) * e(clamp(t / d)); t -= d; } return 7.4; }
 function dragonP(s){
-  const D = DRAGON, Rr = D.R * 1.3, th0 = Math.PI * .85;
+  const D = DRAGON, Rr = D.R * 1.08, th0 = Math.PI * .85;
   if (s <= 0) return [D.cx, D.cy];
   if (s < 1){ const k = s; return [D.cx + Math.cos(th0) * Rr * k, D.cy + Math.sin(th0) * Rr * k * D.f - k * 18]; }
   if (s < 3){ const th = th0 + (s - 1) / 2 * TAU; return [D.cx + Math.cos(th) * Rr, D.cy + Math.sin(th) * Rr * D.f - 18 + Math.sin((s - 1) * TAU * 1.5) * 10]; }
-  const L = [D.cx + Math.cos(th0) * Rr, D.cy + Math.sin(th0) * Rr * D.f - 18], U = [D.cx + Rr * .1, D.cy - Rr * .95];
+  const L = [D.cx + Math.cos(th0) * Rr, D.cy + Math.sin(th0) * Rr * D.f - 18], U = [D.cx + Rr * .1, D.cy - Rr * .5];
   if (s < 4){ const k = eio(s - 3); return [lerp(L[0], U[0], k) + Math.sin(k * Math.PI) * -Rr * .35, lerp(L[1], U[1], k)]; }
   const rc = Rr * .32, cs = -Math.PI / 2 - .6;
   if (s < 4.6){ const k = (s - 4) / .6, th = cs + k * TAU * .82; return [U[0] + Math.cos(th) * rc - Math.cos(cs) * rc, U[1] + Math.sin(th) * rc * .7 - Math.sin(cs) * rc * .7]; }
@@ -312,7 +365,7 @@ function dragonP(s){
   return [D.tx, D.ty];
 }
 function drawDragon(){
-  const D = DRAGON; if (!D.on) return; const age = S.T - D.t0, sh = dragonS(age), N = 76, len = 2.5, Wm = tw() * .2;
+  const D = DRAGON; if (!D.on) return; const age = S.T - D.t0, sh = dragonS(age), N = 90, len = 2.6, Wm = tw() * .27;
   const pts = []; for (let i = 0; i < N; i++){ const s = sh - i * len / N; if (s <= 0.02 || s > 5) { pts.push(null); continue; } const [px, py] = dragonP(s); pts.push([px, py, s]); }
   const col = '#7fd4ff', jit = () => rand(-1.6, 1.6);
   const valid = pts.filter(Boolean); if (valid.length < 2) return;
@@ -347,114 +400,131 @@ function drawDragon(){
   x.save(); x.globalCompositeOperation = 'lighter'; x.fillStyle = '#ffffff'; x.beginPath(); x.ellipse(Lh * .38, -Wm * .28, Wm * .22, Wm * .12, 0, 0, TAU); x.fill(); x.restore(); halo(Lh * .38, -Wm * .28, Wm * .9, '#bfefff', 1);
   x.restore();
 }
+const DT_THUNDER = [.7, 1.9, .55, 1.25, .24];
 function castThunder(){
-  const f0 = FOES[0], [gx, gy] = tc(f0.c, f0.r), [mx, my] = tc(MAGE.c, MAGE.r), col = '#8fd8ff', D = DRAGON;
-  const self = makeCircle({ x: mx, y: my, r: tw() * .62, flat: .5, col, sweep: .26, glow: 'rgba(120,200,255,.3)', seed: 3 }); MAGE.glow = .9;
-  let sky;
-  at(.45, () => { sky = makeCircle({ x: gx, y: gy - tw() * 2.25, r: tw() * 1.35, flat: .32, col, sweep: .36, glow: 'rgba(120,200,255,.25)', seed: 11, sky: true }); });
-  at(.95, () => { SFX.charge(1.1); FX(1.15, k => { sky.charge = k; self.charge = k; S.dim = lerp(0, .4, k); converge(sky, 3, col); if (Math.random() < .35){ const a1 = rand(0, TAU), a2 = a1 + rand(.4, 1.4); bolt(sky.x + Math.cos(a1) * sky.r, sky.y + Math.sin(a1) * sky.r * sky.flat, sky.x + Math.cos(a2) * sky.r, sky.y + Math.sin(a2) * sky.r * sky.flat, 26, col, 1.3, .9, Math.random() * 1e6 | 0, 1, 5); } }); });
-  at(1.4, () => { self.dissolveAt = S.T; });
-  at(1.55, () => { Object.assign(D, { on: true, t0: S.T, cx: sky.x, cy: sky.y, R: sky.r, f: sky.flat, tx: gx, ty: gy - tw() * .2, jaw: 0, roar: 0 }); SFX.whoosh(.5, .5); tone('sawtooth', 120, 260, .6, .08); S.trauma += .2; });
-  const tRoar = 1.55 + .35 + 1.0 + .3 + .08;
-  at(tRoar, () => { SFX.roar(); FX(.62, k => { D.jaw = Math.sin(clamp(k * 1.3) * Math.PI) * .75; D.roar = 1 - k; S.trauma = Math.max(S.trauma, .38); S.chroma = Math.max(S.chroma, 4); }); for (let i = 0; i < 3; i++) at(i * .14, () => S.shocks.push({ x: dragonP(dragonS(S.T - D.t0))[0], y: dragonP(dragonS(S.T - D.t0))[1], t0: S.real, spd: H * .9, str: .5, life: .5 })); });
-  const tHit = 1.55 + .35 + 1.0 + .3 + .55 + .16;
-  at(tHit - .16, () => SFX.whoosh(.18, .6));
+  const f0 = FOES[0], [gx, gy] = tc(f0.c, f0.r), [mx, my] = tc(MAGE.c, MAGE.r), col = '#8fd8ff', D = DRAGON, skyY = gy - tw() * 2.5, skyR = tw() * 2.1;
+  letterTo(1, .8); camTo(.8, W * .55, H * .36, 2.2); MAGE.glow = .9; SFX.drone(3.5, 55);
+  const self = makeCircle({ x: mx, y: my, r: tw() * .7, flat: .5, col, glow: 'rgba(120,200,255,.3)', seed: 3, layerDur: .45, stagger: .12 });
+  let sky, sats = [];
+  at(1.0, () => { sky = makeCircle({ x: gx, y: skyY, r: skyR, flat: .3, col, glow: 'rgba(120,200,255,.22)', seed: 11, sky: true, layerDur: .6, stagger: .22 }); SFX.taiko(.8); });
+  at(1.2, () => { SFX.choir([110, 164.8, 220, 277.2], 4.2, .06); FX(2.4, k => { S.clouds = eio(k); S.dim = k * .35; }); });
+  at(2.0, () => { S.tcard = { t0: S.T, big: '天流雷擊', small: '천류뇌격 · 제7위계', hold: 2.4, col: '#8fd8ff' }; });
+  at(2.4, () => { [0, 1, 2].forEach(i => at(i * .18, () => { const a = -Math.PI / 2 + (i - 1) * 1.15; sats.push(makeCircle({ x: gx + Math.cos(a) * skyR * 1.45, y: skyY + Math.sin(a) * skyR * .55 - tw() * .3, r: tw() * .55, flat: .32, col, sky: true, seed: 40 + i, layerDur: .35, stagger: .07, quiet: true })); SFX.swish(i + 2); SFX.taiko(.4); })); });
+  at(2.6, () => { FX(2.0, k => { S.rays = eio(k); S.ground = eio(k); lift(gx, gy, tw() * 2, 1); }); });
+  at(3.3, () => { SFX.charge(1.9); camTo(.86, gx, H * .36, 1.8); FX(1.9, k => { sky.charge = k; sats.forEach(c => c.charge = k); self.charge = k; S.cloudFlash = Math.random() < .08 ? 1 : S.cloudFlash * .9; converge(sky, 4, col);
+    if (Math.random() < .5){ const s1 = sats[(Math.random() * sats.length) | 0]; if (s1) bolt(s1.x, s1.y, sky.x + rand(-skyR, skyR) * .5, sky.y + rand(-10, 10), 30, col, 1.4, .9, Math.random() * 1e6 | 0, 1, 5); } S.trauma = Math.max(S.trauma, k * .12); }); });
+  at(5.2, () => { duck(.12, .05); self.dissolveAt = S.T; FX(.6, k => { sky.charge = 1 + k * .6; }); });
+  const tD = 5.8; at(tD, () => { duck(1, .02); Object.assign(D, { on: true, t0: S.T, cx: sky.x, cy: sky.y, R: sky.r * .95, f: sky.flat, tx: gx, ty: gy - tw() * .2, jaw: 0, roar: 0 }); SFX.whoosh(.8, .6); tone('sawtooth', 90, 240, 1, .1); S.trauma += .3; camTo(.7, gx, skyY + tw() * .3, 1.4); });
+  const tRoar = tD + DT_THUNDER[0] + DT_THUNDER[1] + DT_THUNDER[2] + .1;
+  at(tRoar, () => { SFX.roar(); setTimeout(SFX.roar, 380); camTo(.86, gx, skyY - tw() * .2, .5, eout); FX(1.1, k => { D.jaw = Math.sin(clamp(k * 1.15) * Math.PI) * .85; D.roar = 1 - k; S.trauma = Math.max(S.trauma, .45); S.chroma = Math.max(S.chroma, 5); S.cloudFlash = Math.random() < .3 ? 1 : S.cloudFlash; });
+    for (let i = 0; i < 5; i++) at(i * .2, () => { const [px, py] = dragonP(dragonS(S.T - D.t0)); S.shocks.push({ x: px, y: py, t0: S.real, spd: H * 1.1, str: .7, life: .6 }); }); });
+  const tHit = tD + DT_THUNDER.reduce((a, b) => a + b, 0);
+  at(tHit - .3, () => { SFX.whoosh(.32, .7); camTo(1, gx, gy - tw() * .8, .3, ein); });
   at(tHit, () => { // 팡
-    hit(f0, 'fin', col, { dir: [0, 1] }); FOES.slice(1).forEach(f => hit(f, 'heavy', col, { dir: [foeXY(f)[0] - gx, -.3], nonum: true, silent: true })); SFX.boom(); if (!S.calm){ S.flash = 1; S.flashCol = '#e8f6ff'; }
-    S.shocks.push({ x: gx, y: gy, t0: S.real, spd: H * 1.2, str: 1.6, life: .8 });
-    const seedA = Math.random() * 1e6 | 0; FX(.4, k => { bolt(sky.x, sky.y, gx, gy - 10, 70, col, 5 * (1 - k) + 1.5, 1 - k, seedA + ((S.real * 30) | 0), 4, 7); halo(gx, gy, tw() * 2.2, '#cfeeff', 1 - k); });
-    sky.charge = 1.4;
+    hit(f0, 'fin', col, { dir: [0, 1] }); FOES.slice(1).forEach(f => hit(f, 'heavy', col, { dir: [foeXY(f)[0] - gx, -.3], nonum: true, silent: true })); SFX.boom(); SFX.taiko(1); if (!S.calm){ S.flash = 1.2; S.flashCol = '#e8f6ff'; }
+    S.slowUntil = S.real + 1.1; S.slowScale = .22;
+    S.shocks.push({ x: gx, y: gy, t0: S.real, spd: H * 1.2, str: 2, life: 1 });
+    const seedA = Math.random() * 1e6 | 0; FX(.6, k => { bolt(sky.x, sky.y, gx, gy - 10, 90, col, 8 * (1 - k) + 2, 1 - k, seedA + ((S.real * 30) | 0), 5, 7); halo(gx, gy, tw() * 3, '#cfeeff', 1 - k); });
+    sky.charge = 1.8;
   });
-  at(tHit + .08, () => { // 쩌저저저적
-    SFX.crackle(.75, 46); const N = 11, arms = Array.from({ length: N }, (_, i) => ({ a: i / N * TAU + rand(-.2, .2), L: tw() * rand(2, 3.2) }));
-    FX(.8, k => { const grow = eout(clamp(k * 1.8)), fade = 1 - clamp((k - .6) / .4); arms.forEach((ar, i) => bolt(gx, gy, gx + Math.cos(ar.a) * ar.L * grow, gy + Math.sin(ar.a) * ar.L * grow * .5, 26, col, 1.8, fade, i * 977 + ((S.real * 24) | 0), 2, 5)); S.trauma = Math.max(S.trauma, .25 * fade); });
-    for (let i = 0; i < 6; i++) at(.1 + i * .1, () => { const f = FOES[(i % 4) + 1]; hit(f, 'light', col, { dir: [rand(-1, 1), -1], pitch: i, silent: true, nx: rand(-10, 10) }); });
+  at(tHit + .2, () => { // 쩌저저저적
+    camTo(.85, gx, H * .4, 1.2); SFX.crackle(1.3, 70); const N = 13, arms = Array.from({ length: N }, (_, i) => ({ a: i / N * TAU + rand(-.2, .2), L: tw() * rand(2.4, 3.8) }));
+    FX(1.4, k => { const grow = eout(clamp(k * 1.5)), fade = 1 - clamp((k - .65) / .35); arms.forEach((ar, i) => bolt(gx, gy, gx + Math.cos(ar.a) * ar.L * grow, gy + Math.sin(ar.a) * ar.L * grow * .5, 30, col, 2.2, fade, i * 977 + ((S.real * 20) | 0), 2, 5)); S.trauma = Math.max(S.trauma, .3 * fade); S.cloudFlash = Math.random() < .15 ? 1 : S.cloudFlash; });
+    for (let i = 0; i < 8; i++) at(.12 + i * .13, () => { const f = FOES[(i % 4) + 1]; hit(f, 'light', col, { dir: [rand(-1, 1), -1], pitch: i, silent: true, nx: rand(-12, 12) }); });
   });
-  [[1, 4], [2, 7], [4, 10]].forEach(([fi, p], n) => at(tHit + .85 + n * .13, () => { // 파바방
+  [[1, 4], [2, 7], [3, 10], [4, 12]].forEach(([fi, p], n) => at(tHit + 1.6 + n * .16, () => { // 파바방
     const f = FOES[fi], [hx, hy] = foeXY(f), sd = Math.random() * 1e6 | 0; hit(f, 'mid', col, { dir: [0, 1], pitch: p });
-    FX(.3, k => { bolt(hx + rand(-6, 6), hy - tw() * 2.4, hx, hy, 40, col, 3 * (1 - k) + 1, 1 - k, sd, 2, 6); halo(hx, hy, tw() * 1.1, '#e0f6ff', 1 - k); }); S.shocks.push({ x: hx, y: hy, t0: S.real, spd: H * .9, str: .7, life: .45 }); }));
-  at(tHit + 1.35, () => { sky.dissolveAt = S.T; D.on = false; FX(1, k => { S.dim = lerp(.4, 0, k); }); for (let i = 0; i < 40; i++) P({ x: gx + rand(-tw() * 2, tw() * 2), y: gy + rand(-10, 10), vx: rand(-20, 20), vy: rand(-90, -30), g: 120, life: rand(.5, 1.1), r: 1.3, col }); });
-  return tHit + 2.3;
+    FX(.4, k => { bolt(hx + rand(-6, 6), hy - tw() * 3, hx, hy, 50, col, 4 * (1 - k) + 1, 1 - k, sd, 2, 6); halo(hx, hy, tw() * 1.3, '#e0f6ff', 1 - k); }); S.shocks.push({ x: hx, y: hy, t0: S.real, spd: H * .9, str: .8, life: .5 }); }));
+  at(tHit + 2.5, () => { sky.dissolveAt = S.T; sky.dissolveLen = 1.4; sats.forEach(c => { c.dissolveAt = S.T; c.dissolveLen = 1; }); D.on = false; camTo(1, null, null, 1.6); letterTo(0, 1.2); FX(1.6, k => { S.dim = lerp(.35, 0, k); S.clouds = 1 - k; S.rays = 1 - k; S.ground = 1 - k; }); for (let i = 0; i < 60; i++) P({ x: gx + rand(-tw() * 2.4, tw() * 2.4), y: gy + rand(-10, 10), vx: rand(-20, 20), vy: rand(-90, -30), g: 100, life: rand(.6, 1.4), r: 1.3, col }); });
+  return tHit + 4.3;
 }
 
-/* ================= 스킬 2: 일도양단 — 조용해졌다가 화면이 반으로 썰림 ================= */
+/* ================= 일도양단: 빛의 검이 솟고, 세상이 멈추고, 화면이 썰림 ================= */
 function castCleave(){
   const [mx, my] = tc(MAGE.c, MAGE.r), f0 = FOES[0], [hx, hy] = foeXY(f0), col = '#eef4ff', ca = -.36, na = ca + Math.PI / 2;
-  const self = makeCircle({ x: mx, y: my, r: tw() * .78, flat: .5, col, sweep: .3, glow: 'rgba(220,230,255,.25)', seed: 21 }); MAGE.glow = .7;
-  at(.4, () => { SFX.charge(.45); FX(.4, k => { self.charge = k; converge(self, 4, col); }); });
-  at(.82, () => { SFX.shing(); MAGE.glow = 1.4; const [px, py] = magePos(); FX(.4, k => { const w = W * .5 * eout(clamp(k * 3)); gl(() => { x.moveTo(px - w, py - tw() * .45); x.lineTo(px + w, py - tw() * .45); }, col, 2 * (1 - k) + .5, 1 - k); }); self.collapseAt = S.T + .05; self.collapseLen = .22; });
-  at(1.08, () => { SFX.inhale(.18); at(.18, () => { duck(.05, .02); SFX.ring(); }); FX(.15, k => { S.desat = k; S.dim = k * .25; }); S.partScale = .04; });
-  at(1.32, () => { /* 멈춘 세계에서 먼지만 떠 있음 */ for (let i = 0; i < 40; i++) P({ x: rand(0, W), y: rand(H * .2, H * .9), vx: rand(-4, 4), vy: rand(-3, 3), life: 30, r: rand(.8, 1.6), col: 'rgba(230,230,240,.8)', add: false }); });
-  const tCut = 1.32 + .55;
-  at(tCut, () => { // 쏙: 화면 끝에서 끝까지 한 줄
-    hiss('highpass', 6000, 9000, .06, .9); tone('sine', 5200, 5000, .25, .12);
-    S.cut = { t0: S.real, x: hx, y: hy, a: ca };
-  });
-  at(tCut + .3, () => { // 갈라짐
-    duck(1, .005); S.partScale = 1; SFX.boom(); hiss('highpass', 1500, 9000, .4, .7); S.stop = .26; S.trauma = .75; S.chroma = 14;
+  letterTo(1, .8); camTo(.84, W * .42, H * .4, 2.4); MAGE.glow = .8; SFX.drone(4, 49);
+  const self = makeCircle({ x: mx, y: my, r: tw() * 1.25, flat: .5, col, glow: 'rgba(220,230,255,.25)', seed: 21, layerDur: .55, stagger: .2 });
+  at(.7, () => { S.blade = { a: 0, grow: 0, flash: 0 }; SFX.hum(3.2); SFX.choir([98, 146.8, 196, 246.9], 3.4, .05); FX(1.8, k => { S.blade.grow = eout(k); S.blade.a = clamp(k * 3); lift(mx, my, tw() * 1.2, 1, '#3a3450'); }); });
+  at(1.4, () => { S.tcard = { t0: S.T, big: '一刀兩斷', small: '일도양단 · 제6위계', hold: 2.2, col: '#dfe8ff' }; FX(1.6, k => { S.ground = k; self.charge = k; }); });
+  at(2.7, () => { SFX.charge(1.0); FX(1.0, k => { converge(self, 5, col); S.blade.flash = k * .6; }); });
+  at(3.8, () => { SFX.shing(); MAGE.glow = 1.6; S.blade.flash = 1.4; const [px, py] = magePos(); FX(.6, k => { const w = W * .7 * eout(clamp(k * 2.5)); gl(() => { x.moveTo(px - w, py - tw() * .45); x.lineTo(px + w, py - tw() * .45); }, col, 2.5 * (1 - k) + .5, 1 - k); }); self.collapseAt = S.T + .1; self.collapseLen = .3; });
+  at(4.15, () => { SFX.inhale(.25); at(.25, () => { duck(.04, .02); SFX.ring(); }); FX(.3, k => { S.desat = k; S.dim = k * .3; S.blade.a = 1 - k * .7; S.ground = 1 - k; }); S.partScale = .03; camTo(1.04, hx, hy, 1.6, eio); });
+  at(4.6, () => { for (let i = 0; i < 60; i++) P({ x: rand(0, W), y: rand(H * .15, H * .9), vx: rand(-4, 4), vy: rand(-3, 3), life: 40, r: rand(.8, 1.7), col: 'rgba(230,230,240,.85)', add: false }); });
+  const tCut = 5.9;
+  at(tCut, () => { hiss('highpass', 6000, 9000, .07, 1); tone('sine', 5200, 5000, .4, .14); S.cut = { t0: S.real, x: hx, y: hy, a: ca }; S.blade = null; });
+  at(tCut + .55, () => { // 갈라짐
+    duck(1, .005); S.partScale = 1; SFX.boom(); SFX.taiko(1); hiss('highpass', 1500, 9000, .5, .8); S.stop = .3; S.trauma = .8; S.chroma = 16; S.slowUntil = S.real + 1.2; S.slowScale = .3;
     S.slice.x = hx; S.slice.y = hy; S.slice.a = na; S.slice.t0 = S.real; S.slice.on = 1;
     FOES.forEach(f => { f.split = 1; f.splitA = na; f.flash = .06; hit(f, 'heavy', '#ff5a5a', { dir: [Math.cos(na), Math.sin(na)], nonum: true, silent: true }); });
-    FX(.25, k => { S.desat = 1 - k; S.dim = .25 * (1 - k); });
+    FX(.35, k => { S.desat = 1 - k; S.dim = .3 * (1 - k); });
   });
-  at(tCut + .95, () => { // 붙으며 쾅
-    S.slice.snap = S.real; S.cut = null; SFX.boom(); hit(f0, 'fin', '#ff6a5a', { dir: [1, -.2], ny: -10 }); FOES.slice(1).forEach((f, i) => at(.05 + i * .05, () => hit(f, 'heavy', '#ff6a5a', { dir: [1, -.2], pitch: i * 2 })));
-    FOES.forEach(f => { FX(.9, k => { f.split = 1 + k * 26; f.hide = clamp((k - .5) / .5); }); });
-    S.shocks.push({ x: hx, y: hy, t0: S.real, spd: H * 1.6, str: 1.6, life: .8 });
+  at(tCut + 1.45, () => { // 붙으며 쾅
+    S.slice.snap = S.real; S.cut = null; SFX.boom(); SFX.taiko(1); hit(f0, 'fin', '#ff6a5a', { dir: [1, -.2], ny: -10 }); FOES.slice(1).forEach((f, i) => at(.08 + i * .07, () => hit(f, 'heavy', '#ff6a5a', { dir: [1, -.2], pitch: i * 2 })));
+    FOES.forEach(f => { FX(1.2, k => { f.split = 1 + k * 30; f.hide = clamp((k - .5) / .5); }); });
+    S.shocks.push({ x: hx, y: hy, t0: S.real, spd: H * 1.6, str: 1.8, life: .9 });
+    camTo(.95, W / 2, H * .42, 1.4);
   });
-  at(tCut + 2.2, () => { FOES.forEach(f => { f.split = 0; f.hide = 0; }); S.cut = null; });
-  return tCut + 2.4;
+  at(tCut + 2.9, () => { letterTo(0, 1); camTo(1, null, null, 1.2); });
+  at(tCut + 3.3, () => { FOES.forEach(f => { f.split = 0; f.hide = 0; }); });
+  return tCut + 4;
 }
 
-/* ================= 스킬 3: 블랙홀 — 진이 접혀 구멍이 열리고 배경이 암전 ================= */
+/* ================= 블랙홀: 세 층 진이 차례로 접혀 구멍이 열리고 배경이 암전 ================= */
 const ORB = [];
 function castHole(){
-  const f0 = FOES[0], [gx, gy] = tc(f0.c, f0.r), col = '#c78bff', hx = gx, hy = gy - tw() * 1.05, rMax = tw() * .42;
-  const c = makeCircle({ x: gx, y: gy, r: tw() * 1.75, flat: .5, col, sweep: .36, glow: 'rgba(160,90,255,.25)', seed: 33 });
-  at(.6, () => { SFX.charge(.75); FX(.75, k => { c.charge = k; converge(c, 4, col); }); });
-  at(1.35, () => { c.collapseAt = S.T; c.collapseLen = .42; SFX.inhale(.45); FX(.42, k => { converge(c, 6, '#e8d0ff'); S.dim = k * .3; }); });
-  at(1.8, () => { // 훅: 구멍과 암전
-    S.bh.x = hx; S.bh.y = hy; tone('sine', 50, 28, 1, .9); hiss('lowpass', 900, 60, .6, .6); SFX.rumble(2.2); S.bgBlack = 1; S.dim = 0; S.trauma = .4;
-    FX(.2, k => { S.bh.r = rMax * eout(k); S.bh.w = 1; });
+  const f0 = FOES[0], [gx, gy] = tc(f0.c, f0.r), col = '#c78bff', hx = gx, hy = gy - tw() * 1.25, rMax = tw() * .6;
+  letterTo(1, .8); camTo(.82, W / 2, H * .38, 2.4); SFX.drone(5, 41);
+  const tower = [ makeCircle({ x: gx, y: gy, r: tw() * 2.2, flat: .5, col, glow: 'rgba(160,90,255,.25)', seed: 33, layerDur: .6, stagger: .2 }) ];
+  at(1.0, () => { tower.push(makeCircle({ x: gx, y: gy - tw() * 1.1, r: tw() * 1.5, flat: .42, col, sky: true, seed: 34, layerDur: .45, stagger: .14 })); SFX.taiko(.6); });
+  at(1.8, () => { tower.push(makeCircle({ x: gx, y: gy - tw() * 2.1, r: tw() * .95, flat: .36, col, sky: true, seed: 35, layerDur: .4, stagger: .1 })); SFX.taiko(.7); });
+  at(1.5, () => { S.tcard = { t0: S.T, big: '黑淵', small: '블랙홀 · 제8위계', hold: 2.4, col: '#c78bff' }; SFX.choir([73.4, 87.3, 110, 130.8], 4.4, .06); });
+  at(2.4, () => { SFX.charge(1.6); FX(1.8, k => { tower.forEach(c => c.charge = k); S.ground = k; S.dim = k * .3; converge(tower[0], 5, col); lift(gx, gy, tw() * 2.2, 2, '#2e2640'); S.trauma = Math.max(S.trauma, k * .12); }); });
+  [2, 1, 0].forEach((ci, n) => at(4.3 + n * .32, () => { tower[ci].collapseAt = S.T; tower[ci].collapseLen = .35; SFX.inhale(.32); SFX.taiko(.5 + n * .2); }));
+  at(5.45, () => { duck(.1, .02); });
+  at(5.7, () => { // 훅: 구멍, 암전
+    duck(1, .005); S.bh.x = hx; S.bh.y = hy; tone('sine', 50, 26, 1.4, 1); hiss('lowpass', 900, 60, .9, .7); SFX.rumble(3.2); S.bgBlack = 1; S.dim = 0; S.ground = 0; S.trauma = .5;
+    FX(.35, k => { S.bh.r = rMax * eout(k); S.bh.w = 1; }); camTo(1.12, hx, hy, 3.0, eio);
     FOES.forEach((f, i) => { f.px = hx; f.py = hy; f.spinV = rand(2, 5) * (i % 2 ? 1 : -1); });
-    FX(1.7, k => { FOES.forEach(f => { f.pull = eio(k) * .82; f.rot += f.spinV * .016 * (1 + k * 3); }); S.trauma = Math.max(S.trauma, .12 + k * .12); S.chroma = Math.max(S.chroma, 3 + k * 4);
-      for (let q = 0; q < 6; q++) ORB.push({ a: rand(0, TAU), r: rMax * rand(2.2, 4.4), sp: rand(1.6, 2.6), life: 1, col: Math.random() < .6 ? '#ffb070' : '#c78bff' });
-      if (Math.random() < .5){ const r2 = rand(0, 7) | 0, c2 = rand(0, 7) | 0; if (SHAPE[r2][c2] !== 'X'){ const [px, py] = tc(c2, r2); ORB.push({ a: Math.atan2((py - hy) / .35, px - hx), r: Math.hypot(px - hx, (py - hy) / .35), sp: 1.2, life: 1, tile: true, col: '#2a2440' }); } } });
+    FX(2.8, k => { FOES.forEach(f => { f.pull = eio(k) * .85; f.rot += f.spinV * .016 * (1 + k * 3); }); S.trauma = Math.max(S.trauma, .14 + k * .14); S.chroma = Math.max(S.chroma, 3 + k * 5);
+      for (let q = 0; q < 8; q++) ORB.push({ a: rand(0, TAU), r: rMax * rand(2.2, 5), sp: rand(1.4, 2.4), life: 1, col: Math.random() < .6 ? '#ffb070' : '#c78bff' });
+      if (Math.random() < .6){ const r2 = rand(0, 7) | 0, c2 = rand(0, 7) | 0; if (SHAPE[r2][c2] !== 'X'){ const [px, py] = tc(c2, r2); ORB.push({ a: Math.atan2((py - hy) / .35, px - hx), r: Math.hypot(px - hx, (py - hy) / .35), sp: 1.1, life: 1, tile: true }); } } });
   });
-  at(3.55, () => { FX(.15, k => { S.bh.r = rMax * (1 - ein(k)); }); FOES.forEach(f => { f.pull = 1; f.hide = .85; }); duck(.06, .02); });
-  at(3.72, () => { S.bh.w = 0; });
-  at(3.92, () => { // 폭발
-    duck(1, .005); SFX.boom(); hiss('highpass', 2000, 9000, .5, .7); ORB.length = 0;
-    if (!S.calm){ S.flash = 1; S.flashCol = '#f2e6ff'; }
-    FX(.35, k => { S.bgBlack = 1 - eout(k); });
-    FOES.forEach((f, i) => { f.pull = 0; f.hide = 0; f.rot = 0; const [bx, by] = foeBase(f), d = [bx - hx || rand(-1, 1), by - hy]; hit(f, i ? 'heavy' : 'fin', col, { dir: d, pitch: i, silent: i > 0, nonum: false, ny: i ? 0 : -16 }); });
-    [0, .1, .22].forEach((d, i) => at(d, () => S.shocks.push({ x: hx, y: hy, t0: S.real, spd: H * (1.3 + i * .3), str: 1.8 - i * .4, life: .9 })));
-    for (let i = 0; i < 140; i++){ const a = rand(0, TAU), v = rand(150, 520); P({ x: hx, y: hy, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .55, drag: 1.6, life: rand(.5, 1.2), r: rand(1.2, 2.8), col: Math.random() < .5 ? '#ffb070' : col, kind: 'streak' }); }
-    FX(.7, k => { halo(hx, hy, tw() * 3 * eout(k), '#e8d0ff', 1 - k); x.save(); x.translate(hx, hy); x.scale(1, .4); gl(() => x.arc(0, 0, tw() * 4 * eout(k), 0, TAU), col, 4 * (1 - k) + .5, 1 - k); x.restore(); });
+  at(8.6, () => { FX(.2, k => { S.bh.r = rMax * (1 - ein(k)); }); FOES.forEach(f => { f.pull = 1; f.hide = .9; }); duck(.05, .02); });
+  at(8.82, () => { S.bh.w = 0; });
+  at(9.2, () => { // 폭발
+    duck(1, .005); SFX.boom(); SFX.taiko(1); hiss('highpass', 2000, 9000, .6, .8); ORB.length = 0; S.slowUntil = S.real + 1.1; S.slowScale = .25;
+    if (!S.calm){ S.flash = 1.2; S.flashCol = '#f2e6ff'; }
+    camTo(.88, W / 2, H * .42, 1.4, eout); FX(.5, k => { S.bgBlack = 1 - eout(k); });
+    FOES.forEach((f, i) => { f.pull = 0; f.hide = 0; f.rot = 0; const [bx, by] = foeBase(f), d = [bx - hx || rand(-1, 1), by - hy]; hit(f, i ? 'heavy' : 'fin', col, { dir: d, pitch: i, silent: i > 0, ny: i ? 0 : -16 }); });
+    [0, .12, .26].forEach((d, i) => at(d, () => S.shocks.push({ x: hx, y: hy, t0: S.real, spd: H * (1.3 + i * .35), str: 2 - i * .45, life: 1 })));
+    for (let i = 0; i < 200; i++){ const a = rand(0, TAU), v = rand(150, 600); P({ x: hx, y: hy, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .55, drag: 1.4, life: rand(.6, 1.4), r: rand(1.2, 3), col: Math.random() < .5 ? '#ffb070' : col, kind: 'streak' }); }
+    FX(1, k => { halo(hx, hy, tw() * 4 * eout(k), '#e8d0ff', 1 - k); x.save(); x.translate(hx, hy); x.scale(1, .4); gl(() => x.arc(0, 0, tw() * 5 * eout(k), 0, TAU), col, 5 * (1 - k) + .5, 1 - k); x.restore();
+      x.save(); x.globalCompositeOperation = 'lighter'; for (let i = 0; i < 16; i++){ const a = i / 16 * TAU, L = tw() * 6 * eout(k); x.globalAlpha = (1 - k) * .35; const g = x.createLinearGradient(hx, hy, hx + Math.cos(a) * L, hy + Math.sin(a) * L * .6); g.addColorStop(0, '#fff'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.beginPath(); x.moveTo(hx, hy); x.lineTo(hx + Math.cos(a - .05) * L, hy + Math.sin(a - .05) * L * .6); x.lineTo(hx + Math.cos(a + .05) * L, hy + Math.sin(a + .05) * L * .6); x.fill(); } x.restore(); });
   });
-  return 5.4;
+  at(10.8, () => { letterTo(0, 1); camTo(1, null, null, 1.2); });
+  return 12;
 }
 function drawAccretion(dt){
   if (S.bh.w <= 0 && !ORB.length) return; const hx = S.bh.x, hy = S.bh.y, r = S.bh.r;
-  if (r > 1){ x.save(); x.translate(hx, hy); x.scale(1, .34); gl(() => x.arc(0, 0, r * 2.3, 0, TAU), '#ffb070', 3, .55); gl(() => x.arc(0, 0, r * 3.2, 0, TAU), '#c78bff', 2, .35); x.restore(); halo(hx, hy, r * 4, 'rgba(255,150,90,.6)', .5); }
+  if (r > 1){ x.save(); x.translate(hx, hy); x.scale(1, .34); x.rotate(S.real * .3); gl(() => x.arc(0, 0, r * 2.3, 0, TAU), '#ffb070', 3.4, .6); gl(() => x.arc(0, 0, r * 3.3, .3, TAU - .6), '#c78bff', 2.2, .4); gl(() => x.arc(0, 0, r * 4.4, 1, TAU - 1.6), '#ffb070', 1.4, .3); x.restore(); halo(hx, hy, r * 5, 'rgba(255,150,90,.6)', .55); }
   x.save(); x.globalCompositeOperation = 'lighter';
-  for (const o of ORB){ o.a += dt * o.sp * (r * 2.5 / Math.max(o.r, r)) * 2.2; o.r -= dt * o.r * (o.tile ? .8 : .55); if (o.r < r * 1.05) o.life = 0;
+  for (const o of ORB){ o.a += dt * o.sp * (r * 2.5 / Math.max(o.r, r)) * 2.2; o.r -= dt * o.r * (o.tile ? .7 : .5); if (o.r < r * 1.05) o.life = 0;
     const px = hx + Math.cos(o.a) * o.r, py = hy + Math.sin(o.a) * o.r * .35;
-    if (o.tile){ x.globalCompositeOperation = 'source-over'; x.fillStyle = '#3a3260'; x.save(); x.translate(px, py); x.rotate(o.a * 2); x.fillRect(-5, -3, 10, 6); x.restore(); x.globalCompositeOperation = 'lighter'; }
-    else { x.globalAlpha = .9; x.strokeStyle = o.col; x.lineWidth = 1.6; x.beginPath(); x.moveTo(px, py); x.lineTo(hx + Math.cos(o.a - .12) * o.r, hy + Math.sin(o.a - .12) * o.r * .35); x.stroke(); } }
+    if (o.tile){ x.globalCompositeOperation = 'source-over'; x.fillStyle = '#3a3260'; x.save(); x.translate(px, py); x.rotate(o.a * 2); x.fillRect(-6, -3.5, 12, 7); x.restore(); x.globalCompositeOperation = 'lighter'; }
+    else { x.globalAlpha = .9; x.strokeStyle = o.col; x.lineWidth = 1.7; x.beginPath(); x.moveTo(px, py); x.lineTo(hx + Math.cos(o.a - .14) * o.r, hy + Math.sin(o.a - .14) * o.r * .35); x.stroke(); } }
   x.restore();
   for (let i = ORB.length - 1; i >= 0; i--) if (ORB[i].life <= 0) ORB.splice(i, 1);
 }
-
 const SKILLS = [
   { id: 'thunder', name: '천류뇌격', sub: '하늘 진 · 뇌룡', bg: 'linear-gradient(135deg,#1c3a6a,#3a7ac8)', run: castThunder },
-  { id: 'cleave', name: '일도양단', sub: '정적 · 화면 베기', bg: 'linear-gradient(135deg,#2a2a34,#8a8a9a)', run: castCleave },
-  { id: 'hole', name: '블랙홀', sub: '발밑 진 · 암전', bg: 'linear-gradient(135deg,#1a0a2a,#6a2aa8)', run: castHole },
+  { id: 'cleave', name: '일도양단', sub: '빛의 검 · 화면 베기', bg: 'linear-gradient(135deg,#2a2a34,#8a8a9a)', run: castCleave },
+  { id: 'hole', name: '블랙홀', sub: '세 층 진 · 암전', bg: 'linear-gradient(135deg,#1a0a2a,#6a2aa8)', run: castHole },
 ];
 /* ================= 실행과 매 프레임 ================= */
 let current = 0;
 function cast(i){
   if (S.busy) return; current = i; S.busy = true; audio(); duck(1, .01);
-  parts = []; fx = []; nums = []; ev = []; circles = []; ORB.length = 0; S.T = 0; S.shocks = []; S.cut = null; S.slice = { x: 0, y: 0, a: 0, gap: 0, off: 0 }; S.bh = { x: 0, y: 0, r: 0, w: 0 }; S.bgBlack = 0; S.desat = 0; S.dim = 0; S.partScale = 1; DRAGON.on = false;
+  parts = []; fx = []; nums = []; ev = []; circles = []; ORB.length = 0; S.T = 0; S.shocks = []; S.cut = null; S.slice = { x: 0, y: 0, a: 0, gap: 0, off: 0 }; S.bh = { x: 0, y: 0, r: 0, w: 0 }; S.bgBlack = 0; S.desat = 0; S.dim = 0; S.partScale = 1; DRAGON.on = false; S.clouds = 0; S.rays = 0; S.ground = 0; S.blade = null; S.tcard = null; S.cloudFlash = 0; S.cam = { z: 1, fx: null, fy: null }; S.camTw = null;
   FOES.forEach(f => { f.cracks = []; f.pull = 0; f.hide = 0; f.split = 0; f.rot = 0; f.flash = 0; });
   const end = SKILLS[i].run(); at(end, () => { S.busy = false; MAGE.glow = 0; document.getElementById('cap').textContent = ''; });
   document.getElementById('cap').textContent = SKILLS[i].name;
@@ -466,7 +536,7 @@ function frame(now){
   let dt = rdt * S.speed; if (S.stop > 0){ S.stop -= rdt; dt = 0; } else if (S.real < S.slowUntil) dt *= S.slowScale;
   S.T += dt;
   const due = ev.filter(e => e.t <= S.T); ev = ev.filter(e => e.t > S.T); due.sort((a, b) => a.t - b.t).forEach(e => e.fn());
-  FOES.forEach(f => { sstep(f.kx, dt); sstep(f.ky, dt); sstep(f.sq, dt); f.flash -= dt; }); MAGE.glow *= Math.exp(-dt * .7);
+  FOES.forEach(f => { sstep(f.kx, dt); sstep(f.ky, dt); sstep(f.sq, dt); f.flash -= dt; }); MAGE.glow *= Math.exp(-dt * .5); stepCam(); S.cloudFlash *= Math.exp(-rdt * 8);
   S.trauma = Math.max(0, S.trauma - rdt * 1.8); S.zoom = 1 + (S.zoom - 1) * Math.exp(-rdt * 5); S.chroma *= Math.exp(-rdt * 4); S.flash *= Math.exp(-rdt * 8);
   S.shocks = S.shocks.filter(s => S.real - s.t0 < s.life);
   // 슬라이스 상태
@@ -477,40 +547,47 @@ function frame(now){
   const ox = amp * sh * (Math.sin(tt * 1.3) * .6 + Math.sin(tt * 2.9 + 1) * .4), oy = amp * sh * (Math.sin(tt * 1.7 + 2) * .6 + Math.sin(tt * 3.3) * .4), orot = .05 * sh * Math.sin(tt * 1.1) * (S.calm ? .35 : 1);
   if (S.bgBlack < 1) background();
   if (S.bgBlack > 0){ x.save(); x.globalAlpha = S.bgBlack; x.fillStyle = '#000'; x.fillRect(0, 0, W, H); x.globalCompositeOperation = 'lighter'; for (const [sx, sy, r, b] of STARS){ x.globalAlpha = S.bgBlack * (.4 + .6 * b); x.fillStyle = '#e8e0ff'; x.fillRect(sx * W, sy * H * 1.5, r * 1.3, r * 1.3); } x.restore(); }
-  x.save(); x.translate(W / 2 + ox, H / 2 + oy); x.rotate(orot); x.translate(-W / 2, -H / 2);
-  if (S.zoom > 1.001){ x.translate(S.zx, S.zy); x.scale(S.zoom, S.zoom); x.translate(-S.zx, -S.zy); }
-  board(1 - S.bgBlack);
+  const cz = S.cam.z, cfx = S.cam.fx ?? W / 2, cfy = S.cam.fy ?? H / 2;
+  let M = new DOMMatrix().translate(W / 2 + ox, H / 2 + oy).rotate(orot * 180 / Math.PI).scale(cz).translate(-cfx, -cfy);
+  if (S.zoom > 1.001) M = M.translate(S.zx, S.zy).scale(S.zoom).translate(-S.zx, -S.zy);
+  S.M = M; x.save(); x.setTransform(new DOMMatrix().scale(DPR).multiply(M));
+  const f0p = tc(FOES[0].c, FOES[0].r);
+  drawClouds(f0p[0], f0p[1] - tw() * 2.5, tw() * 2.1);
+  board(1 - S.bgBlack); drawGround(FOES[0].c, FOES[0].r, 3.2, circles.length ? circles[0].col : '#fff');
   circles.filter(c => !c.sky).forEach(c => drawCircle(c, dt));
   FOES.slice().sort((a, b) => (a.c + a.r) - (b.c + b.r)).forEach(f => drawFoe(f));
-  drawMage(); drawAccretion(dt);
+  drawBlade(); drawMage(); drawAccretion(dt);
   circles.filter(c => c.sky).forEach(c => drawCircle(c, dt)); circles = circles.filter(c => !c.dead);
-  drawDragon();
+  drawRays(f0p[0], f0p[1] - tw() * 2.5, tw() * 3.2, 'rgba(170,220,255,.9)'); drawDragon();
   fx = fx.filter(e => { const age = S.T - e.t0; if (age > e.dur){ if (e.dur > 0 && !e.ended){ e.ended = true; e.draw(1, e.dur); } return false; } e.draw(clamp(age / e.dur), age); return true; });
   const pdt = dt * (S.partScale ?? 1);
   for (const p of parts){ p.life -= pdt; const dr = Math.exp(-p.drag * pdt); p.vx *= dr; p.vy *= dr; p.vy += p.g * pdt; p.x += p.vx * pdt; p.y += p.vy * pdt; }
   parts = parts.filter(p => p.life > 0);
   x.save(); for (const p of parts){ const a = clamp(p.life / p.max); x.globalCompositeOperation = p.add ? 'lighter' : 'source-over'; x.globalAlpha = p.add ? a : Math.min(1, a * 1.5); x.fillStyle = p.col; x.strokeStyle = p.col;
-    if (p.kind === 'streak'){ x.lineWidth = p.r; x.lineCap = 'round'; x.beginPath(); x.moveTo(p.x, p.y); x.lineTo(p.x - p.vx * .03, p.y - p.vy * .03); x.stroke(); } else { x.beginPath(); x.arc(p.x, p.y, p.r * (p.shrink ? Math.max(.25, a) : 1), 0, TAU); x.fill(); } } x.restore();
+    if (p.kind === 'streak'){ x.lineWidth = p.r; x.lineCap = 'round'; x.beginPath(); x.moveTo(p.x, p.y); x.lineTo(p.x - p.vx * .03, p.y - p.vy * .03); x.stroke(); } else if (p.kind === 'rock'){ x.save(); x.translate(p.x, p.y); x.rotate((p.rot || 0) + S.real); x.fillRect(-p.r, -p.r * .7, p.r * 2, p.r * 1.4); x.restore(); } else { x.beginPath(); x.arc(p.x, p.y, p.r * (p.shrink ? Math.max(.25, a) : 1), 0, TAU); x.fill(); } } x.restore();
   // 일도양단의 한 줄
   if (S.cut && !S.slice.on){ const a = S.real - S.cut.t0, k = clamp(a / .07), L = Math.hypot(W, H) * 1.2, cx = Math.cos(S.cut.a), cy = Math.sin(S.cut.a), x0 = S.cut.x - cx * L / 2, y0 = S.cut.y - cy * L / 2;
     gl(() => { x.moveTo(x0, y0); x.lineTo(x0 + cx * L * k, y0 + cy * L * k); }, '#ffffff', 1.2 + Math.random() * .6, 1); }
   x.restore();
   // 화면 효과: 색 빼기, 어둡게, 번쩍
   if (S.desat > .01){ x.save(); x.globalCompositeOperation = 'saturation'; x.globalAlpha = S.desat; x.fillStyle = '#808080'; x.fillRect(0, 0, W, H); x.restore(); }
-  if (S.dim > .01){ x.fillStyle = `rgba(2,2,8,${S.dim})`; x.fillRect(0, 0, W, H); x.save(); x.translate(W / 2 + ox, H / 2 + oy); x.rotate(orot); x.translate(-W / 2, -H / 2); drawMage(); FOES.forEach(f => drawFoe(f)); circles.forEach(c => { if (c.sky || S.dim > .2) drawCircle(c, 0); }); drawDragon(); x.restore(); }
+  if (S.dim > .01){ x.fillStyle = `rgba(2,2,8,${S.dim})`; x.fillRect(0, 0, W, H); x.save(); x.setTransform(new DOMMatrix().scale(DPR).multiply(M)); drawBlade(); drawMage(); FOES.forEach(f => drawFoe(f)); circles.forEach(c => drawCircle(c, 0)); drawDragon(); x.restore(); }
   // 피해 숫자
   for (const n of nums){ const age = S.real - n.t0; if (age > 1.5) continue; const pop = age < .08 ? lerp(.3, 1.4, age / .08) : age < .16 ? lerp(1.4, 1, (age - .08) / .08) : 1, a = age > 1.1 ? 1 - (age - 1.1) / .4 : 1, size = Math.round(16 * n.s * pop * (n.crit ? 1.15 : 1));
-    x.save(); x.globalAlpha = a; x.font = `900 ${size}px "Noto Serif KR", serif`; x.textAlign = 'center'; x.lineJoin = 'round'; x.lineWidth = Math.max(3, size * .2); x.strokeStyle = '#120604'; const s = n.v.toLocaleString('ko-KR'), yy = n.y - age * 18 + oy; x.strokeText(s, n.x + ox, yy); x.fillStyle = n.crit ? '#ffe68a' : '#fff4e8'; x.fillText(s, n.x + ox, yy);
-    if (n.crit){ x.font = `900 ${Math.round(size * .42)}px "Noto Serif KR", serif`; x.lineWidth = 3; x.strokeText('치명', n.x + ox, yy - size * .85); x.fillStyle = '#ff6b3d'; x.fillText('치명', n.x + ox, yy - size * .85); } x.restore(); }
+    const sp2 = M.transformPoint(new DOMPoint(n.x, n.y)); x.save(); x.globalAlpha = a; x.font = `900 ${size}px "Noto Serif KR", serif`; x.textAlign = 'center'; x.lineJoin = 'round'; x.lineWidth = Math.max(3, size * .2); x.strokeStyle = '#120604'; const s = n.v.toLocaleString('ko-KR'), yy = sp2.y - age * 18; const nxx = sp2.x; x.strokeText(s, nxx, yy); x.fillStyle = n.crit ? '#ffe68a' : '#fff4e8'; x.fillText(s, nxx, yy);
+    if (n.crit){ x.font = `900 ${Math.round(size * .42)}px "Noto Serif KR", serif`; x.lineWidth = 3; x.strokeText('치명', nxx, yy - size * .85); x.fillStyle = '#ff6b3d'; x.fillText('치명', nxx, yy - size * .85); } x.restore(); }
+  const lb = H * .11 * S.letterV; if (lb > .5){ x.fillStyle = '#000'; x.fillRect(0, 0, W, lb); x.fillRect(0, H - lb, W, lb); }
+  drawTitle();
   if (S.flash > .01){ x.save(); x.globalCompositeOperation = 'lighter'; x.globalAlpha = Math.min(1, S.flash); x.fillStyle = S.flashCol; x.fillRect(0, 0, W, H); x.restore(); }
   // 빛 번짐
   x.setTransform(1, 0, 0, 1, 0, 0); sx2.globalCompositeOperation = 'copy'; sx2.drawImage(sc, 0, 0, small.width, small.height); x.save(); x.globalCompositeOperation = 'lighter'; x.globalAlpha = .42; x.drawImage(small, 0, 0, sc.width, sc.height); x.restore();
   // ---- 후처리 ----
   const inv = S.real < (S.invertUntil || 0) ? 1 : 0;
   if (GL){ const { gl: g, U } = GL; g.viewport(0, 0, glc.width, glc.height); g.texImage2D(g.TEXTURE_2D, 0, g.RGBA, g.RGBA, g.UNSIGNED_BYTE, sc); g.uniform1i(U.T, 0); g.uniform2f(U.R, sc.width, sc.height);
-    const shs = S.shocks.slice(-3); ['SH0', 'SH1', 'SH2'].forEach((n, i) => { const s2 = shs[i]; if (s2){ const a = S.real - s2.t0; g.uniform4f(U[n], (s2.x + ox) * DPR, (s2.y + oy) * DPR, a * s2.spd * DPR, s2.str * (1 - a / s2.life) * (S.calm ? .5 : 1)); } else g.uniform4f(U[n], 0, 0, 0, 0); });
-    g.uniform4f(U.BH, (S.bh.x + ox) * DPR, (S.bh.y + oy) * DPR, S.bh.r * DPR, S.bh.r > 1 ? S.bh.w : 0);
-    g.uniform4f(U.SL, (S.slice.x + ox) * DPR, (S.slice.y + oy) * DPR, S.slice.a, (S.slice.gap || 0) * DPR); g.uniform1f(U.SLO, (S.slice.off || 0) * DPR);
+    const w2s = (px, py) => { const q = M.transformPoint(new DOMPoint(px, py)); return [q.x * DPR, q.y * DPR]; }, zs = cz * (S.zoom || 1);
+    const shs = S.shocks.slice(-3); ['SH0', 'SH1', 'SH2'].forEach((n, i) => { const s2 = shs[i]; if (s2){ const a = S.real - s2.t0, q = w2s(s2.x, s2.y); g.uniform4f(U[n], q[0], q[1], a * s2.spd * DPR * zs, s2.str * (1 - a / s2.life) * (S.calm ? .5 : 1)); } else g.uniform4f(U[n], 0, 0, 0, 0); });
+    const bq = w2s(S.bh.x, S.bh.y); g.uniform4f(U.BH, bq[0], bq[1], S.bh.r * DPR * zs, S.bh.r > 1 ? S.bh.w : 0);
+    const lq = w2s(S.slice.x, S.slice.y); g.uniform4f(U.SL, lq[0], lq[1], S.slice.a, (S.slice.gap || 0) * DPR); g.uniform1f(U.SLO, (S.slice.off || 0) * DPR);
     g.uniform1f(U.CH, S.chroma * DPR * (S.calm ? .3 : 1)); g.uniform1f(U.INV, inv); g.drawArrays(g.TRIANGLE_STRIP, 0, 4); }
   else if (inv){ x.save(); x.globalCompositeOperation = 'difference'; x.fillStyle = '#fff'; x.fillRect(0, 0, sc.width, sc.height); x.restore(); }
   requestAnimationFrame(frame);
