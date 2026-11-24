@@ -1,0 +1,1167 @@
+<title>캐릭터 방향 시안</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;900&display=swap">
+<style>
+/* Layout: 위 칩 줄(고정)로 방향 8개를 넘김. 상세는 마법사·적 → 기사→왕 → 판 장면 → 평가 순. 폰 우선 2열. */
+:root{
+  --bg:#f4f2ee; --paper:#ffffff; --ink:#1c1a20; --muted:#625c68; --line:#dcd8d0;
+  --accent:#8a4b2a; --accent-soft:#f3e4d8; --ok:#2f7d55; --mid:#9a7a2a; --no:#a1462e;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --serif:"Noto Serif KR","Apple SD Gothic Neo",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141317; --paper:#1d1b21; --ink:#ece8f0; --muted:#a59fae; --line:#302c36;
+  --accent:#e0a070; --accent-soft:#3a2a20; --ok:#6cc495; --mid:#d8b860; --no:#e48a72; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#141317; --paper:#1d1b21; --ink:#ece8f0; --muted:#a59fae; --line:#302c36;
+  --accent:#e0a070; --accent-soft:#3a2a20; --ok:#6cc495; --mid:#d8b860; --no:#e48a72; color-scheme:dark }
+html,body{background:var(--bg);color:var(--ink)}
+body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding-top:28px;padding-bottom:8px;display:grid;gap:8px}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(26px,6vw,36px);line-height:1.2;margin:0}
+h2{font-family:var(--serif);font-weight:900;font-size:clamp(22px,5vw,28px);line-height:1.25;margin:0}
+h3{font-size:15px;margin:0;font-weight:700;color:var(--muted);letter-spacing:.02em}
+p{margin:0}
+.lead{font-size:15px;color:var(--muted)} .lead b{color:var(--ink)}
+.honest{background:var(--accent-soft);border-radius:10px;padding:10px 14px;font-size:14px}
+nav.chips{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-top:10px;padding-bottom:10px;margin-top:12px}
+nav.chips .row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+nav.chips .row::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:7px 12px;border-radius:99px;cursor:pointer;white-space:nowrap;display:inline-flex;gap:6px;align-items:center;min-height:36px}
+.chip .n{font-size:12px;color:var(--muted)}
+.chip[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-current="true"] .n{color:inherit;opacity:.7}
+.chip i{width:8px;height:8px;border-radius:50%;display:none}
+.chip i.ok{display:block;background:var(--ok)}.chip i.mid{display:block;background:var(--mid)}.chip i.no{display:block;background:var(--no)}
+.chip:focus-visible,button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-top:20px;padding-bottom:80px;display:grid;gap:28px}
+.sec{display:grid;gap:10px}
+.over{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.tile{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;display:grid;text-align:left;padding:0;font:inherit;color:inherit}
+.tile .pair{display:grid;grid-template-columns:1fr 1fr}
+.tile .art{aspect-ratio:200/240;background:#222}
+.tile .cap{padding:8px 12px 10px;display:grid}
+.tile .cap b{font-size:15px}
+.tile .cap span{font-size:12px;color:var(--muted)}
+.badge{font-weight:700}.badge.ok{color:var(--ok)}.badge.mid{color:var(--mid)}.badge.no{color:var(--no)}
+.art svg,.art canvas{width:100%;height:100%;display:block}
+.detail{display:grid;gap:26px}
+.dhead{display:grid;gap:8px}
+.dhead .num{font-size:13px;color:var(--accent);font-weight:700;letter-spacing:.08em}
+.dhead .refs{font-size:13px;color:var(--muted)}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px}
+@media (max-width:520px){.pc{grid-template-columns:1fr}}
+.pc div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.pc b{display:block;font-size:12px;letter-spacing:.06em}
+.pc .g b{color:var(--ok)}.pc .r b{color:var(--no)}
+.hint{font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:zoom-in;padding:0;font:inherit;color:inherit;text-align:left;display:grid}
+.card .art{aspect-ratio:200/240;background:#222}
+.card .art.board{aspect-ratio:360/230}
+.card .cap{padding:7px 10px 9px;font-size:13px;line-height:1.45}
+.card .cap b{display:block;font-size:14px}
+.card .cap span{color:var(--muted)}
+.rate{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px}
+.rate .opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{font:inherit;font-weight:700;font-size:15px;padding:10px 18px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;min-height:44px}
+.opt[aria-pressed="true"][data-v="좋아"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt[aria-pressed="true"][data-v="애매"]{background:var(--mid);border-color:var(--mid);color:#fff}
+.opt[aria-pressed="true"][data-v="별로"]{background:var(--no);border-color:var(--no);color:#fff}
+textarea{font:inherit;font-size:16px;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);color:var(--ink);resize:vertical}
+.st{font-size:13px;color:var(--muted);min-height:1.2em}.st.ok{color:var(--ok)}.st.err{color:var(--no)}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pager button{font:inherit;font-weight:700;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;min-height:48px}
+.pager button:disabled{opacity:.35;cursor:default}
+.zoom{position:fixed;inset:0;z-index:20;background:rgba(10,8,12,.92);display:grid;place-items:center;padding:16px;cursor:zoom-out}
+.zoom[hidden]{display:none}
+.zoom .box{width:min(100%,560px);display:grid;gap:10px;color:#eee;text-align:center}
+.zoom .art{width:100%;aspect-ratio:200/240;max-height:78vh}
+.zoom .art.w{aspect-ratio:360/230}
+.zoom .art svg,.zoom .art canvas{object-fit:contain}
+.zoom p{font-size:14px;color:#cfc8d8}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>캐릭터 방향 시안 8종</h1>
+    <p class="lead">이번엔 칠하는 법이 아니라 <b>뼈대</b>를 바꿨어. 비율, 실루엣, 얼굴, 사역마를 어떤 존재로 보는지가 방향마다 달라. 방향마다 <b>마법사, 적, 같은 사역마의 기사→왕, 7×7 판 장면</b>이 있어.</p>
+    <p class="honest">코드로 그린 방향 시험지야. 최종 그림이 아니라 "이 뼈대로 가면 이런 게임"을 보는 용도. 마음에 드는 방향이 정해지면 최종 그림을 어떻게 얻을지 같이 정하자.</p>
+  </header>
+</div>
+<nav class="chips" aria-label="방향 선택"><div class="wrap"><div class="row" id="chips"></div></div></nav>
+<div class="wrap"><main id="main"></main></div>
+<div class="zoom" id="zoom" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="크게 보기"><div class="box"><div class="art" id="zoomArt"></div><p id="zoomCap"></p></div></div>
+<script>
+/* 공통 도우미 + 방향 1~4 */
+const H = {};
+H.p = (d, f, a = '') => `<path d="${d}" fill="${f}" ${a}/>`;
+H.c = (x, y, r, f, a = '') => `<circle cx="${x}" cy="${y}" r="${r}" fill="${f}" ${a}/>`;
+H.e = (x, y, rx, ry, f, a = '') => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${f}" ${a}/>`;
+H.l = (d, s, w, a = '') => `<path d="${d}" fill="none" stroke="${s}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${a}/>`;
+H.g = (s, a = '') => `<g ${a}>${s}</g>`;
+/* 바깥 외곽선은 굵게: 같은 모양을 먼저 굵은 선으로 깔고 위에 색을 얹는다 */
+H.OL = (shapes, w, col) => `<g fill="${col}" stroke="${col}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round">${shapes.replace(/ fill="(?!none)[^"]*"/g, '').replace(/ opacity="[^"]*"/g, '')}</g>${shapes}`;
+/* 살아 있는 눈: 흰자, 홍채, 동공, 같은 쪽 하이라이트 두 개 */
+H.eye = (x, y, r, iris, look = [0, 0], pupil = '#1a1014') => {
+  const ix = x + look[0], iy = y + look[1];
+  return H.c(x, y, r, '#fffaf2') + H.c(ix, iy, r * .7, iris) + H.c(ix + look[0] * .15, iy + look[1] * .15, r * .4, pupil) + H.c(ix - r * .26, iy - r * .3, r * .22, '#fff') + H.c(ix + r * .22, iy + r * .2, r * .09, '#fff');
+};
+H.glow = (id, x, y, r, col, a = .8) => ({ def: `<radialGradient id="${id}"><stop offset="0" stop-color="${col}" stop-opacity="${a}"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`, el: H.c(x, y, r, `url(#${id})`) });
+H.star = (cx, cy, r, n = 5, k = .45) => { let d = ''; for (let i = 0; i < n * 2; i++){ const a = -Math.PI / 2 + i * Math.PI / n, rr = i % 2 ? r * k : r; d += (i ? 'L' : 'M') + (cx + Math.cos(a) * rr).toFixed(1) + ',' + (cy + Math.sin(a) * rr).toFixed(1); } return d + 'Z'; };
+
+H.noBg = false;
+H.bg = s => H.noBg ? '' : s;
+const DIRS = [];
+
+/* =========================================================
+   1. 살아 있는 마도구 — 사역마는 악마가 깃든 도구
+   ========================================================= */
+(() => {
+  const K = '#2a1a14', P = H.p, C = H.c, E = H.e, L = H.l;
+  const brass = '#d9a441', brassL = '#f2c869', brassD = '#a8742a', wax = '#f7efdf', waxS = '#e6d5b8', fl = '#ff7a2a', fl2 = '#ffc14a', fl3 = '#fff3b0';
+  const bg = (id, glow) => { const g = H.glow(id + 'g', 100, 120, 110, glow, .55); return { def: g.def, el: H.bg(`<rect width="200" height="240" fill="#f3e7cd"/>` + g.el + `<g fill="none" stroke="#c9a878" stroke-width="1" opacity=".55"><circle cx="100" cy="128" r="86"/><circle cx="100" cy="128" r="80"/><path d="${H.star(100, 128, 80, 7, .5)}"/></g>` + E(100, 224, 70, 9, '#2a1a14', 'opacity=".16"')) }; };
+
+  const mage = () => {
+    const b = bg('d1m', '#ffd9a0');
+    const body = [
+      P('M74,196 L72,222 Q86,227 98,222 L96,196Z', '#5a3a24'), P('M104,196 L104,222 Q118,227 131,221 L126,196Z', '#5a3a24'),
+      P('M74,118 C70,150 66,180 63,200 L137,200 C134,180 130,150 126,118 Q100,108 74,118Z', '#4a6a8a'),
+      P('M81,128 L119,128 L126,202 L74,202Z', '#f1e4c6'),
+      P('M124,122 C140,114 148,98 151,84 L162,90 C156,110 146,126 131,136Z', '#4a6a8a'),
+      P('M76,124 C62,138 59,156 69,167 L86,161 C80,150 82,140 87,132Z', '#4a6a8a'),
+      P('M57,171 L102,165 L104,178 L60,184Z', '#b8452f'), P('M61,158 L100,155 L101,167 L63,170Z', '#3f6a4a'), P('M59,147 L96,147 L96,157 L59,157Z', '#c9963a'),
+      C(84, 165, 7, '#f3cfae'), C(156, 86, 7.5, '#f3cfae'),
+      P('M152,90 L178,24 Q189,40 174,60 Q167,73 158,88Z', '#fbf5e6'),
+      P('M108,44 C112,30 124,27 129,34 C121,34 115,38 113,47Z', '#7a4a2a'),
+      C(100, 82, 34, '#f3cfae'),
+      P('M66,82 C63,50 86,40 104,42 C127,42 141,58 136,86 C130,71 122,64 112,66 C116,75 109,77 104,68 C98,77 88,75 86,66 C78,70 71,77 66,82Z', '#7a4a2a'),
+      P('M40,56 C48,42 62,40 74,48 C72,52 71,55 70,58 C60,54 50,52 40,56Z', '#2f5a5a'),
+      P('M68,63 C70,35 96,22 118,30 C134,36 141,50 139,63 C120,55 90,55 68,63Z', '#2f5a5a'),
+    ].join('');
+    const det = [
+      P('M68,63 C90,55 120,55 139,63 L138,69 C119,62 90,62 69,69Z', brass),
+      L('M150,32 L130,40 M147,46 L128,48', '#7a4a2a', 1.6, 'opacity=".5"'),
+      L('M174,30 L158,86', '#b8a888', 1.6),
+      C(181, 22, 3, '#2b3550'),
+      E(96, 160, 5, 3.5, '#2b3550', 'opacity=".75"'), C(108, 182, 2.6, '#2b3550', 'opacity=".7"'), C(90, 188, 1.8, '#2b3550', 'opacity=".7"'),
+      L('M62,152 L96,152 M64,162 L99,161 M62,176 L101,172', '#fff7e6', 1.2, 'opacity=".8"'),
+      L('M100,128 L100,200', '#d8c8a2', 1.4),
+      E(84, 91, 3.2, 4.2, K), E(114, 90, 3.2, 4.2, K), C(83, 89.2, 1.3, '#fff'), C(113, 88.2, 1.3, '#fff'),
+      `<g fill="#ffffff" fill-opacity=".28" stroke="${K}" stroke-width="3.2"><circle cx="85" cy="90" r="13"/><circle cx="115" cy="89" r="13"/></g>`,
+      L('M98,90 Q100,87 102,90', K, 2.6), L('M78,84 L83,80 M108,83 L113,79', '#fff', 2.2),
+      P('M95,104 Q101,111 107,104 Q101,107.5 95,104Z', '#9a3a30'),
+      E(76, 101, 6, 3.2, '#f29a8a', 'opacity=".6"'), E(125, 100, 6, 3.2, '#f29a8a', 'opacity=".6"'),
+      C(72, 96, 1, '#a0603a'), C(76, 99, 1, '#a0603a'), C(128, 95, 1, '#a0603a'),
+      C(125, 108, 3, '#2b3550', 'opacity=".8"'),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 7, K) + det };
+  };
+
+  const candleFace = (lid) => [
+    H.eye(88, 150, 10.5, '#7a3a1a', [2, -2]), H.eye(115, 148, 10.5, '#7a3a1a', [2, -2]),
+    lid ? P('M76,146 C80,134 98,134 100,146Z M103,144 C107,132 125,132 127,144Z', wax) + L('M77,146 Q88,141 99,146 M104,144 Q115,139 126,144', K, 2.4) : L('M80,134 L94,137 M108,135 L121,131', K, 2.6),
+    P('M96,166 Q102,174 109,165 Q102,169 96,166Z', '#8a2a20'),
+    E(78, 165, 6.5, 3.5, '#f39a8a', 'opacity=".55"'), E(124, 162, 6.5, 3.5, '#f39a8a', 'opacity=".55"'),
+  ].join('');
+
+  const famK = () => {
+    const b = bg('d1k', '#ffc070'), gl = H.glow('d1kf', 103, 70, 62, '#ffb340', .7);
+    const body = [
+      C(152, 205, 13, brass), E(100, 214, 50, 12, brassD), E(100, 208, 44, 9, brassL),
+      P('M72,206 L72,112 Q72,102 82,101 L118,99 Q128,100 128,110 L128,206Z', wax),
+      P('M72,112 Q72,102 82,101 L118,99 Q128,100 128,110 L128,128 Q124,137 121,127 L120,116 Q116,122 114,141 Q110,150 107,140 L106,113 Q98,117 92,113 L90,119 Q86,125 82,119 L80,113 L77,134 Q72,142 72,130Z', '#fffaf0'),
+      P('M80,158 Q77,172 80,184 Q85,189 86,179 Q85,170 85,160Z', '#fffaf0'),
+      P('M100,100 C80,96 77,70 92,52 C98,44 104,34 112,20 C115,40 129,54 127,74 C125,92 115,100 100,100Z', fl),
+    ].join('');
+    const det = [
+      C(152, 205, 7, b ? '#f3e7cd' : '#fff'),
+      P('M118,104 L128,110 L128,206 L118,206Z', waxS, 'opacity=".6"'),
+      P('M101,98 C90,94 90,78 98,66 C102,60 106,52 110,46 C112,60 120,70 118,82 C116,94 110,98 101,98Z', fl2),
+      P('M102,96 C96,92 97,84 101,78 C104,84 109,88 107,93 C106,96 104,97 102,96Z', fl3),
+      L('M101,100 L103,92', K, 2.4),
+      candleFace(false),
+      L('M72,172 Q59,175 62,188 Q66,192 72,187', brassD, 4), L('M128,166 Q146,156 151,137', brassD, 4),
+      L('M149,141 L171,92', '#e8c48a', 5.5), E(172, 88, 5, 7.5, '#c8322a', 'transform="rotate(25 172 88)"'), C(176, 80, 2.4, fl3),
+      P('M90,186 L110,186 L110,196 Q100,204 90,196Z', '#9aa3ad', `stroke="${K}" stroke-width="2"`), L('M100,188 L100,200 M93,192 L107,192', '#5a6370', 2),
+    ].join('');
+    return { defs: b.def + gl.def, svg: b.el + gl.el + H.OL(body, 7, K) + det };
+  };
+
+  const famKing = () => {
+    const b = bg('d1g', '#e8b0ff'), gl = H.glow('d1gf', 100, 60, 80, '#ffb340', .6);
+    const arms = [[56, 70], [76, 58], [124, 58], [144, 70]];
+    const body = [
+      P('M50,212 C44,160 56,118 80,110 L122,110 C146,118 158,160 152,212 Q100,224 50,212Z', '#6a2a5a'),
+      P('M54,226 L72,196 L130,196 L148,226 L134,226 L120,208 L82,208 L68,226Z', brass),
+      P('M68,200 L68,98 Q68,88 78,87 L124,86 Q134,87 134,98 L134,200Z', wax),
+      ...arms.map(([x, y]) => P(`M${x - 6},${y + 18} L${x - 6},${y} L${x + 6},${y} L${x + 6},${y + 18}Z`, wax)),
+      ...arms.map(([x, y]) => P(`M${x},${y} C${x - 7},${y - 4} ${x - 6},${y - 16} ${x + 1},${y - 24} C${x + 6},${y - 14} ${x + 7},${y - 4} ${x},${y}Z`, fl)),
+      P('M100,86 C76,82 72,52 90,32 C97,24 104,14 112,0 C116,22 132,38 130,60 C128,80 116,88 100,86Z', fl),
+      P('M62,100 L138,100 L136,86 L64,86Z', brass),
+    ].join('');
+    const det = [
+      ...arms.map(([x, y]) => L(`M${x},${y + 18} Q${x < 100 ? x + 4 : x - 4},${y + 30} ${x < 100 ? 66 : 134},96`, brass, 4)),
+      ...arms.map(([x, y]) => P(`M${x},${y - 2} C${x - 3},${y - 5} ${x - 2},${y - 11} ${x + 1},${y - 15} C${x + 3},${y - 9} ${x + 4},${y - 4} ${x},${y - 2}Z`, fl3)),
+      P('M101,84 C88,80 88,62 97,50 C102,42 106,34 110,26 C113,42 122,52 120,66 C118,80 110,84 101,84Z', fl2),
+      P('M102,82 C95,78 96,68 101,62 C105,68 110,72 108,78 C107,81 104,82 102,82Z', fl3),
+      P('M50,212 Q100,224 152,212 L151,200 Q100,212 51,200Z', '#fffaf0'), ...[[62, 206], [82, 210], [102, 212], [122, 210], [142, 206]].map(([x, y]) => P(`M${x},${y - 3} l2,4 l-2,3 l-2,-3Z`, K)),
+      P('M124,100 L134,100 L134,200 L124,200Z', waxS, 'opacity=".55"'),
+      P('M68,100 L68,124 Q72,132 75,122 L76,100Z M90,100 L90,112 Q94,120 97,110 L98,100Z', brassL),
+      candleFace(true).replace(/88,150/g, '88,152'),
+      P('M93,162 C88,160 82,164 80,160 C84,168 92,166 98,163Z M108,163 C114,166 122,168 124,160 C121,164 114,160 109,162Z', brass),
+      L('M134,150 Q150,140 154,126', brassD, 4), L('M152,130 L172,52', brass, 5), P('M162,54 L184,50 L177,34Z', brass, `stroke="${K}" stroke-width="2.5" stroke-linejoin="round"`),
+      L('M80,132 Q100,150 122,132', brass, 2.6), C(101, 150, 7, brass, `stroke="${K}" stroke-width="2"`), P(H.star(101, 150, 4, 5), '#fff3b0'),
+      ...[[64, 93], [82, 93], [100, 93], [118, 93], [136, 93]].map(([x, y]) => C(x, y, 2.6, '#c8322a')),
+      C(58, 222, 5, brassD), C(144, 222, 5, brassD),
+    ].join('');
+    return { defs: b.def + gl.def, svg: b.el + gl.el + H.OL(body, 7, K) + det };
+  };
+
+  const foe = () => {
+    const b = bg('d1e', '#a0a8ff'), ink = '#1b2142', ink2 = '#2c3566';
+    const body = [
+      P('M56,128 C44,120 34,104 36,86 C44,96 52,104 66,108Z', ink),
+      P('M144,124 C158,112 170,96 168,76 C160,90 150,98 136,104Z', ink),
+      P('M70,214 L66,152 Q66,134 84,130 L86,112 L114,112 L116,130 Q134,134 134,152 L130,214Z', ink2),
+      P('M78,114 C70,92 76,62 100,56 C124,62 130,92 122,114Z', ink),
+      P('M82,72 C66,60 60,40 70,24 C74,42 84,52 94,60Z', ink), P('M118,70 C132,54 132,32 120,16 C120,34 112,48 104,58Z', ink),
+      P('M78,88 L62,80 L76,98Z', ink), P('M122,88 L140,78 L124,98Z', ink),
+      P('M138,214 C150,214 158,206 152,198 C146,204 140,206 132,206Z', '#b98a5a'),
+    ].join('');
+    const det = [
+      P('M72,206 L72,160 Q72,146 86,142 L114,142 Q128,146 128,160 L128,206Z', '#11152e', 'opacity=".7"'),
+      P('M80,150 Q78,170 80,190', 'none', 'stroke="#8a9aff" stroke-width="3" stroke-linecap="round" opacity=".6"'),
+      P('M84,170 L116,170 L116,196 L84,196Z', '#efe2c4'), L('M92,178 L108,178 M92,186 L104,186', '#6a5a3a', 1.6),
+      P('M82,82 L99,91 L83,98Z', '#ff3a2a'), P('M118,82 L101,91 L117,98Z', '#ff3a2a'), C(89, 91, 2.4, '#ffe27a'), C(111, 91, 2.4, '#ffe27a'),
+      P('M84,102 L116,102 L110,110 L105,105 L100,111 L95,105 L90,110Z', '#fffaf0'), L('M84,102 L116,102', '#ffffff', 1),
+      L('M36,86 Q30,70 44,50', '#fbf5e6', 4), P('M44,50 L50,30 L52,52Z', '#fbf5e6', `stroke="${K}" stroke-width="2"`),
+      P('M70,200 Q66,214 70,222 Q75,224 75,214 Q74,206 74,200Z', ink), P('M118,206 Q116,218 120,224 Q125,224 124,214Z', ink),
+      C(108, 66, 4, '#5a68b0', 'opacity=".7"'),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 7, K) + det };
+  };
+
+  DIRS.push({ id: 'tool', name: '살아 있는 마도구', ref: '리버스: 1999의 말하는 사과, 인스크립션의 살아 있는 카드',
+    d: '사역마는 악마가 깃든 도구야. 촛대, 잉크병, 마도서, 플라스크. 작위가 오를수록 물건의 격이 올라가.',
+    g: '우리 게임 "마법 산업" 컨셉이랑 제일 고유하게 맞아. 물건이라 실루엣이 저절로 갈리고, 코드로도 끝까지 만들 수 있어.',
+    r: '미소녀·미소년 뽑기를 기대하면 아쉬워. 주인공이 평범해 보일 수 있어.',
+    board: { top: '#e9d8b4', top2: '#dcc69c', side: '#8a6a44', line: '#b99a6a', bg: '#f3e7cd' },
+    chars: { mage: { name: '견습 마법사', sub: '큰 안경, 잉크 묻은 앞치마, 깃펜', draw: mage },
+      famK: { name: '촛불이 · 기사', sub: '흠: 녹아서 조금씩 키가 줄어', draw: famK },
+      famKing: { name: '샹들리에 왕 · 왕', sub: '같은 촛불이가 왕까지 오른 모습', draw: famKing },
+      foe: { name: '잉크병 임프 · 적', sub: '엎질러진 잉크에서 기어 나와', draw: foe } } });
+})();
+
+/* =========================================================
+   2. 16비트 몬스터 도감 — 진화가 곧 승급 (그린 뒤 도트로 변환)
+   ========================================================= */
+(() => {
+  const P = H.p, C = H.c, E = H.e, L = H.l;
+  const mage = () => ({ defs: '', svg: [
+    P('M66,226 L78,150 L122,150 L134,226Z', '#2f8a8a'), P('M66,226 L69,210 L131,210 L134,226Z', '#f2c14a'),
+    P('M78,154 L60,196 L72,200 L86,166Z', '#2f8a8a'), C(66, 198, 7, '#ffd9b8'),
+    L('M150,92 L140,226', '#8a5a34', 6), C(152, 86, 11, '#5ae0ff'), C(149, 83, 4, '#e8ffff'),
+    P('M122,154 L146,168 L142,178 L118,166Z', '#2f8a8a'), C(146, 172, 7, '#ffd9b8'),
+    P('M70,132 C60,150 62,170 70,184 L82,150Z', '#ff9a3a'), P('M130,132 C140,150 138,170 130,184 L118,150Z', '#ff9a3a'),
+    C(100, 130, 32, '#ffd9b8'),
+    P('M70,120 C76,104 90,100 100,104 C110,100 124,104 130,120 C118,114 110,118 100,112 C90,118 82,114 70,120Z', '#ff9a3a'),
+    E(88, 134, 5, 8, '#2a1a3a'), E(112, 134, 5, 8, '#2a1a3a'), C(86, 130, 2.4, '#fff'), C(110, 130, 2.4, '#fff'),
+    E(80, 146, 5, 3, '#ff8a8a'), E(120, 146, 5, 3, '#ff8a8a'), P('M96,150 Q100,154 104,150Z', '#a03a3a'),
+    E(100, 104, 80, 15, '#5a3aa0'),
+    P('M52,104 C70,74 84,44 110,24 C132,10 154,22 162,36 C148,30 134,34 126,48 C132,66 142,86 148,104Z', '#5a3aa0'),
+    P('M58,98 C62,92 64,90 66,86 L142,86 C144,90 146,94 148,98Z', '#f2c14a'),
+    P(H.star(112, 66, 9), '#f2c14a'), C(162, 36, 6, '#f2c14a'),
+  ].join('') });
+  const famK = () => ({ defs: '', svg: [
+    E(70, 218, 10, 5, '#ff9a3a'), E(128, 218, 10, 5, '#ff9a3a'),
+    E(100, 168, 56, 54, '#8a5a34'),
+    E(100, 186, 34, 32, '#f3e2c0'), L('M88,176 l4,4 l4,-4 M104,176 l4,4 l4,-4 M96,192 l4,4 l4,-4', '#c8a070', 3),
+    E(52, 172, 14, 28, '#6a4226', 'transform="rotate(14 52 172)"'),
+    E(150, 176, 22, 24, '#9aa3ad'), P('M150,160 L150,192 M136,176 L164,176', '#9aa3ad', 'stroke="#c8322a" stroke-width="5"'),
+    P('M64,128 L58,96 L80,116Z', '#6a4226'), P('M136,128 L142,96 L120,116Z', '#6a4226'),
+    E(84, 140, 23, 22, '#f3e2c0'), E(116, 140, 23, 22, '#f3e2c0'),
+    C(84, 140, 15, '#ffd24a'), C(116, 140, 15, '#ffd24a'), C(86, 141, 9, '#1a1014'), C(118, 141, 9, '#1a1014'), C(82, 136, 4, '#fff'), C(114, 136, 4, '#fff'),
+    P('M94,154 L106,154 L100,166Z', '#ff9a3a'),
+    P('M72,118 C74,98 126,98 128,118 Q100,110 72,118Z', '#9aa3ad'), L('M80,112 L120,112', '#5a6370', 3), P('M96,100 C98,84 110,80 118,84 C110,88 104,92 104,102Z', '#c8322a'),
+  ].join('') });
+  const famKing = () => ({ defs: '', svg: [
+    E(76, 222, 12, 5, '#ff9a3a'), E(124, 222, 12, 5, '#ff9a3a'),
+    P('M40,216 C36,170 46,120 68,98 L132,98 C154,120 164,170 160,216 Q100,228 40,216Z', '#6a2a8a'),
+    E(100, 152, 50, 72, '#7a4a2a'),
+    E(100, 170, 30, 44, '#f3e2c0'), L('M88,158 l5,5 l5,-5 M102,158 l5,5 l5,-5 M94,178 l6,6 l6,-6 M92,198 l8,6 l8,-6', '#c8a070', 3),
+    P('M46,104 Q100,82 154,104 L150,120 Q100,102 50,120Z', '#fffaf0'), C(70, 106, 2.4, '#1a1014'), C(100, 98, 2.4, '#1a1014'), C(130, 106, 2.4, '#1a1014'),
+    P('M60,84 L44,20 L82,70Z', '#7a4a2a'), P('M140,84 L156,20 L118,70Z', '#7a4a2a'),
+    P('M76,64 L78,40 L90,54 L100,34 L110,54 L122,40 L124,64Z', '#f2c14a'), C(100, 46, 4, '#e8322a'),
+    E(82, 98, 22, 21, '#f3e2c0'), E(118, 98, 22, 21, '#f3e2c0'),
+    C(82, 99, 14, '#ffb52a'), C(118, 99, 14, '#ffb52a'), C(84, 100, 8, '#1a1014'), C(120, 100, 8, '#1a1014'), C(80, 95, 3.6, '#fff'), C(116, 95, 3.6, '#fff'),
+    P('M60,84 L98,92 L98,86 L62,76Z', '#5a321a'), P('M140,84 L102,92 L102,86 L138,76Z', '#5a321a'),
+    P('M94,112 L106,112 L100,126Z', '#ff9a3a'),
+    L('M150,170 L172,56', '#f2c14a', 6), C(173, 50, 10, '#e8322a'), C(170, 47, 3.4, '#ffc0c0'),
+    E(146, 172, 14, 10, '#7a4a2a'),
+  ].join('') });
+  const foe = () => ({ defs: '', svg: [
+    P('M86,180 C60,150 34,140 18,146 C30,154 32,164 28,176 C40,172 48,178 48,188 C58,182 68,186 72,194Z', '#6a2a6a'),
+    P('M114,180 C140,150 166,140 182,146 C170,154 168,164 172,176 C160,172 152,178 152,188 C142,182 132,186 128,194Z', '#6a2a6a'),
+    L('M126,206 C150,214 160,196 166,184', '#e83a2a', 6), P('M166,184 L156,182 L172,172 L168,190Z', '#e83a2a'),
+    P('M84,206 L82,224 L96,224 L96,208Z M116,206 L118,224 L104,224 L104,208Z', '#c82a2a'),
+    E(100, 188, 32, 28, '#e83a2a'), E(100, 194, 18, 16, '#ffb07a'),
+    C(100, 140, 40, '#e83a2a'),
+    P('M70,118 C58,104 56,86 64,72 C70,88 80,98 88,104Z', '#fff0d0'), P('M130,118 C142,104 144,86 136,72 C130,88 120,98 112,104Z', '#fff0d0'),
+    E(84, 138, 9, 10, '#fff36a'), E(116, 138, 9, 10, '#fff36a'), E(86, 140, 4, 7, '#1a1014'), E(114, 140, 4, 7, '#1a1014'),
+    P('M80,158 Q100,174 120,158 Q100,166 80,158Z', '#5a0a1a'), P('M86,160 L90,166 L93,161Z M107,161 L110,166 L114,160Z', '#fff'),
+    L('M56,206 L40,140', '#5a3a24', 5), P('M32,140 L36,120 L40,134 L44,118 L48,134 L52,120 L50,142Z', '#c0c8d0'),
+    C(66, 194, 8, '#e83a2a'),
+  ].join('') });
+  DIRS.push({ id: 'dex', name: '16비트 몬스터 도감', ref: '포켓몬, PokeRogue, 숲속의 작은 마녀',
+    d: '기본 도형 몸에 주색 하나, 과장 하나. 같은 종이 기사에서 왕으로 "진화"하는 게 곧 승급이야.',
+    g: '작은 판에서 제일 잘 읽히고, 네가 좋아하는 PokeRogue 감성과 바로 이어져.', r: '포켓몬 아류로 보일 수 있어. 그리모어, 인장 같은 소재로 차별화해야 해.',
+    pixel: true, board: { top: '#5aa05a', top2: '#4a8a4a', side: '#6a4a2a', line: '#3a6a3a', bg: '#2a3a5a' },
+    chars: { mage: { name: '꼬마 마녀', sub: '몸만 한 모자, 반짝이는 지팡이', draw: mage },
+      famK: { name: '솜부엉 · 기사', sub: '도토리 투구와 작은 방패. 흠: 낮에는 졸아', draw: famK },
+      famKing: { name: '왕부엉 · 왕', sub: '귀깃이 왕관처럼 자랐어', draw: famKing },
+      foe: { name: '불씨 임프 · 적', sub: '갈퀴 들고 떼로 몰려와', draw: foe } } });
+})();
+
+/* =========================================================
+   3. 그림자극 종이인형 — 얼굴 없는 실루엣, 오려 낸 무늬, 무대 조명
+   ========================================================= */
+(() => {
+  const INK = '#0c0910', PIN = '#c9a35a', P = H.p, C = H.c, E = H.e, L = H.l;
+  const stage = (id, c1, c2) => `<radialGradient id="${id}" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="${c1}"/><stop offset=".55" stop-color="${c2}"/><stop offset="1" stop-color="#140a12"/></radialGradient>`;
+  const paper = id => `<filter id="${id}"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="3"/><feColorMatrix values="0 0 0 0 .2  0 0 0 0 .1  0 0 0 0 .05  0 0 0 .22 0"/></filter>`;
+  /* sil: 흰색=종이, holes: 검은색=오려 낸 구멍 */
+  const puppet = (id, c1, c2, sil, holes, extra, rods) => ({
+    defs: stage(id + 's', c1, c2) + paper(id + 'p') + `<mask id="${id}m" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="240"><g fill="#fff">${sil}</g><g fill="#000">${holes}</g></mask>`,
+    svg: H.bg(`<rect width="200" height="240" fill="url(#${id}s)"/><rect width="200" height="240" filter="url(#${id}p)"/>` + (rods || '')) + `<rect width="200" height="240" fill="${INK}" mask="url(#${id}m)"/>` + extra + H.bg(`<rect y="226" width="200" height="14" fill="#0a0608"/>`),
+  });
+  const scallop = (x0, x1, y, n, h) => { let d = ''; const w = (x1 - x0) / n; for (let i = 0; i < n; i++) d += ` Q${x1 - w * (i + .5)},${y + h} ${x1 - w * (i + 1)},${y}`; return d; };
+  const rowHoles = (pts, r) => pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('');
+  const tear = (x, y, s, a) => `<path transform="translate(${x},${y}) rotate(${a}) scale(${s})" d="M0,-6 C3,-2 3,3 0,5 C-3,3 -3,-2 0,-6Z"/>`;
+
+  const mage = () => {
+    const sil = [
+      `<path d="M70,224 C74,182 79,142 87,114 L113,112 C121,142 132,182 142,224${scallop(70, 142, 224, 8, 7)}Z"/>`,
+      '<path d="M93,88 C91,74 98,64 110,64 C118,64 122,70 122,76 L129,82 L122,85 C122,92 116,98 107,98 L101,104 L91,104Z"/>',
+      '<path d="M93,74 C80,80 77,102 84,122 L95,112 C91,100 92,88 97,80Z"/>',
+      '<path d="M76,73 L138,66 L139,71 L79,79Z"/><path d="M88,71 C93,50 101,28 95,6 C108,22 120,44 125,67Z"/>',
+      '<path d="M116,118 L140,100 L147,108 L123,128Z"/><path d="M140,101 L156,75 L164,79 L148,107Z"/>',
+      '<path d="M157,74 L162,74 L154,224 L149,224Z"/>', '<circle cx="161" cy="58" r="13"/>', `<path d="${H.star(161, 58, 22, 10, .55)}"/>`,
+      '<path d="M86,122 L70,150 L76,154 L92,130Z"/>',
+    ].join('');
+    const holes = [
+      '<path d="M103,42 A9,9 0 1 0 112,52 A7,7 0 1 1 103,42Z"/>', `<path d="${H.star(100, 28, 3.4)}"/>`, `<path d="${H.star(111, 60, 2.6)}"/>`,
+      '<path d="M110,76 Q114,73 117,76 Q114,78 110,76Z"/>',
+      rowHoles([[88, 150], [96, 148], [104, 147], [112, 148], [120, 151]], 2.6), rowHoles([[84, 176], [93, 174], [102, 173], [111, 174], [120, 176], [129, 179]], 3.4),
+      [[80, 204], [90, 202], [100, 201], [110, 202], [120, 203], [130, 206]].map(([x, y]) => tear(x, y, 1.2, 0)).join(''),
+      '<circle cx="161" cy="58" r="6"/>', '<path d="M99,124 L101,136 L99,140 L97,136Z"/>',
+    ].join('');
+    const extra = C(161, 58, 6, '#ff5a3a', 'opacity=".85"') + '<path d="M103,42 A9,9 0 1 0 112,52 A7,7 0 1 1 103,42Z" fill="#ffd86a" opacity=".8"/>' + C(140, 102, 2.4, PIN) + C(118, 122, 2.4, PIN) + C(88, 126, 2.4, PIN) + C(100, 110, 2.4, PIN);
+    const rods = L('M140,102 L182,240', '#2a1a14', 1.6, 'opacity=".75"') + L('M100,140 L60,240', '#2a1a14', 1.6, 'opacity=".75"');
+    return puppet('d3m', '#ffe2a0', '#e0863a', sil, holes, extra, rods);
+  };
+  const famK = () => {
+    const sil = [
+      '<path d="M58,150 C60,120 84,102 112,104 C136,106 150,124 148,148 C146,172 126,186 100,186 L70,214 L66,196 C60,184 57,166 58,150Z"/>',
+      '<path d="M120,108 C120,88 132,76 148,78 C160,80 166,90 166,98 L196,104 L166,110 C162,118 150,122 140,120Z"/>',
+      '<path d="M100,186 L96,222 L92,222 L95,186Z M116,184 L118,222 L114,222 L111,184Z"/>', '<path d="M86,222 L100,222 L100,225 L86,225Z M108,222 L124,222 L124,225 L108,225Z"/>',
+      '<path d="M138,82 C136,66 146,56 160,58 L156,64 C150,64 146,70 147,80Z"/>', '<path d="M150,58 C156,40 170,34 180,38 C172,44 166,50 160,62Z"/>',
+      '<path d="M58,160 L30,126 L36,122 L64,152Z"/>', '<path d="M26,118 L38,128 L40,112Z"/>',
+    ].join('');
+    const holes = [
+      '<circle cx="150" cy="94" r="4.2"/>', [[80, 130], [94, 124], [108, 122], [76, 146], [90, 140], [104, 138], [118, 136], [84, 160], [98, 156], [112, 154], [126, 152]].map(([x, y]) => tear(x, y, 1.3, -60)).join(''),
+      rowHoles([[66, 200], [70, 206]], 1.8),
+    ].join('');
+    const extra = '<circle cx="150" cy="94" r="4.2" fill="#ffe27a" opacity=".9"/>' + C(112, 112, 2.4, PIN) + C(100, 186, 2.2, PIN) + C(62, 156, 2.2, PIN);
+    return puppet('d3k', '#bff0e0', '#3a8a8a', sil, holes, extra, L('M112,112 L150,240', '#0a1a1a', 1.6, 'opacity=".7"'));
+  };
+  const famKing = () => {
+    const wing = (s) => `<path transform="${s}" d="M100,120 C80,100 50,84 14,86 C24,92 28,98 26,104 C34,104 38,108 38,114 C44,112 50,116 50,122 C56,120 62,124 62,130 C70,128 76,132 76,138 C84,134 92,134 100,140Z"/>`;
+    const sil = [
+      wing(''), wing('translate(200,0) scale(-1,1)'),
+      '<path d="M76,150 C74,124 86,108 100,106 C114,108 126,124 124,150 C122,176 112,192 100,196 C88,192 78,176 76,150Z"/>',
+      '<path d="M84,108 C82,86 90,74 102,74 C114,74 120,84 120,96 L140,100 L120,106 C116,112 108,114 100,114Z"/>',
+      '<path d="M86,76 L84,50 L92,60 L98,42 L104,58 L112,44 L114,62 L120,52 L118,78Z"/>',
+      '<path d="M92,192 C84,210 70,222 54,226 C70,226 84,220 94,210 C92,220 94,226 100,232 C106,226 108,220 106,210 C116,220 130,226 146,226 C130,222 116,210 108,192Z"/>',
+    ].join('');
+    const holes = [
+      '<circle cx="106" cy="90" r="5"/>', '<circle cx="92" cy="62" r="3"/><circle cx="104" cy="58" r="3"/><circle cx="114" cy="64" r="2.6"/>',
+      ...[0, 1].map(m => [[30, 96], [44, 102], [58, 108], [72, 116], [86, 124], [40, 110], [54, 116], [68, 124], [82, 132]].map(([x, y]) => tear(m ? 200 - x : x, y, 1.15, m ? 60 : -60)).join('')),
+      rowHoles([[100, 128], [92, 140], [108, 140], [100, 152], [92, 164], [108, 164], [100, 176]], 3),
+      '<path d="M100,200 C96,208 96,214 100,220 C104,214 104,208 100,200Z"/>',
+    ].join('');
+    const extra = '<circle cx="106" cy="90" r="5" fill="#ffe27a"/>' + '<circle cx="92" cy="62" r="3" fill="#ff4a4a" opacity=".9"/><circle cx="104" cy="58" r="3" fill="#4ad0ff" opacity=".9"/><circle cx="114" cy="64" r="2.6" fill="#ff4a4a" opacity=".9"/>' + C(100, 120, 2.4, PIN) + C(80, 132, 2.2, PIN) + C(120, 132, 2.2, PIN);
+    return puppet('d3g', '#d8c8ff', '#5a3a9a', sil, holes, extra, L('M80,132 L40,240', '#0a0a1a', 1.6, 'opacity=".7"') + L('M120,132 L160,240', '#0a0a1a', 1.6, 'opacity=".7"'));
+  };
+  const foe = () => {
+    const sil = [
+      '<path d="M100,112 C76,112 64,132 66,156 C68,182 82,200 100,202 C118,200 132,182 134,156 C136,132 124,112 100,112Z"/>',
+      '<path d="M76,120 C62,104 58,84 66,66 C70,84 80,98 92,108Z"/><path d="M124,120 C138,104 142,84 134,66 C130,84 120,98 108,108Z"/>',
+      '<path d="M70,150 C46,132 26,132 10,142 L22,148 L12,160 L26,160 L20,174 L36,166 L40,180 L50,166 L70,170Z"/>',
+      '<path d="M130,150 C154,132 174,132 190,142 L178,148 L188,160 L174,160 L180,174 L164,166 L160,180 L150,166 L130,170Z"/>',
+      '<path d="M88,200 L84,224 L92,224 L96,202Z M112,200 L116,224 L108,224 L104,202Z"/>',
+      '<path d="M128,186 C146,196 156,186 160,170 L166,174 L160,160 L154,172 C150,182 144,186 132,180Z"/>',
+      '<path d="M44,224 L60,120 L64,120 L50,224Z"/><path d="M52,124 L50,104 L56,116 L60,98 L64,116 L70,104 L68,124Z"/>',
+    ].join('');
+    const holes = [
+      '<path d="M82,146 L96,152 L84,158Z"/><path d="M118,146 L104,152 L116,158Z"/>',
+      '<path d="M82,172 L88,180 L94,172 L100,182 L106,172 L112,180 L118,172 L116,184 L84,184Z"/>',
+      rowHoles([[40, 150], [52, 154], [160, 150], [148, 154]], 2.6),
+    ].join('');
+    const extra = '<path d="M82,146 L96,152 L84,158Z M118,146 L104,152 L116,158Z" fill="#ff3a2a"/>' + C(100, 130, 2.2, PIN) + C(72, 160, 2.2, PIN) + C(128, 160, 2.2, PIN);
+    return puppet('d3e', '#ffb0a0', '#a02a3a', sil, holes, extra, L('M72,160 L30,240', '#1a0a0a', 1.6, 'opacity=".7"'));
+  };
+  DIRS.push({ id: 'puppet', name: '그림자극 종이인형', ref: '로테 라이니거의 그림자극, 인도네시아 와양',
+    d: '얼굴 대신 옆모습 실루엣, 오려 낸 레이스 무늬, 관절 핀과 막대. 색은 무대 조명이 맡아.',
+    g: '분위기가 확 살고, 코드로 끝까지 만들 수 있는 방향 중 하나야. 마법진이 무대 조명이 돼.', r: '표정이 없어서 애착이 약할 수 있어. 판 위에선 진영색 조명이 꼭 필요해.',
+    board: { top: '#3a2a40', top2: '#2e2234', side: '#140c16', line: '#5a4a60', bg: '#1a1018', glow: '#ffb060' },
+    chars: { mage: { name: '종이 마법사', sub: '오린 초승달 모자, 레이스 망토', draw: mage },
+      famK: { name: '종이까마귀 · 기사', sub: '창 든 까마귀. 흠: 비 오면 축 처져', draw: famK },
+      famKing: { name: '까마귀 왕 · 왕', sub: '겹겹이 오린 날개, 색유리 왕관', draw: famKing },
+      foe: { name: '그림자 임프 · 적', sub: '톱니 웃음, 붉은 눈', draw: foe } } });
+})();
+
+/* =========================================================
+   4. 귀여운데 섬뜩한 컬트 — 귀엽게 시작해 작위가 오를수록 기괴해짐
+   ========================================================= */
+(() => {
+  const K = '#1a0f14', P = H.p, C = H.c, E = H.e, L = H.l;
+  const red = '#e0413a', redD = '#a82a2a', cream = '#fff3e0', fox = '#f08a3a', gold = '#f2c14a', pur = '#4a2a5a', pink = '#ff9aaa';
+  const bg = (id, c1, c2) => ({ def: `<radialGradient id="${id}" cx=".5" cy=".45" r=".7"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient>`, el: H.bg(`<rect width="200" height="240" fill="url(#${id})"/>` + `<g fill="none" stroke="${K}" stroke-width="1.4" opacity=".18"><circle cx="100" cy="130" r="88"/><path d="${H.star(100, 130, 88, 5, .38)}"/></g>` + E(100, 224, 64, 9, K, 'opacity=".22"')) });
+  const dotEye = (x, y, rx, ry) => E(x, y, rx, ry, K) + C(x - rx * .35, y - ry * .4, rx * .38, '#fff') + C(x + rx * .25, y + ry * .3, rx * .16, '#fff');
+
+  const mage = () => {
+    const b = bg('d4m', '#ffe9c8', '#f0b07a');
+    const body = [
+      P('M40,214 C44,226 62,228 66,214 C60,206 48,204 40,214Z', fox),
+      P('M52,222 C50,170 60,122 100,112 C140,122 150,170 148,222Z', red),
+      P('M60,74 L66,40 L84,62Z', fox), P('M140,74 L134,40 L116,62Z', fox),
+      P('M56,122 C48,74 74,46 100,46 C126,46 152,74 144,122 C130,134 70,134 56,122Z', red),
+      E(100, 98, 36, 34, '#3a1a22'),
+      P('M70,106 C68,82 84,68 100,68 C116,68 132,82 130,106 C126,124 74,124 70,106Z', fox),
+      P('M84,110 C90,100 110,100 116,110 C110,122 90,122 84,110Z', cream),
+      L('M136,206 L154,72', '#5a3a24', 6), P('M146,72 L162,72 L160,52 L148,52Z', cream), P('M154,50 C148,44 150,36 155,30 C158,38 162,42 158,50Z', '#ffb340'),
+      C(155, 84, 9, cream), C(150, 172, 9, fox),
+    ].join('');
+    const det = [
+      E(40, 214, 6, 4, cream), P('M62,42 L68,52 L72,48Z M138,42 L132,52 L128,48Z', K),
+      dotEye(86, 94, 6, 7.5), dotEye(114, 94, 6, 7.5), E(100, 106, 3.5, 2.5, K), L('M96,112 Q100,116 104,112', K, 2),
+      E(77, 106, 5, 3, pink, 'opacity=".8"'), E(123, 106, 5, 3, pink, 'opacity=".8"'),
+      L('M64,166 Q100,180 136,166', gold, 4), P('M96,176 L104,176 L106,196 L94,196Z', gold, `stroke="${K}" stroke-width="2"`),
+      P('M90,144 Q100,132 110,144 Q100,152 90,144Z', cream, `stroke="${K}" stroke-width="2.4"`), C(100, 144, 3.4, K),
+      L('M80,130 Q100,140 120,130', redD, 3, 'opacity=".6"'),
+      C(155, 84, 4, '#5a9aff'), C(156, 84, 2, K), C(154, 82.5, 1, '#fff'),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 7, K) + det };
+  };
+  const bunnyHead = (x, y, r) => P(`M${x - r},${y} C${x - r},${y - r * 1.05} ${x + r},${y - r * 1.05} ${x + r},${y} C${x + r},${y + r * .85} ${x - r},${y + r * .85} ${x - r},${y}Z`, cream);
+  const famK = () => {
+    const b = bg('d4k', '#fff0d8', '#f4b8a0');
+    const body = [
+      P('M78,104 C70,70 72,30 84,20 C94,32 94,70 92,104Z', cream),
+      P('M110,102 C114,74 126,60 146,60 C154,62 152,72 144,74 C130,76 122,88 122,104Z', cream),
+      P('M66,218 C60,186 70,160 100,156 C130,160 140,186 134,218Z', cream),
+      P('M64,170 C70,158 130,158 136,170 L128,196 C110,190 90,190 72,196Z', red),
+      bunnyHead(100, 128, 40),
+      E(84, 220, 12, 6, cream), E(118, 220, 12, 6, cream),
+      L('M140,196 L160,150', '#8a5a34', 5), P('M152,156 L170,120 L176,124 L160,160Z', '#d8dde3'),
+    ].join('');
+    const det = [
+      P('M82,96 C78,70 80,40 85,30 C89,42 89,70 88,96Z', pink), P('M116,96 C120,80 128,70 142,66 C134,72 126,82 124,96Z', pink),
+      dotEye(86, 132, 7, 8.5), dotEye(114, 132, 7, 8.5),
+      L('M95,146 Q100,150 105,146 M100,146 Q100,150 100,150', K, 2.2), P('M97,142 L103,142 L100,145Z', '#ff7a8a'),
+      E(74, 146, 6, 3.4, pink, 'opacity=".85"'), E(126, 146, 6, 3.4, pink, 'opacity=".85"'),
+      L('M72,160 Q100,170 128,160', '#6a6a72', 5), C(100, 170, 6, gold, `stroke="${K}" stroke-width="2"`), L('M97,172 L103,172', K, 1.6),
+      L('M150,162 L158,152', '#5a3a24', 4),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 7, K) + det };
+  };
+  const famKing = () => {
+    const b = bg('d4g', '#e8d0ff', '#7a4a8a');
+    const cand = [[36, 112], [46, 78], [68, 52], [132, 52], [154, 78], [164, 112]];
+    const body = [
+      `<circle cx="100" cy="112" r="74" fill="none" stroke="${gold}" stroke-width="5"/>`,
+      ...cand.map(([x, y]) => P(`M${x - 4},${y + 4} L${x - 4},${y - 12} L${x + 4},${y - 12} L${x + 4},${y + 4}Z`, cream)),
+      P('M74,96 C64,60 62,16 76,4 C88,20 88,60 88,96Z', cream), P('M126,96 C136,60 138,16 124,4 C112,20 112,60 112,96Z', cream),
+      P('M54,226 C50,170 64,126 100,118 C136,126 150,170 146,226Z', pur),
+      P('M62,130 Q100,112 138,130 L134,146 Q100,128 66,146Z', cream),
+      bunnyHead(100, 112, 42),
+      P('M72,78 C66,64 70,52 78,46 C76,58 80,66 86,72Z M128,78 C134,64 130,52 122,46 C124,58 120,66 114,72Z', '#eadcc8'),
+      L('M146,200 L168,90', gold, 5), C(170, 82, 11, cream),
+    ].join('');
+    const det = [
+      ...cand.map(([x, y]) => P(`M${x},${y - 12} C${x - 4},${y - 16} ${x - 2},${y - 22} ${x},${y - 26} C${x + 2},${y - 22} ${x + 4},${y - 16} ${x},${y - 12}Z`, '#ffb340')),
+      E(81, 40, 5, 6.5, K), C(79, 38, 2, '#fff'), E(119, 40, 5, 6.5, K), C(117, 38, 2, '#fff'),
+      dotEye(84, 116, 7, 8.5), dotEye(116, 116, 7, 8.5),
+      E(100, 94, 5, 9, cream, `stroke="${K}" stroke-width="2.4"`), E(100, 95, 3, 6, red), C(99, 92, 1.4, '#fff'),
+      E(100, 134, 6, 5, K), C(98, 133, 1.3, '#fff'), C(102, 135, .9, '#fff'),
+      E(72, 128, 7, 4, pink, 'opacity=".85"'), E(128, 128, 7, 4, pink, 'opacity=".85"'),
+      ...[[80, 136], [96, 130], [112, 130], [126, 136]].map(([x, y]) => P(`M${x},${y} l2,5 l-2,3 l-2,-3Z`, K)),
+      L('M100,150 L100,224', '#2a1a34', 3), ...[160, 180, 200].map(y => C(100, y, 3, red)),
+      C(170, 82, 6, red), C(170, 82, 3, K), C(168, 80, 1.4, '#fff'),
+      L('M62,178 C74,186 80,196 76,210 M138,178 C126,186 120,196 124,210', '#2a1a34', 2.4, 'opacity=".7"'),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 7, K) + det };
+  };
+  const foe = () => {
+    const b = bg('d4e', '#ffd0c0', '#c85a4a');
+    const body = [
+      P('M60,140 C40,126 26,128 18,138 C28,140 30,148 28,156 C38,152 44,156 46,164 C52,158 60,158 66,164Z', '#3a1a2a'),
+      P('M140,140 C160,126 174,128 182,138 C172,140 170,148 172,156 C162,152 156,156 154,164 C148,158 140,158 134,164Z', '#3a1a2a'),
+      P('M84,206 L80,224 L96,224 L96,208Z M116,206 L120,224 L104,224 L104,208Z', redD),
+      E(100, 184, 36, 32, red),
+      C(100, 132, 42, red),
+      P('M66,110 C50,96 48,72 60,58 C62,78 70,90 82,98Z', cream), P('M134,110 C150,96 152,72 140,58 C138,78 130,90 118,98Z', cream),
+      L('M60,212 L44,150', '#5a3a24', 5), P('M36,152 L40,130 L44,146 L48,128 L52,146 L56,132 L54,156Z', '#c0c8d0'),
+      C(62, 190, 9, red),
+    ].join('');
+    const det = [
+      E(100, 190, 20, 16, '#ffb0a0'),
+      H.eye(82, 128, 12, '#ffd23a', [1, 1]), dotEye(116, 128, 5, 6),
+      L('M76,154 Q100,164 124,154', K, 3), L('M80,150 L84,160 M88,152 L92,162 M96,153 L100,163 M104,153 L108,163 M112,152 L116,161 M120,150 L123,158', K, 2),
+      P('M58,186 L68,196 L74,186 L66,180Z', '#efe2c4', `stroke="${K}" stroke-width="2"`), L('M60,188 L72,190', '#c8b89a', 1.4),
+      L('M72,104 Q80,110 88,106', K, 2.4),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 7, K) + det };
+  };
+  DIRS.push({ id: 'cult', name: '귀여운데 섬뜩한 컬트', ref: '컬트 오브 더 램, 언덕 너머로',
+    d: '2등신 동물, 굵은 외곽선, 의식의 붉은색. 기사는 귀여운 하인인데, 작위가 오를수록 눈이 늘고 기괴해져.',
+    g: '판에서 잘 읽히고, "강해질수록 무서워지는" 게 뽑기 승급에 이야기를 줘.', r: '진지한 정통 마법이 블랙코미디로 기울 수 있어. 대놓고 따라 하면 아류로 보여.',
+    board: { top: '#e8c8a0', top2: '#dab48a', side: '#7a3a2a', line: '#b8785a', bg: '#f0b07a' },
+    chars: { mage: { name: '아기 여우 술사', sub: '커다란 붉은 두건, 눈 달린 촛대 지팡이', draw: mage },
+      famK: { name: '하인 토끼 · 기사', sub: '나무칼과 방울 목줄. 흠: 한쪽 귀가 늘 접혀 있어', draw: famK },
+      famKing: { name: '천안 토끼왕 · 왕', sub: '귀에도 이마에도 눈이 생겼어. 볼은 그대로 발그레', draw: famKing },
+      foe: { name: '꿰맨 입 임프 · 적', sub: '짝짝이 눈, 붕대 감은 팔', draw: foe } } });
+})();
+/* 방향 5~8 */
+/* =========================================================
+   5. 꼬마 마녀 × 고딕 성 — 귀여운 SD 주인공, 진지한 어둠
+   ========================================================= */
+(() => {
+  const K = '#24142e', P = H.p, C = H.c, E = H.e, L = H.l;
+  const dress = '#2a1a3a', dress2 = '#3e2a5a', frill = '#f4eefa', hair = '#dccbf2', hairS = '#b8a2d8', skin = '#fde6d8', crim = '#d0304a', silver = '#c8d0e0', gold = '#e8c060';
+  const bg = (id, glow) => {
+    const g = H.glow(id + 'g', 100, 110, 100, glow, .45);
+    return { def: `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2452"/><stop offset="1" stop-color="#120a1c"/></linearGradient><linearGradient id="${id}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8e0ff" stop-opacity=".5"/><stop offset="1" stop-color="#8a70c0" stop-opacity=".08"/></linearGradient>` + g.def,
+      el: H.bg(`<rect width="200" height="240" fill="url(#${id})"/><path d="M60,240 L60,90 C60,40 100,20 100,20 C100,20 140,40 140,90 L140,240Z" fill="url(#${id}w)"/><path d="M100,22 L100,240 M60,120 L140,120 M60,170 L140,170" stroke="#2a1a3a" stroke-width="3" opacity=".5"/>` + C(150, 40, 10, '#f4eefa', 'opacity=".5"') + g.el + E(100, 226, 66, 8, '#000', 'opacity=".35"')) };
+  };
+  const animeEye = (x, y, flip) => {
+    const rx = 8.5, ry = 10.5;
+    return E(x, y, rx, ry, '#fff') + E(x + (flip ? -.8 : .8), y + 1, rx * .82, ry * .86, crim) + E(x + (flip ? -.8 : .8), y + 3, rx * .6, ry * .5, '#ff7a8a', 'opacity=".55"') + E(x + (flip ? -.8 : .8), y + .5, rx * .4, ry * .48, '#3a0a1a') +
+      C(x - 3, y - 4, 2.8, '#fff') + C(x + 3, y + 4, 1.2, '#fff') + L(`M${x - rx - 1},${y - 4} Q${x},${y - ry - 4} ${x + rx + 1},${y - 5}`, K, 3.2) + L(`M${flip ? x - rx - 1 : x + rx + 1},${y - 5} l${flip ? -3 : 3},-3`, K, 2);
+  };
+  const mage = () => {
+    const b = bg('d5m', '#c8a0ff');
+    const body = [
+      P('M72,110 C50,130 46,174 60,206 C64,190 70,172 78,150Z', hair),
+      P('M128,110 C152,126 162,168 150,202 C146,184 138,168 122,150Z', hair),
+      P('M84,214 L82,226 L95,226 L95,214Z M106,214 L106,226 L119,226 L117,214Z', '#1a1020'),
+      P('M76,168 C64,184 57,200 55,212 Q100,224 145,212 C143,200 136,184 124,168Z', dress2),
+      P('M80,146 L120,146 L123,172 L77,172Z', dress),
+      P('M80,148 C66,154 62,168 70,178 L84,170Z', dress), P('M120,148 C134,152 140,164 134,176 L120,168Z', dress),
+      `<path d="M50,214 L154,116" stroke="${silver}" stroke-width="5" fill="none"/>`,
+      C(74, 176, 6.5, skin), C(131, 172, 6.5, skin),
+      `<g transform="rotate(-6 100 112)">` + C(100, 114, 29, skin) +
+        P('M71,110 C72,90 86,82 100,84 C116,82 130,92 130,112 C124,101 116,99 110,105 C106,97 98,97 94,105 C88,99 78,101 71,110Z', hair) +
+        P('M71,108 C66,120 66,134 70,142 L76,124Z M129,108 C134,120 134,134 130,142 L124,124Z', hair) +
+        P('M58,94 C64,64 84,44 100,30 C114,16 136,8 154,16 C142,18 133,26 131,36 C134,54 137,72 140,90Z', dress) +
+        E(98, 92, 72, 14, dress, 'transform="rotate(-5 98 92)"') + `</g>`,
+      P('M152,96 C164,96 170,110 164,120 C168,108 160,102 152,104Z', silver), C(156, 112, 6, crim),
+    ].join('');
+    const det = [
+      P('M56,212 Q60,206 64,212 Q68,206 72,212 Q76,206 80,212 Q84,206 88,212 Q92,206 96,212 Q100,206 104,212 Q108,206 112,212 Q116,206 120,212 Q124,206 128,212 Q132,206 136,212 Q140,206 144,212 Q100,222 56,212Z', frill),
+      L('M85,216 L95,216 M85,220 L95,220 M107,216 L117,216 M107,220 L117,220', '#e8e0f0', 1.6),
+      P('M80,144 Q100,154 120,144 L124,152 Q100,164 76,152Z', frill),
+      L('M94,154 L106,162 M106,154 L94,162 M94,162 L106,170 M106,162 L94,170', '#8a6aa8', 1.4),
+      P('M94,150 L100,156 L106,150 L100,160Z', crim),
+      `<g transform="rotate(-6 100 112)">` +
+        P('M58,94 Q99,84 140,90 L139,98 Q99,92 59,102Z', '#8a2a4a') + P('M126,86 C140,82 150,88 160,96 C150,96 142,98 132,94Z M126,92 C134,104 136,116 132,126 C128,114 124,104 120,96Z', '#8a2a4a') +
+        `<path d="M110,64 A8,8 0 1 0 118,74 A6,6 0 1 1 110,64Z" fill="${gold}"/>` +
+        animeEye(88, 120, false) + animeEye(113, 120, true) +
+        L('M97,135 Q100,137 103,135', K, 1.8) + E(78, 130, 6, 3, '#ff9ab0', 'opacity=".6"') + E(123, 130, 6, 3, '#ff9ab0', 'opacity=".6"') +
+        L('M80,96 Q86,92 90,98 M106,98 Q112,92 120,96', hairS, 2) + `</g>`,
+      C(158, 108, 2, '#fff', 'opacity=".9"'),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 6, K) + det };
+  };
+  const wingL = (s) => `<path transform="${s}" d="M66,130 C44,106 22,100 6,110 C16,114 20,120 18,128 C28,126 34,130 34,138 C42,134 50,138 52,146 L66,150Z" fill="#3a1a44"/>`;
+  const famK = () => {
+    const b = bg('d5k', '#ff9ad0'), sh = E(104, 222, 40, 6, '#000', 'opacity=".4"');
+    const body = [
+      wingL(''), wingL('translate(212,0) scale(-1,1)'),
+      P('M126,190 C130,206 120,214 126,226 L132,218 L138,226 C132,212 140,204 136,190Z', crim),
+      P('M132,96 L146,104 L152,194 L140,190Z', '#3a1630'),
+      P('M70,198 L140,190 L152,194 L84,202Z', '#f4ead8'),
+      P('M62,104 L132,96 L140,190 L70,198Z', '#6a2a5a'),
+    ].join('');
+    const det = [
+      L('M74,199 L140,192 M78,201 L146,193', '#c8b898', 1),
+      P('M62,104 L76,103 L63,118Z M132,96 L120,98 L133,110Z M70,198 L84,196 L69,184Z M140,190 L128,191 L139,178Z', silver),
+      `<path d="M70,110 L128,104 L134,184 L76,190Z" fill="none" stroke="${gold}" stroke-width="1.6" opacity=".7"/>`,
+      E(102, 146, 24, 17, '#fff8ff'), H.eye(103, 147, 15, '#8a3ab0', [-1, 1], '#200a2a'),
+      L('M78,140 Q102,118 126,138', K, 3.4), L('M80,136 l-5,-5 M90,128 l-3,-6 M114,128 l3,-6 M124,136 l5,-5', K, 2.2),
+      E(84, 170, 6, 3, '#ff9ab0', 'opacity=".7"'), E(122, 166, 6, 3, '#ff9ab0', 'opacity=".7"'),
+      P('M108,196 L112,204 L115,195Z', '#fff', `stroke="${K}" stroke-width="1.4"`),
+    ].join('');
+    return { defs: b.def, svg: b.el + sh + H.OL(body, 6, K) + det };
+  };
+  const famKing = () => {
+    const b = bg('d5g', '#ffcf6a'), gl = H.glow('d5gg', 100, 140, 96, '#c870ff', .55);
+    const page = (x, y, a) => `<g transform="translate(${x},${y}) rotate(${a})"><path d="M-9,-12 L9,-12 L9,12 L-9,12Z" fill="#f4ead8" stroke="${K}" stroke-width="1.6"/><path d="M-5,-6 L5,-6 M-5,-1 L4,-1 M-5,4 L3,4" stroke="#8a3ab0" stroke-width="1.2"/></g>`;
+    const body = [
+      wingL('translate(-14,-10) scale(1.15)'), wingL('translate(226,-10) scale(-1.15,1.15)'),
+      `<path transform="translate(-6,-58) scale(.9)" d="M66,130 C50,110 40,92 44,74 C52,88 58,92 66,94 C62,84 64,74 70,68 C74,84 80,96 90,104Z" fill="#5a2a6a"/>`,
+      `<path transform="translate(206,-58) scale(-.9,.9)" d="M66,130 C50,110 40,92 44,74 C52,88 58,92 66,94 C62,84 64,74 70,68 C74,84 80,96 90,104Z" fill="#5a2a6a"/>`,
+      P('M140,74 L156,82 L164,198 L150,200Z', '#3a1630'),
+      P('M62,212 L150,200 L164,198 L78,216Z', '#f4ead8'),
+      P('M52,86 L140,74 L150,200 L62,212Z', '#4a1a4a'),
+      P('M74,80 L76,52 L88,66 L96,44 L104,64 L116,48 L120,74Z', gold),
+    ].join('');
+    const petals = Array.from({ length: 8 }, (_, i) => { const a = i / 8 * Math.PI * 2; return E(101 + Math.cos(a) * 26, 142 + Math.sin(a) * 26, 9, 5, '#7a3a8a', `transform="rotate(${a * 180 / Math.PI} ${101 + Math.cos(a) * 26} ${142 + Math.sin(a) * 26})" stroke="${gold}" stroke-width="1.4"`); }).join('');
+    const det = [
+      gl.el,
+      P('M52,86 L70,84 L54,104Z M140,74 L124,76 L141,92Z M62,212 L80,210 L61,192Z M150,200 L134,202 L149,184Z', gold),
+      C(101, 142, 34, 'none', `stroke="${gold}" stroke-width="2.4"`), petals,
+      E(101, 142, 20, 14, '#fff8ff'), H.eye(101, 142, 13, '#ffb020', [0, 1], '#200a2a'), E(101, 143, 2.4, 8, '#200a2a'),
+      L('M80,136 Q101,116 122,136', K, 3), C(86, 66, 3, crim), C(110, 60, 3, crim),
+      L('M48,120 C80,150 120,170 158,176', silver, 4, 'stroke-dasharray="7 3"'), P('M120,170 L134,170 L134,184 L120,184Z', silver, `stroke="${K}" stroke-width="2"`), C(127, 166, 5, 'none', `stroke="${silver}" stroke-width="2.4"`),
+      page(30, 186, -18), page(172, 60, 14), page(178, 150, 22), page(26, 58, -10),
+    ].join('');
+    return { defs: b.def + gl.def, svg: b.el + H.OL(body, 6, K) + det };
+  };
+  const foe = () => {
+    const b = bg('d5e', '#ff6a6a'), st = '#8a8a9e', stD = '#5a5a6e';
+    const body = [
+      P('M70,140 C50,118 46,92 58,76 C62,98 74,112 88,120Z', stD), P('M130,140 C150,118 154,92 142,76 C138,98 126,112 112,120Z', stD),
+      P('M66,226 L72,204 L128,204 L134,226Z', '#4a3a5a'), P('M62,206 L138,206 L132,196 L68,196Z', '#5a4a6a'),
+      P('M128,186 C148,190 156,176 152,162 L160,158 L150,152 L146,164 C146,174 140,180 128,176Z', st),
+      E(100, 170, 34, 30, st),
+      P('M66,120 L62,92 L82,108Z M134,120 L138,92 L118,108Z', st),
+      E(100, 128, 40, 34, st),
+      P('M72,108 L66,92 L80,100Z M128,108 L134,92 L120,100Z', '#d8d0c0'),
+      P('M76,188 C70,196 72,202 80,200 L86,192Z M124,188 C130,196 128,202 120,200 L114,192Z', st),
+    ].join('');
+    const det = [
+      E(84, 128, 9, 10, '#ffcf5a'), E(116, 128, 9, 10, '#ffcf5a'), E(85, 129, 3, 8, '#1a0a0a'), E(115, 129, 3, 8, '#1a0a0a'), C(81, 124, 2.4, '#fff'), C(113, 124, 2.4, '#fff'),
+      P('M80,146 Q100,160 120,146 Q100,154 80,146Z', '#2a0a14'), P('M86,148 L89,154 L92,149Z M108,149 L111,154 L114,148Z', '#fff'),
+      L('M110,164 L104,176 L110,186 M72,140 L80,150', '#3a3a4a', 1.6),
+      L('M70,206 L130,206', '#8a7a9a', 1.4), E(100, 170, 16, 12, '#a0a0b4', 'opacity=".6"'),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 6, K) + det };
+  };
+  DIRS.push({ id: 'nobeta', name: '꼬마 마녀 × 고딕 성', ref: '리틀 위치 노베타, 고딕 롤리타 패션',
+    d: '3~4등신 마녀에 몸 절반만 한 모자와 큰 눈. 주인공은 귀엽고, 세계는 진지하게 어두워.',
+    g: '서브컬처 감성과 서양 고딕이 만나는 지점이야. 뽑기 애착이 제일 쉽게 생겨.', r: '흔한 "귀여운 마녀" 클리셰가 될 수 있어. 최종 그림은 사람 손이 필요해.',
+    board: { top: '#4a3a5a', top2: '#3e3050', side: '#1a1024', line: '#6a5a80', bg: '#1c1228' },
+    chars: { mage: { name: '꼬마 마녀', sub: '거대한 모자, 프릴 드레스, 초승달 지팡이', draw: mage },
+      famK: { name: '날개책 · 기사', sub: '눈 하나 달린 마도서. 흠: 자다가 책장이 넘어가', draw: famK },
+      famKing: { name: '대마도서 · 왕', sub: '장미창 표지, 사슬 자물쇠, 날개 넷', draw: famKing },
+      foe: { name: '석상 임프 · 적', sub: '성당 지붕에서 뛰어내린 꼬마 가고일', draw: foe } } });
+})();
+
+/* =========================================================
+   6. 미뇰라식 고딕 판화 — 큰 검정 덩어리, 그림자 속 눈
+   ========================================================= */
+(() => {
+  const BK = '#0e0c0e', P = H.p, C = H.c, E = H.e, L = H.l;
+  const bone = '#e3d6b8', red = '#a3242a', ochre = '#b08a3a', coat = '#2e2a33', rim = '#8a7a66';
+  const bg = (id, c1, c2) => ({ def: `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`,
+    el: H.bg(`<rect width="200" height="240" fill="url(#${id})"/>` + P('M0,170 C40,160 80,176 120,166 C160,158 180,168 200,164 L200,190 L0,190Z', '#ffffff', 'opacity=".08"') + P('M0,216 L200,212 L200,240 L0,240Z', '#1a1618') + P('M0,214 L200,210 L200,214 L0,218Z', rim, 'opacity=".4"')) });
+  const mage = () => {
+    const b = bg('d6m', '#56645f', '#7a6e5c'), gl = H.glow('d6mg', 170, 62, 36, '#ff4a2a', .7);
+    return { defs: b.def + gl.def, svg: b.el + gl.el + [
+      P('M72,226 L60,212 L78,194Z', BK),
+      P('M72,226 L80,156 L84,100 L118,98 L124,156 L138,226 L116,226 L108,188 L98,226Z', coat),
+      P('M72,226 L80,156 L84,100 L97,100 L93,150 L99,226Z', BK), P('M108,188 L116,226 L112,226 L106,196Z', BK),
+      P('M118,98 L124,156 L138,226 L133,226 L121,158 L115,100Z', rim),
+      P('M84,226 L82,214 L96,214 L98,226Z M110,226 L112,214 L126,214 L130,226Z', BK),
+      L('M86,150 L74,226', ochre, 3), P('M80,142 L92,140 L92,150 L86,154 L80,150Z', bone), C(84, 146, 1.6, BK), C(89, 146, 1.6, BK), P('M82,150 L90,150 L90,156 L82,156Z', bone),
+      P('M84,98 L118,96 L117,106 L86,110Z', red), P('M110,104 L126,152 L118,154 L104,108Z', red), P('M84,98 L96,98 L94,109 L86,110Z', '#5a1014'),
+      P('M116,104 L150,90 L154,100 L122,116Z', coat), P('M116,108 L150,96 L152,100 L120,116Z', BK),
+      P('M150,86 L162,78 L166,84 L158,94 L152,96Z', bone), L('M160,80 L168,72 M163,83 L172,78 M158,92 L168,92', bone, 2.2),
+      C(170, 62, 16, 'none', `stroke="${red}" stroke-width="2.6"`), P('M170,50 L181,70 L159,70Z', 'none', `stroke="${red}" stroke-width="2"`), L('M170,56 L170,74 M164,64 L176,64', '#ff6a4a', 1.6),
+      P('M90,74 L114,72 L113,92 L103,100 L91,94Z', bone),
+      P('M88,70 L116,68 L114,86 L104,83 L90,88Z', BK),
+      P('M94,80 L100,78 L99,81Z', '#f6e8a0'), P('M106,78 L112,77 L110,80Z', '#f6e8a0'),
+      P('M100,84 L98,92 L102,92Z', BK), L('M98,96 L106,95', BK, 1.6), P('M91,94 L96,92 L95,99Z', BK),
+      P('M54,76 L146,66 L138,61 L64,69Z', BK), P('M78,69 L82,40 L120,37 L124,66Z', BK), P('M80,62 L123,59 L123,64 L80,67Z', '#5a1014'), P('M118,40 L120,37 L124,66 L122,66Z', rim, 'opacity=".6"'),
+    ].join('') };
+  };
+  const famK = () => {
+    const b = bg('d6k', '#4f5c58', '#6e6252'), gl = H.glow('d6kg', 152, 102, 14, '#ff3a2a', .9);
+    return { defs: b.def + gl.def, svg: b.el + [
+      P('M60,200 C40,196 30,180 34,164 C40,178 48,186 62,190Z', BK),
+      P('M60,222 C54,190 62,160 86,150 L112,148 C120,170 118,200 114,222Z', BK),
+      P('M108,150 L132,132 L140,150 L134,222 L124,222 L124,176 L116,222 L106,222Z', BK),
+      P('M118,140 L128,96 L150,90 L182,104 L178,114 L152,118 L140,136Z', BK),
+      P('M132,96 L131,74 L136,82 L139,70 L145,92Z', BK),
+      P('M86,150 L112,148 L114,156 L90,158Z', rim, 'opacity=".55"'), P('M150,90 L182,104 L180,107 L150,94Z', rim, 'opacity=".7"'),
+      ...[156, 168, 180].map(y => P(`M114,${y} L130,${y - 8} L130,${y - 4} L116,${y + 4}Z`, bone)),
+      P('M164,112 L168,118 L170,112Z M172,111 L175,116 L177,110Z', bone),
+      gl.el, P('M146,100 L158,98 L154,103Z', '#ff3a2a'),
+      ...[[122, 132], [128, 128], [134, 125], [140, 123]].map(([x, y]) => C(x, y, 3.4, 'none', `stroke="${ochre}" stroke-width="2"`)),
+      C(126, 140, 3, 'none', `stroke="${ochre}" stroke-width="2"`), C(124, 147, 3, 'none', `stroke="${ochre}" stroke-width="2"`),
+    ].join('') };
+  };
+  const famKing = () => {
+    const b = bg('d6g', '#4a3a3a', '#6a4a3a'), gl = H.glow('d6gg', 104, 96, 80, '#ff6a2a', .5);
+    const antler = 'M92,70 L82,42 L70,46 L78,32 L68,20 L84,28 L88,12 L94,34 L100,64Z';
+    return { defs: b.def + gl.def, svg: b.el + gl.el + [
+      P('M58,124 L50,80 L72,98 L72,58 L92,86 L100,44 L110,86 L130,58 L130,98 L152,80 L146,124Z', red),
+      P('M72,120 L70,92 L86,106 L100,72 L114,106 L130,92 L128,120Z', ochre),
+      P('M40,226 L48,170 C52,130 80,110 110,108 C140,110 160,130 162,170 L170,226 L148,226 L144,182 L130,226 L112,226 L114,188 L90,188 L88,226 L70,226 L66,182 L58,226Z', BK),
+      P('M150,140 C158,150 162,160 162,170 L170,226 L166,226 L158,172 C156,160 154,152 148,144Z', rim, 'opacity=".6"'),
+      P('M76,112 L84,70 L116,62 L136,74 L134,112 L118,138 L96,138Z', BK),
+      P(antler, bone), `<path d="${antler}" fill="${bone}" transform="translate(208,-2) scale(-1,1)"/>`,
+      P('M84,78 L132,72 L130,100 L118,118 L100,118 L88,102Z', bone),
+      P('M94,88 L106,86 L104,94 L95,95Z M114,85 L126,83 L124,91 L115,92Z', BK), P('M104,74 L112,73 L110,81 L105,81Z', BK),
+      P('M97,89 L103,88 L101,92Z M117,86 L123,85 L121,89Z M106,75 L110,75 L108,79Z', '#ff3a2a'),
+      P('M100,118 L104,126 L107,118 L111,126 L114,118Z', bone),
+      L('M88,104 L108,100 M112,108 L126,102', '#8a7a5a', 1.4),
+      ...[[70, 150], [64, 162], [60, 174], [58, 186]].map(([x, y]) => C(x, y, 4, 'none', `stroke="${ochre}" stroke-width="2.4"`)),
+      ...[[140, 148], [146, 160]].map(([x, y]) => C(x, y, 4, 'none', `stroke="${ochre}" stroke-width="2.4"`)), P('M150,168 L156,176 L148,174Z', ochre),
+      ...[150, 164, 178].map(y => P(`M98,${y} L118,${y - 6} L118,${y - 2} L100,${y + 4}Z`, bone, 'opacity=".85"')),
+    ].join('') };
+  };
+  const foe = () => {
+    const b = bg('d6e', '#3e4a46', '#5e5446');
+    return { defs: b.def, svg: b.el + [
+      P('M70,222 L80,170 C82,140 96,124 116,124 C134,126 142,144 138,168 L132,222 L120,222 L122,186 L100,186 L92,222Z', BK),
+      P('M86,150 L50,176 L36,222 L42,222 L58,184 L92,164Z', BK), L('M36,222 L30,228 M38,222 L36,230 M40,222 L44,229', bone, 2),
+      P('M132,150 L164,170 L172,214 L166,214 L156,178 L128,164Z', BK), L('M172,214 L178,222 M170,214 L170,224 M168,214 L162,222', bone, 2),
+      P('M100,130 L94,98 L110,86 L130,96 L128,128 L116,138Z', BK),
+      P('M102,94 L94,78 L104,90Z M124,92 L132,76 L126,94Z', bone),
+      P('M100,102 L126,98 L124,120 L112,130 L102,122Z', bone),
+      P('M104,106 L112,105 L110,112 L105,112Z M116,104 L123,103 L121,110 L117,110Z', BK),
+      P('M106,120 L108,125 L110,120 L112,125 L114,120 L116,125 L118,119Z', BK),
+      ...[[96, 132], [92, 142], [90, 152]].map(([x, y]) => P(`M${x},${y} L${x - 8},${y - 4} L${x},${y + 4}Z`, BK)),
+      P('M128,140 C136,150 138,164 136,176 L132,176 C134,164 132,152 126,144Z', rim, 'opacity=".55"'),
+      P('M120,186 C140,196 150,210 144,226', 'none', `stroke="${BK}" stroke-width="3"`),
+    ].join('') };
+  };
+  DIRS.push({ id: 'mignola', name: '미뇰라식 고딕 판화', ref: '다키스트 던전, 헬보이(마이크 미뇰라)',
+    d: '6~7등신, 각진 쐐기 실루엣, 큰 검정 덩어리. 얼굴은 그림자 속에 눈만 남고, 흉터 같은 흠이 매력이 돼.',
+    g: '"대가를 치르는 마법" 분위기가 제일 잘 나와. 보스가 진짜 무서워.', r: '뽑기의 "갖고 싶은" 귀여움이 약해. 판 위에서 어두운 덩어리끼리 묻혀서 윤곽 빛이 꼭 필요해.',
+    board: { top: '#5a5a52', top2: '#4e4e48', side: '#1a1618', line: '#7a7266', bg: '#3e4a46' },
+    chars: { mage: { name: '오컬티스트', sub: '그림자 속 두 눈, 붉은 인장을 그리는 뼈 손', draw: mage },
+      famK: { name: '검은 개 · 기사', sub: '사슬 목줄. 흠: 찢어진 귀', draw: famK },
+      famKing: { name: '사슬 끊은 왕 · 왕', sub: '뼈 가면, 세 눈, 불꽃 갈기, 사슴뿔 왕관', draw: famKing },
+      foe: { name: '여윈 임프 · 적', sub: '바닥까지 닿는 긴 팔, 뼈 가면', draw: foe } } });
+})();
+
+/* =========================================================
+   7. 에칭 삽화 아틀리에 — 펜 선, 해칭, 옅은 물감
+   ========================================================= */
+(() => {
+  const K = '#2b211a', P = H.p, C = H.c, E = H.e, L = H.l;
+  const paperBg = id => ({ def: `<filter id="${id}f"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="9"/><feColorMatrix values="0 0 0 0 .4  0 0 0 0 .3  0 0 0 0 .2  0 0 0 .18 0"/></filter><pattern id="${id}h" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(38)"><line x1="1.6" y1="0" x2="1.6" y2="3.2" stroke="${K}" stroke-width=".6"/></pattern><pattern id="${id}x" patternUnits="userSpaceOnUse" width="3.2" height="3.2" patternTransform="rotate(38)"><path d="M1.6,0 L1.6,3.2 M0,1.6 L3.2,1.6" stroke="${K}" stroke-width=".55"/></pattern>`,
+    el: H.bg(`<rect width="200" height="240" fill="#f1e8d6"/><rect width="200" height="240" filter="url(#${id}f)"/>` + E(100, 226, 60, 6, `url(#${id}h)`, 'opacity=".7"') + `<rect x="8" y="8" width="184" height="224" fill="none" stroke="${K}" stroke-width=".8" opacity=".5"/>`) });
+  const mage = () => {
+    const b = paperBg('d7m'), H1 = 'url(#d7mh)';
+    const body = [
+      P('M66,226 C68,184 74,146 86,118 L120,116 C132,146 142,186 148,226 Q108,232 66,226Z', '#9dbcb6'),
+      P('M92,124 L114,122 L118,226 L90,226Z', '#efe6d2'),
+      P('M86,226 L84,216 L98,216 L98,226Z M108,226 L108,216 L122,216 L124,226Z', '#6a4a34'),
+      P('M92,122 L62,106 L57,116 L88,134Z', '#9dbcb6'), C(56, 110, 5.5, '#f2dcc4'),
+      P('M118,124 C128,136 132,150 128,162 L118,158 C120,148 118,138 114,130Z', '#9dbcb6'), P('M114,156 L134,152 L136,170 L116,174Z', '#8a3a2a'),
+      C(104, 98, 15, '#f2dcc4'),
+      P('M90,96 C88,80 100,74 110,76 C120,78 122,90 119,102 C116,94 110,90 104,92 C98,90 92,92 90,96Z', '#7a5234'),
+      P('M117,100 C124,110 124,124 118,132 C118,122 116,112 113,104Z', '#7a5234'),
+      E(102, 82, 34, 7, '#d0a862', 'transform="rotate(-8 102 82)"'),
+      P('M86,80 C90,60 98,44 110,30 C113,46 117,62 122,77Z', '#d0a862'),
+    ].join('');
+    const det = [
+      P('M66,226 C68,184 74,146 86,118 L94,118 C84,150 80,190 80,228Z', H1),
+      P('M128,160 C134,186 140,208 144,226 L136,228 C132,204 128,182 122,160Z', H1),
+      P('M86,80 C90,60 98,44 110,30 L104,64 L96,80Z', H1),
+      L('M88,80 Q104,74 120,77', '#7a3a2a', 3),
+      P('M112,70 L118,62 L119,72Z', '#5a6a7a', `stroke="${K}" stroke-width=".8"`),
+      L('M90,160 L118,158', '#6a4a34', 3.4), P('M96,162 L102,162 L102,172 L96,172Z M106,161 L112,161 L111,170 L106,170Z', '#3a4a7a', `stroke="${K}" stroke-width=".9"`),
+      L('M98,97 L101,97 M108,96 L111,96', K, 1.4), C(99.6, 98.4, 1, K), C(109.6, 97.4, 1, K), L('M104,99 L103,104 L105,104', K, .9), L('M101,108 Q104,109 107,107', K, 1),
+      E(97, 104, 3, 1.6, '#e8a090', 'opacity=".5"'),
+      L('M44,40 L70,214', '#8a6a44', 3.6), L('M44,40 L70,214', K, .7, 'transform="translate(1.6,0)"'),
+      P('M40,40 L48,39 L46,26 L44,18 L42,26Z', '#9aa3ad', `stroke="${K}" stroke-width="1"`), L('M44,22 L44.4,36', K, .8),
+      `<g fill="none" stroke="#2d4a7a" stroke-width="1.6" stroke-linecap="round"><path d="M46,18 C70,14 88,30 86,52 C84,76 60,88 38,82 C18,76 10,56 18,38 C24,26 34,20 42,19"/><path d="M48,30 C64,28 76,40 74,54 C72,68 58,76 44,72 C30,68 24,56 28,44" opacity=".7"/><path d="M36,40 L52,64 M60,38 L36,62 M48,34 L48,70" opacity=".5"/></g>`,
+      C(44, 18, 3, '#2d4a7a', 'opacity=".5"'),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 2.4, K) + det };
+  };
+  const hare = (x0, s, king) => {
+    const fur = '#cfa77a';
+    return [
+      P(`M60,220 C52,180 64,150 92,146 C118,144 136,160 138,190 C140,206 132,220 120,222Z`, fur),
+      P(`M54,206 C44,204 42,192 50,188 C56,186 60,192 60,198Z`, '#f6efe2'),
+      P(`M110,152 C104,126 118,108 138,110 C154,112 162,126 158,140 C154,152 140,158 126,158Z`, fur),
+      P(`M124,114 C116,82 118,54 126,42 C132,58 134,86 132,112Z`, fur), P(`M134,114 C134,84 142,60 152,52 C154,70 148,94 140,116Z`, fur),
+      P(`M118,190 C116,204 116,214 120,222 L134,222 C134,212 132,200 130,190Z`, fur), P(`M100,214 C98,222 112,226 120,222 L116,212Z`, fur),
+    ].join('');
+  };
+  const famK = () => {
+    const b = paperBg('d7k'), H1 = 'url(#d7kh)';
+    const body = hare() + P('M74,150 L118,146 L124,182 L72,190Z', '#b8503a') + P('M124,112 L120,96 L128,104 L126,92 L132,106Z M140,112 L146,98 L148,106 L154,96 L146,114Z', '#e8dcc0');
+    const det = [
+      P('M60,220 C52,180 64,150 80,148 C70,170 68,200 72,222Z', H1),
+      P('M127,108 C124,86 124,64 127,50 C129,66 130,88 129,108Z', '#e8b0a0', 'opacity=".8"'),
+      L('M76,160 L120,156 M74,172 L122,168 M90,150 L84,188 M106,148 L104,184', '#e8c060', 1.4), ...[76, 84, 92, 100, 108, 116].map(x => L(`M${x},${190 - (x - 72) * .2} l0,6`, '#e8c060', 1.2)),
+      P('M84,140 L98,140 L100,152 L82,154Z', '#efe6d2'), L('M86,144 L96,144', K, .8),
+      C(144, 126, 4.4, K), C(142.6, 124.6, 1.4, '#fff'), C(146, 128, .6, '#fff'),
+      P('M156,138 L160,136 L159,141Z', '#c87a7a'), L('M158,140 L176,134 M158,142 L176,144 M156,142 L170,150', K, .6),
+      L('M70,176 C76,172 82,174 86,178 M64,196 C70,192 76,194 80,198 M100,200 C104,196 110,196 114,200', K, .7),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 2.4, K) + det };
+  };
+  const famKing = () => {
+    const b = paperBg('d7g'), H1 = 'url(#d7gh)', fur = '#c99a68', bone = '#efe4c8', gold = '#d8a83a';
+    const antL = 'M112,66 C104,48 94,36 80,30 C88,38 92,44 94,50 C84,46 74,46 66,50 C76,52 86,56 96,62 C92,64 90,70 92,76 L104,74Z';
+    const body = [
+      P('M48,224 C40,170 54,126 92,116 C128,110 152,136 156,180 C158,204 150,222 140,226Z', fur),
+      P('M56,140 L148,132 L154,190 L50,198Z', '#3a5a8a'),
+      P('M50,196 L154,188 L156,200 L48,208Z', gold),
+      P('M100,124 C92,98 104,74 128,72 C150,72 164,90 160,110 C156,128 140,136 122,134Z', fur),
+      P('M106,80 C96,52 98,28 106,18 C114,34 116,58 114,80Z', fur), P('M146,80 C150,52 160,32 172,26 C174,46 166,68 154,84Z', fur),
+      P(antL, bone), `<path d="${antL}" fill="${bone}" transform="translate(262,6) scale(-1,1)"/>`,
+      P('M76,120 C86,106 112,104 124,120 C118,132 100,138 84,134Z', '#f6efe2'),
+      P('M68,224 L66,200 L82,200 L84,226Z M130,224 L130,200 L146,200 L148,226Z', fur),
+    ].join('');
+    const det = [
+      P('M48,224 C40,170 54,126 70,120 C60,160 58,200 64,226Z', H1),
+      P('M108,76 C104,56 104,38 107,26 C110,42 111,60 110,76Z', '#e8b0a0', 'opacity=".8"'),
+      L('M60,150 L148,142 M58,184 L152,176', '#e8c060', 1.6),
+      `<g transform="translate(100,164)"><path d="M-14,8 L-14,-4 L-7,2 L0,-10 L7,2 L14,-4 L14,8Z" fill="${gold}" stroke="${K}" stroke-width="1"/><circle cx="0" cy="-12" r="2" fill="#c8322a"/></g>`,
+      ...[56, 66, 76, 86, 96, 106, 116, 126, 136, 146].map(x => L(`M${x},${206 - (x - 50) * .07} l-1,8`, gold, 1.4)),
+      ...[[76, 32], [70, 50], [122, 34]].map(([x, y]) => C(x, y, 3.2, 'none', `stroke="${gold}" stroke-width="1.6"`)),
+      L('M70,52 L70,60', K, .7), C(70, 63, 3, '#c8322a', `stroke="${K}" stroke-width=".8"`), L('M190,46 L190,54', K, .7), C(190, 57, 3, '#3a7ac8', `stroke="${K}" stroke-width=".8"`),
+      C(140, 96, 4.4, K), C(138.6, 94.6, 1.4, '#fff'),
+      P('M158,108 L162,106 L161,111Z', '#c87a7a'), L('M160,110 L180,104 M160,112 L180,114', K, .6),
+      L('M84,124 l3,6 M96,126 l2,7 M108,124 l2,6', K, .7),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 2.4, K) + det };
+  };
+  const foe = () => {
+    const b = paperBg('d7e'), X = 'url(#d7ex)';
+    const body = [
+      P('M128,196 C156,204 172,190 168,170 C164,158 152,160 154,172 C156,182 146,188 132,182Z', '#2a2430'),
+      P('M66,216 C56,188 62,150 96,142 C130,136 146,166 140,196 C138,212 128,220 116,220Z', '#2a2430'),
+      P('M74,150 C60,128 62,100 80,86 C80,104 86,118 98,126Z', '#2a2430'), P('M124,146 C140,128 142,100 126,86 C124,104 118,118 106,126Z', '#2a2430'),
+      E(100, 134, 30, 26, '#2a2430'),
+      P('M80,124 L70,100 L88,114Z M120,124 L130,100 L112,114Z', '#2a2430'),
+      P('M78,216 L74,226 L88,226 L88,216Z M112,216 L114,226 L128,226 L124,216Z', '#2a2430'),
+    ].join('');
+    const det = [
+      P('M66,216 C56,188 62,150 96,142 C130,136 146,166 140,196 C138,212 128,220 116,220Z', X, 'opacity=".55"'),
+      E(88, 132, 6, 5, '#f6efe2'), E(112, 132, 6, 5, '#f6efe2'), C(89, 133, 2.4, '#c8322a'), C(111, 133, 2.4, '#c8322a'),
+      P('M86,146 Q100,156 114,146 Q100,151 86,146Z', '#f6efe2'),
+      ...[[70, 222], [134, 224], [150, 210]].map(([x, y]) => E(x, y, 5, 2, '#2a2430')),
+      L('M60,170 C54,160 52,150 56,140 M144,170 C150,162 152,150 148,142', K, .8),
+    ].join('');
+    return { defs: b.def, svg: b.el + H.OL(body, 2.4, K) + det };
+  };
+  DIRS.push({ id: 'etching', name: '에칭 삽화 아틀리에', ref: '마녀모자 아틀리에(시라하마 카모메), 옛 동화책 삽화',
+    d: '5~6등신, 작은 눈과 사실적인 얼굴, 펜 선과 해칭, 옅은 물감. 마법은 "그리는" 행위고, 옷의 펜촉과 잉크병이 진짜 도구야.',
+    g: '손으로 그린 느낌이 강해서 AI처럼 안 보여. 동판화, 수채 취향이랑 이어져.', r: '가는 해칭은 작은 판 위에서 회색으로 뭉개져. 최종 품질은 손그림이 필요해.',
+    board: { top: '#e8dcc4', top2: '#ddd0b4', side: '#8a7a5a', line: '#a89870', bg: '#f1e8d6' },
+    chars: { mage: { name: '잉크 견습생', sub: '펜촉 지팡이로 공중에 마법진을 그려', draw: mage },
+      famK: { name: '뿔토끼 · 기사', sub: '문장 덮개와 두루마리 가방. 흠: 뿔이 짝짝이', draw: famK },
+      famKing: { name: '뿔토끼 왕 · 왕', sub: '부적 걸린 가지뿔, 왕관 문장 덮개', draw: famKing },
+      foe: { name: '잉크 얼룩 임프 · 적', sub: '번진 잉크에서 생겨난 꼬마 악마', draw: foe } } });
+})();
+
+/* =========================================================
+   8. 고에티아 악마 도감 — 원전 묘사를 목판화 조형으로
+   ========================================================= */
+(() => {
+  const K = '#16120f', PA = '#eee2c6', VR = '#c2412d', OC = '#c89a3a', P = H.p, C = H.c, E = H.e, L = H.l;
+  const gouge = (d, w = 1.6) => L(d, PA, w);
+  const frame = (id, title) => ({ def: `<filter id="${id}"><feTurbulence type="fractalNoise" baseFrequency=".6" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .3  0 0 0 0 .2  0 0 0 0 .1  0 0 0 .2 0"/></filter>`,
+    el: H.bg(`<rect width="200" height="240" fill="${PA}"/><rect width="200" height="240" filter="url(#${id})"/><rect x="6" y="6" width="188" height="228" fill="none" stroke="${K}" stroke-width="4"/><rect x="12" y="12" width="176" height="216" fill="none" stroke="${K}" stroke-width="1.2"/>` + `<text x="100" y="27" text-anchor="middle" font-family="Noto Serif KR, serif" font-weight="900" font-size="10" fill="${K}" letter-spacing="2">${title}</text>` + P('M20,212 L180,212 L180,216 L20,216Z', K)) });
+  const mage = () => {
+    const f = frame('d8m', '마도 서기관');
+    const body = [
+      P('M60,212 C62,170 70,130 84,104 L118,102 C132,130 140,170 142,212Z', K),
+      P('M78,110 C70,84 80,56 100,50 C122,52 132,80 124,108Z', K),
+      P('M88,98 C86,80 92,68 102,68 C112,68 118,80 116,98 C112,110 92,110 88,98Z', PA),
+      P('M72,150 L128,146 L134,176 L68,180Z', PA), P('M100,148 L101,178', K, ''),
+      P('M60,212 L64,200 L140,198 L142,212Z', VR),
+    ].join('');
+    const det = [
+      gouge('M74,206 C76,180 80,150 88,124 M86,208 C88,186 92,160 96,140 M128,206 C126,186 122,164 116,140 M116,206 C114,190 112,176 108,166'),
+      gouge('M84,96 C82,78 88,62 100,58 M118,94 C120,80 116,66 108,60', 1.2),
+      L('M93,88 Q96,86 99,88 M105,88 Q108,86 111,88', K, 1.6), L('M102,90 L100,98 L103,98', K, 1.2), L('M97,103 L107,103', K, 1.4),
+      L('M100,148 L101,178', K, 2), L('M76,156 L96,154 M76,162 L94,160 M106,154 L124,152 M106,160 L122,158', VR, 1.6), L('M76,168 L94,166 M106,166 L124,164', K, 1),
+      C(72, 178, 5, OC, `stroke="${K}" stroke-width="1.6"`), C(130, 174, 5, OC, `stroke="${K}" stroke-width="1.6"`),
+      C(140, 132, 8, VR, `stroke="${K}" stroke-width="2"`), P(H.star(140, 132, 4.4, 5), PA),
+    ].join('');
+    return { defs: f.def, svg: f.el + H.OL(body, 3, K) + det };
+  };
+  const famK = () => {
+    const f = frame('d8k', '두꺼비 · 기사');
+    const body = [
+      P('M44,206 C40,176 56,150 100,146 C144,150 160,176 156,206 Z', K),
+      P('M60,160 C54,130 70,104 100,102 C130,104 146,130 140,160Z', K),
+      C(74, 112, 15, K), C(126, 112, 15, K),
+      P('M70,96 C76,80 124,80 130,96 L126,100 C112,92 88,92 74,100Z', OC), P('M100,82 C102,68 112,62 120,64 C112,68 108,74 106,84Z', VR),
+      P('M40,206 L50,190 L66,206Z M160,206 L150,190 L134,206Z', K),
+      P('M70,196 C80,176 120,176 130,196Z', PA),
+    ].join('');
+    const det = [
+      C(74, 112, 10, OC), C(126, 112, 10, OC), E(74, 113, 2.6, 7, K), E(126, 113, 2.6, 7, K), C(71, 108, 2, PA), C(123, 108, 2, PA),
+      P('M64,104 C70,100 80,100 86,106 L84,112 C78,106 70,106 64,110Z', K),
+      L('M66,140 Q100,154 134,140', PA, 2), L('M70,144 Q100,156 130,144', VR, 1.6),
+      C(100, 126, 4, VR, `stroke="${K}" stroke-width="1.4"`),
+      ...[[62, 166], [76, 172], [124, 172], [138, 166], [56, 186], [144, 186], [90, 160], [110, 160]].map(([x, y]) => C(x, y, 2.4, PA)),
+      L('M78,186 L122,186 M82,192 L118,192', K, 1),
+      gouge('M48,198 C50,184 56,172 66,164 M152,198 C150,184 144,172 134,164', 1.2),
+    ].join('');
+    return { defs: f.def, svg: f.el + H.OL(body, 3, K) + det };
+  };
+  const famKing = () => {
+    const f = frame('d8g', '제1위 · 동방의 왕 바엘');
+    const legs = [[-1, 140, 70, 176], [-1, 146, 52, 196], [-1, 152, 48, 214], [-1, 158, 66, 210]].flatMap(([s, y, x2, y2], i) => {
+      const k = `M100,${y} C${100 - 30},${y - 30 - i * 4} ${x2 - 6},${y2 - 70 + i * 10} ${x2},${y2}`;
+      return [L(k, K, 6), L(k.replace(/(\d+\.?\d*),/g, (m, x) => (200 - +x) + ','), K, 6)];
+    }).join('');
+    const body = [
+      E(100, 168, 40, 32, K), E(100, 132, 26, 20, K),
+      C(58, 108, 20, K), C(142, 108, 20, K), P('M128,96 L132,74 L144,90Z M156,96 L152,74 L142,90Z', K),
+      P('M82,92 C80,66 90,54 100,54 C110,54 120,66 118,92 C114,110 86,110 82,92Z', PA),
+      P('M84,94 C86,112 96,122 100,124 C104,122 114,112 116,94 C110,104 90,104 84,94Z', K),
+      P('M82,62 L84,40 L92,52 L100,34 L108,52 L116,40 L118,62Z', OC),
+    ].join('');
+    const det = [
+      legs,
+      gouge('M70,170 C76,156 90,148 100,148 C110,148 124,156 130,170 M76,184 C86,176 114,176 124,184', 1.6), gouge('M100,140 L100,196', 1.2),
+      L('M88,78 Q92,75 96,78 M104,78 Q108,75 112,78', K, 1.8), C(92, 79, 1.4, K), C(108, 79, 1.4, K), L('M100,80 L98,88 L101,88', K, 1.2),
+      gouge('M92,100 L94,110 M100,102 L100,114 M108,100 L106,110', 1),
+      C(91, 46, 2.4, VR), C(100, 40, 3, VR), C(109, 46, 2.4, VR),
+      C(54, 104, 6, OC), E(54, 105, 1.8, 5, K), C(66, 116, 2, PA), C(50, 118, 1.8, PA), C(62, 98, 1.6, PA), L('M44,118 Q58,126 72,116', PA, 1.6),
+      E(136, 108, 5, 6, OC), E(150, 108, 5, 6, OC), E(136, 109, 1.4, 4.6, K), E(150, 109, 1.4, 4.6, K), P('M141,114 L145,114 L143,117Z', VR),
+      L('M128,118 L118,116 M128,120 L118,122 M156,118 L168,116 M156,120 L168,122', PA, 1),
+      P('M131,80 L136,88 L140,82Z M153,80 L148,88 L144,82Z', VR),
+    ].join('');
+    return { defs: f.def, svg: f.el + legs + H.OL(body, 3, K) + det.replace(legs, '') };
+  };
+  const foe = () => {
+    const f = frame('d8e', '잡귀 · 임프');
+    const body = [
+      P('M80,140 C56,116 32,112 18,122 C28,126 32,134 30,144 C40,140 48,146 50,154 C58,148 68,152 72,160Z', K),
+      P('M120,140 C144,116 168,112 182,122 C172,126 168,134 170,144 C160,140 152,146 150,154 C142,148 132,152 128,160Z', K),
+      P('M74,206 C68,176 76,150 100,148 C124,150 132,176 126,206Z', K),
+      C(100, 122, 28, K), P('M78,106 C68,90 68,74 76,64 C78,80 84,92 92,100Z M122,106 C132,90 132,74 124,64 C122,80 116,92 108,100Z', K),
+      P('M84,206 L80,212 L94,212 L94,206Z M116,206 L120,212 L106,212 L106,206Z', K),
+      L('M146,212 L156,120', K, 4), P('M146,120 L150,96 L156,112 L162,94 L166,114 L170,100 L166,124Z', K),
+    ].join('');
+    const det = [
+      P('M86,116 L98,122 L86,126Z M114,116 L102,122 L114,126Z', VR),
+      P('M84,134 L116,134 L110,142 L105,137 L100,143 L95,137 L90,142Z', PA),
+      gouge('M80,196 C80,176 86,162 96,156 M120,196 C120,180 114,166 106,160 M90,170 L110,170 M92,180 L108,180', 1.4),
+      gouge('M36,126 C50,128 62,136 70,148 M164,126 C150,128 138,136 130,148', 1.2),
+      L('M128,180 C142,184 146,196 140,206', K, 3), P('M140,206 L134,210 L146,214Z', VR),
+    ].join('');
+    return { defs: f.def, svg: f.el + H.OL(body, 3, K) + det };
+  };
+  DIRS.push({ id: 'goetia', name: '고에티아 악마 도감', ref: '진·여신전생(카네코 가즈마), 『지옥 사전』 판화',
+    d: '원전에 적힌 모습을 그대로 살려. 바엘은 두꺼비·사람·고양이 머리에 거미 다리. 목판화처럼 검정, 종이색, 주홍, 황토만 써.',
+    g: '작위 시스템과 개념이 제일 정확히 맞고, 도감 읽는 재미가 커.', r: '사역마마다 디자인이 완전히 달라서 1인 제작 부담이 제일 커. 크기가 제각각이라 판 위 스케일도 어려워.',
+    board: { top: '#e6d8b8', top2: '#d8c8a4', side: '#16120f', line: '#16120f', bg: '#eee2c6' },
+    chars: { mage: { name: '마도 서기관', sub: '두건, 붉은 글씨 사본, 밀랍 인장', draw: mage },
+      famK: { name: '두꺼비 · 기사', sub: '바엘의 첫 모습. 흠: 한쪽 눈이 늘 반쯤 감겨', draw: famK },
+      famKing: { name: '바엘 · 왕', sub: '원전 그대로: 두꺼비, 사람, 고양이 머리에 거미 다리', draw: famKing },
+      foe: { name: '목판 임프 · 적', sub: '갈퀴 든 잡귀', draw: foe } } });
+})();
+/* 화면: 칩, 한눈에, 상세(마법사·기사·왕·적 + 판 장면), 평가 저장 */
+(() => {
+'use strict';
+const SVGNS = 'http://www.w3.org/2000/svg';
+const wrapSvg = (r, w = 200, h = 240) => `<svg xmlns="${SVGNS}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><defs>${r.defs}</defs>${r.svg}</svg>`;
+const drawChar = (d, k, noBg) => { H.noBg = !!noBg; const r = d.chars[k].draw(); H.noBg = false; return r; };
+
+/* ---------- 도트 변환 (16비트 방향) ---------- */
+const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const palOf = s => [...new Set((s.match(/#[0-9a-fA-F]{6}\b/g) || []).map(x => x.toLowerCase()))].map(hex2rgb);
+function loadSvg(svg){ return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); }); }
+async function pixelate(svg, w, h, pal, outline){
+  const img = await loadSvg(svg);
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
+  x.drawImage(img, 0, 0, w, h);
+  let data; try { data = x.getImageData(0, 0, w, h); } catch (e) { return c; }
+  const a = data.data, q = (r, g, b) => { let best = pal[0], bd = 1e9; for (const p of pal){ const d = (r - p[0]) ** 2 * .3 + (g - p[1]) ** 2 * .59 + (b - p[2]) ** 2 * .11; if (d < bd){ bd = d; best = p; } } return best; };
+  const op = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++){ const k = i * 4; if (a[k + 3] > 110){ const p = q(a[k], a[k + 1], a[k + 2]); a[k] = p[0]; a[k + 1] = p[1]; a[k + 2] = p[2]; a[k + 3] = 255; op[i] = 1; } else a[k + 3] = 0; }
+  if (outline){ const o = hex2rgb(outline); for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++){ const i = y * w + xx; if (op[i]) continue; const n = (xx > 0 && op[i - 1]) || (xx < w - 1 && op[i + 1]) || (y > 0 && op[i - w]) || (y < h - 1 && op[i + w]); if (n){ const k = i * 4; a[k] = o[0]; a[k + 1] = o[1]; a[k + 2] = o[2]; a[k + 3] = 255; } } }
+  x.putImageData(data, 0, 0); return c;
+}
+function upscale(src, s, bg){ const c = document.createElement('canvas'); c.width = src.width * s; c.height = src.height * s; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; if (bg) bg(x, c.width, c.height, s); x.drawImage(src, 0, 0, c.width, c.height); return c; }
+function pixelBg(x, W, H, s){
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#24305a'); g.addColorStop(1, '#3a2a5a'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#4a3a7a'; x.fillRect(0, H * .9, W, H * .1); x.fillStyle = '#5a4a8a'; x.fillRect(0, H * .9, W, s);
+  x.fillStyle = '#c8d8ff'; [[6, 8], [52, 12], [14, 30], [58, 40], [30, 6], [44, 26]].forEach(([px, py]) => x.fillRect(px * s, py * s, s, s));
+}
+
+/* ---------- 7×7 판 장면 ---------- */
+const SHAPE = ['XX...XX', 'X.....X', '.......', '.......', '.......', 'X.....X', 'XX...XX'];
+const TW = 44, TH = 22, OX = 180, OY = 46;
+const tileC = (c, r) => [OX + (c - r) * TW / 2, OY + (c + r) * TH / 2 + TH / 2];
+const PIECES = [['foe', 2, 1, 'e'], ['foe', 4, 1, 'e'], ['foe', 5, 3, 'e'], ['famK', 1, 4, 'a'], ['mage', 3, 5, 'a']];
+const TARGET = new Set(['2,1', '3,1', '4,1', '3,2', '2,2', '4,2']);
+function boardSvg(d, withPieces){
+  const b = d.board; let s = `<rect width="360" height="230" fill="${b.bg}"/>`;
+  if (b.glow) s += `<defs><radialGradient id="bgl${d.id}"><stop offset="0" stop-color="${b.glow}" stop-opacity=".55"/><stop offset="1" stop-color="${b.glow}" stop-opacity="0"/></radialGradient></defs><ellipse cx="180" cy="120" rx="190" ry="110" fill="url(#bgl${d.id})"/>`;
+  for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++){
+    if (SHAPE[r][c] === 'X') continue; const [x, y] = tileC(c, r);
+    const top = `M${x},${y - TH / 2} L${x + TW / 2},${y} L${x},${y + TH / 2} L${x - TW / 2},${y}Z`;
+    if (r === 6 || SHAPE[r + 1][c] === 'X') s += `<path d="M${x - TW / 2},${y} L${x},${y + TH / 2} L${x},${y + TH / 2 + 9} L${x - TW / 2},${y + 9}Z" fill="${b.side}"/>`;
+    if (c === 6 || SHAPE[r][c + 1] === 'X') s += `<path d="M${x + TW / 2},${y} L${x},${y + TH / 2} L${x},${y + TH / 2 + 9} L${x + TW / 2},${y + 9}Z" fill="${b.side}" opacity=".8"/>`;
+    s += `<path d="${top}" fill="${(r + c) % 2 ? b.top2 : b.top}" stroke="${b.line}" stroke-width="1"/>`;
+    if (TARGET.has(c + ',' + r)) s += `<path d="${top}" fill="#ff5a3a" opacity=".28"/><path d="M${x - 8},${y} L${x},${y - 4} L${x + 8},${y} L${x},${y + 4}Z" fill="none" stroke="#ff5a3a" stroke-width="1.2" opacity=".8"/>`;
+  }
+  const [mx, my] = tileC(3, 1);
+  s += `<ellipse cx="${mx}" cy="${my + 6}" rx="62" ry="30" fill="none" stroke="#ffb040" stroke-width="1.6" stroke-dasharray="5 4" opacity=".9"/>`;
+  PIECES.forEach(([, c, r, side]) => { const [x, y] = tileC(c, r); s += `<ellipse cx="${x}" cy="${y}" rx="15" ry="7.5" fill="none" stroke="${side === 'a' ? '#4ac8ff' : '#ff4a4a'}" stroke-width="2.4"/>`; });
+  if (withPieces){
+    PIECES.slice().sort((a, z) => (a[1] + a[2]) - (z[1] + z[2])).forEach(([k, c, r]) => {
+      const [x, y] = tileC(c, r), rr = drawChar(d, k, true), w = k === 'mage' ? 58 : 52, h = w * 1.2;
+      s += `<svg x="${x - w / 2}" y="${y - h * .94}" width="${w}" height="${h}" viewBox="0 0 200 240" overflow="visible"><defs>${rr.defs}</defs>${rr.svg}</svg>`;
+    });
+  }
+  return `<svg xmlns="${SVGNS}" viewBox="0 0 360 230" width="360" height="230">${s}</svg>`;
+}
+
+/* ---------- 그리기 ---------- */
+async function renderChar(el, d, k){
+  if (!d.pixel){ el.innerHTML = wrapSvg(drawChar(d, k)); return; }
+  const r = drawChar(d, k, true), svg = wrapSvg(r);
+  const spr = await pixelate(svg, 64, 77, palOf(svg), '#1a1424');
+  el.replaceChildren(upscale(spr, 5, pixelBg));
+}
+async function renderBoard(el, d){
+  if (!d.pixel){ el.innerHTML = boardSvg(d, true); return; }
+  const bsvg = boardSvg(d, false), s = 2;
+  const base = await pixelate(bsvg, 180, 115, palOf(bsvg), null);
+  const c = upscale(base, 4); const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
+  for (const [k, cc, rr] of PIECES.slice().sort((a, z) => (a[1] + a[2]) - (z[1] + z[2]))){
+    const r = drawChar(d, k, true), svg = wrapSvg(r);
+    const w = k === 'mage' ? 30 : 26, h = Math.round(w * 1.2);
+    const spr = await pixelate(svg, w, h, palOf(svg), '#1a1424');
+    const [px, py] = tileC(cc, rr);
+    x.drawImage(spr, Math.round(px / s - w / 2) * 4, Math.round(py / s - h * .94) * 4, w * 4, h * 4);
+  }
+  el.replaceChildren(c);
+}
+
+/* ---------- 화면 ---------- */
+const main = document.getElementById('main'), chips = document.getElementById('chips');
+const state = {}, LS = 'mahocukai.dirs.draft';
+try { Object.assign(state, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
+const saveDraft = () => { try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} };
+const cls = v => v === '좋아' ? 'ok' : v === '애매' ? 'mid' : v === '별로' ? 'no' : '';
+let db = null, writable = true, current = 'all', rateUI = null;
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ io.unobserve(e.target); const f = e.target.__draw; e.target.__draw = null; f && f(); } }), { rootMargin: '300px' }) : null;
+const lazy = (el, f) => { if (io){ el.__draw = f; io.observe(el); } else f(); };
+const mk = (tag, cls2, text) => { const e = document.createElement(tag); if (cls2) e.className = cls2; if (text != null) e.textContent = text; return e; };
+
+function buildChips(){
+  chips.replaceChildren();
+  const add = (id, label, num) => { const b = mk('button', 'chip'); b.type = 'button';
+    if (num){ b.appendChild(mk('span', 'n', num)); } b.appendChild(document.createTextNode(label));
+    const dot = mk('i', cls(state['dir-' + id]?.choice)); b.appendChild(dot);
+    b.setAttribute('aria-current', String(current === id)); b.addEventListener('click', () => go(id)); chips.appendChild(b); };
+  add('all', '한눈에'); DIRS.forEach((d, i) => add(d.id, d.name, String(i + 1)));
+}
+function go(id, noScroll){
+  current = id; try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  buildChips(); const act = chips.querySelector('[aria-current="true"]'); if (act) act.scrollIntoView({ inline: 'center', block: 'nearest' });
+  id === 'all' ? overview() : detail(DIRS.find(d => d.id === id));
+  if (!noScroll) window.scrollTo(0, document.querySelector('nav.chips').offsetTop);
+}
+function overview(){
+  main.replaceChildren();
+  const sec = mk('section', 'sec'); sec.append(mk('h2', '', '한눈에 보기'), mk('p', 'lead', '방향마다 마법사와 왕 작위 사역마야. 누르면 그 방향 전체(기사 작위, 적, 판 장면)로 가.'));
+  const grid = mk('div', 'over');
+  DIRS.forEach((d, i) => {
+    const b = mk('button', 'tile'); b.type = 'button';
+    const pair = mk('div', 'pair'); const a1 = mk('div', 'art'), a2 = mk('div', 'art'); pair.append(a1, a2); b.appendChild(pair);
+    const cap = mk('div', 'cap'); cap.appendChild(mk('b', '', `${i + 1}. ${d.name}`));
+    const v = state['dir-' + d.id]?.choice; cap.appendChild(v ? mk('span', 'badge ' + cls(v), v) : mk('span', '', d.ref));
+    b.appendChild(cap); b.addEventListener('click', () => go(d.id)); grid.appendChild(b);
+    lazy(pair, () => { renderChar(a1, d, 'mage'); renderChar(a2, d, 'famKing'); });
+  });
+  sec.appendChild(grid); main.appendChild(sec);
+}
+function card(d, k){
+  const ch = d.chars[k], b = mk('button', 'card'); b.type = 'button'; b.setAttribute('aria-label', `${ch.name} 크게 보기`);
+  const art = mk('div', 'art'); b.appendChild(art);
+  const cap = mk('div', 'cap'); cap.append(mk('b', '', ch.name), mk('span', '', ch.sub)); b.appendChild(cap);
+  b.addEventListener('click', () => zoom(d, k)); lazy(art, () => renderChar(art, d, k)); return b;
+}
+function detail(d){
+  main.replaceChildren();
+  const idx = DIRS.indexOf(d), wrap = mk('div', 'detail');
+  const hd = mk('div', 'dhead'); hd.append(mk('p', 'num', `${idx + 1} / ${DIRS.length}`), mk('h2', '', d.name), mk('p', 'd', d.d), mk('p', 'refs', '참고: ' + d.ref));
+  const pc = mk('div', 'pc'); const g = mk('div', 'g'); g.append(mk('b', '', '좋은 점'), document.createTextNode(d.g)); const r = mk('div', 'r'); r.append(mk('b', '', '걱정'), document.createTextNode(d.r)); pc.append(g, r); hd.appendChild(pc);
+  wrap.appendChild(hd);
+  const s1 = mk('section', 'sec'); s1.appendChild(mk('h3', '', '마법사와 적'));
+  const g1 = mk('div', 'grid'); g1.append(card(d, 'mage'), card(d, 'foe')); s1.appendChild(g1);
+  const s2 = mk('section', 'sec'); s2.append(mk('h3', '', '같은 사역마의 기사 작위 → 왕 작위'), mk('p', 'hint', '돌파·승급하면 이렇게 바뀌어. 귀여운 핵심 하나는 왕까지 남겨뒀어.'));
+  const g2 = mk('div', 'grid'); g2.append(card(d, 'famK'), card(d, 'famKing')); s2.appendChild(g2);
+  const s3 = mk('section', 'sec'); s3.append(mk('h3', '', '7×7 판 위에서'), mk('p', 'hint', '실제 전투 크기(말 하나가 손톱만 함)로 놓았어. 파란 고리는 내 편, 빨간 고리는 적, 주황 점선은 영창 중인 마법 범위.'));
+  const bw = mk('button', 'card wide'); bw.type = 'button'; bw.setAttribute('aria-label', '판 장면 크게 보기'); const ba = mk('div', 'art board'); bw.appendChild(ba); bw.addEventListener('click', () => zoom(d, 'board'));
+  lazy(ba, () => renderBoard(ba, d)); s3.appendChild(bw);
+  wrap.append(s1, s2, s3, rateBox(d));
+  const pg = mk('div', 'pager'); const prev = mk('button', '', '← 이전'), next = mk('button', '', idx === DIRS.length - 1 ? '한눈에 보기' : '다음 →'); prev.type = next.type = 'button';
+  prev.disabled = idx === 0; prev.addEventListener('click', () => go(DIRS[idx - 1].id)); next.addEventListener('click', () => go(idx === DIRS.length - 1 ? 'all' : DIRS[idx + 1].id));
+  pg.append(prev, next); wrap.appendChild(pg); main.appendChild(wrap);
+}
+const busy = {}, again = {}, timers = {};
+function rateBox(d){
+  const key = 'dir-' + d.id; if (!state[key]) state[key] = { choice: '', note: '' };
+  const box = mk('section', 'rate'); box.setAttribute('aria-labelledby', 'rate-h');
+  const h = mk('h3', '', `"${d.name}" 어때?`); h.id = 'rate-h';
+  const opts = mk('div', 'opts'); opts.setAttribute('role', 'group');
+  const btns = ['좋아', '애매', '별로'].map(v => { const b = mk('button', 'opt', v); b.type = 'button'; b.dataset.v = v; b.setAttribute('aria-pressed', String(state[key].choice === v));
+    b.addEventListener('click', () => { const cur = state[key]; cur.choice = cur.choice === v ? '' : v; btns.forEach(x => x.setAttribute('aria-pressed', String(cur.choice === x.dataset.v))); save(key, d.name); buildChips(); }); return b; });
+  opts.append(...btns);
+  const ta = mk('textarea'); ta.rows = 2; ta.placeholder = '좋은 점, 섞고 싶은 점 (예: 마도구 사역마 + 꼬마 마녀 주인공)'; ta.value = state[key].note || ''; ta.setAttribute('aria-label', `${d.name} 메모`);
+  ta.addEventListener('input', () => { state[key].note = ta.value; clearTimeout(timers[key]); timers[key] = setTimeout(() => { timers[key] = null; save(key, d.name); }, 900); });
+  ta.addEventListener('blur', () => { if (timers[key]){ clearTimeout(timers[key]); timers[key] = null; save(key, d.name); } });
+  const st = mk('p', 'st'); st.setAttribute('aria-live', 'polite'); st.textContent = db ? '' : '저장 연결 중…';
+  box.append(h, opts, ta, st); rateUI = { key, btns, ta, st }; return box;
+}
+async function save(key, title){
+  saveDraft(); if (!db || !writable) return;
+  if (busy[key]){ again[key] = true; return; }
+  busy[key] = true; const u = rateUI && rateUI.key === key ? rateUI : null;
+  if (u){ u.st.className = 'st'; u.st.textContent = '저장 중…'; }
+  try { const s = state[key]; await db.doc('answers/' + key).set({ q: key, title, choice: s.choice || '', note: s.note || '', updatedAt: new Date().toISOString() }); if (u){ u.st.className = 'st ok'; u.st.textContent = '저장됨'; } }
+  catch (e) { if (e && e.code === 'invalid_argument') writable = false; if (u){ u.st.className = 'st err'; u.st.textContent = writable ? '저장이 안 됐어. 잠시 뒤에 다시 해줘.' : '이 계정으로는 저장할 수 없어. 채팅으로 알려줘.'; } }
+  busy[key] = false; if (again[key]){ again[key] = false; save(key, title); }
+}
+const zoomEl = document.getElementById('zoom'), zoomArt = document.getElementById('zoomArt'), zoomCap = document.getElementById('zoomCap');
+let lastFocus = null;
+function zoom(d, k){
+  lastFocus = document.activeElement; zoomArt.className = 'art' + (k === 'board' ? ' w' : '');
+  if (k === 'board'){ renderBoard(zoomArt, d); zoomCap.textContent = `${d.name} · 7×7 판 장면`; }
+  else { renderChar(zoomArt, d, k); zoomCap.textContent = `${d.name} · ${d.chars[k].name} — ${d.chars[k].sub}`; }
+  zoomEl.hidden = false; zoomEl.focus();
+}
+const closeZoom = () => { zoomEl.hidden = true; zoomArt.replaceChildren(); if (lastFocus) lastFocus.focus(); };
+zoomEl.addEventListener('click', closeZoom); addEventListener('keydown', e => { if (e.key === 'Escape' && !zoomEl.hidden) closeZoom(); });
+
+const startId = (location.hash || '').slice(1);
+go(DIRS.some(d => d.id === startId) ? startId : 'all', true);
+(async () => {
+  try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+  if (!db){ if (rateUI) rateUI.st.textContent = '여기선 저장이 안 될 수 있어. 그럼 채팅으로 알려줘.'; return; }
+  if (rateUI) rateUI.st.textContent = '';
+  db.collection('answers').onSnapshot(snap => {
+    snap.docs.forEach(doc => { const v = doc.data(); if (!v || !doc.id.startsWith('dir-')) return; const key = doc.id; if (busy[key] || timers[key]) return;
+      state[key] = { choice: typeof v.choice === 'string' ? v.choice : '', note: typeof v.note === 'string' ? v.note : '' };
+      if (rateUI && rateUI.key === key){ rateUI.btns.forEach(b => b.setAttribute('aria-pressed', String(state[key].choice === b.dataset.v))); if (document.activeElement !== rateUI.ta) rateUI.ta.value = state[key].note; } });
+    saveDraft(); buildChips();
+  }, () => {});
+})();
+window.__D = { DIRS, renderChar, renderBoard };
+})();
+</script>
