@@ -1,0 +1,402 @@
+<title>직사각형과 인장</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;900&display=swap">
+<style>
+/* Layout: 주인공 → 같은 인장의 기사·백작·왕 → 성격이 다른 인장과 적 → 7×7 판 장면 → 전체 한마디. 그림은 전부 캔버스로 움직이고, 누르면 반응하며 한마디 함. */
+:root{
+  --bg:#f2f0ec; --paper:#ffffff; --ink:#1c1a20; --muted:#625c68; --line:#dcd8d0;
+  --accent:#d8432a; --accent-soft:#f6e2dc; --ok:#2f7d55; --mid:#9a7a2a; --no:#a1462e;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --serif:"Noto Serif KR","Apple SD Gothic Neo",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121114; --paper:#1b1a1e; --ink:#ece8ee; --muted:#a39daa; --line:#2c2930;
+  --accent:#ff7a5a; --accent-soft:#3a2420; --ok:#6cc495; --mid:#d8b860; --no:#e48a72; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#121114; --paper:#1b1a1e; --ink:#ece8ee; --muted:#a39daa; --line:#2c2930;
+  --accent:#ff7a5a; --accent-soft:#3a2420; --ok:#6cc495; --mid:#d8b860; --no:#e48a72; color-scheme:dark }
+html,body{background:var(--bg);color:var(--ink)}
+body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%}
+.wrap{max-width:880px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px));display:grid;gap:30px}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(26px,6vw,34px);line-height:1.2;margin:0}
+h2{font-family:var(--serif);font-weight:900;font-size:20px;margin:0}
+p{margin:0}
+.lead{color:var(--muted);font-size:15px}
+.hint{font-size:13px;color:var(--muted)}
+.bar{display:flex;gap:8px;flex-wrap:wrap}
+.toggle{font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;min-height:40px}
+section{display:grid;gap:12px}
+.row{display:grid;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.row.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:grid}
+.stage{position:relative;aspect-ratio:1;background:#0c0b10;cursor:pointer;touch-action:manipulation}
+.stage.tall{aspect-ratio:5/4}
+.stage.board{aspect-ratio:16/10}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.say{position:absolute;left:50%;top:8%;transform:translate(-50%,6px);max-width:86%;background:#fbf6ea;color:#1c1a20;font-size:13px;font-weight:600;line-height:1.35;padding:6px 10px;border-radius:10px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.say.on{opacity:1;transform:translate(-50%,0)}
+.say::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#fbf6ea}
+.tap{position:absolute;right:8px;bottom:6px;font-size:11px;color:#8a8496;pointer-events:none}
+.body{padding:9px 11px 11px;display:grid;gap:4px;font-size:13px;line-height:1.5}
+.body h3{margin:0;font-family:var(--serif);font-weight:900;font-size:16px}
+.body .r{font-size:12px;color:var(--muted)}
+.rate{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px}
+.rate h3{margin:0;font-size:14px;color:var(--muted)}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opt{font:inherit;font-weight:700;font-size:14px;padding:8px 16px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;min-height:40px}
+.opt[aria-pressed="true"][data-v="좋아"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt[aria-pressed="true"][data-v="애매"]{background:var(--mid);border-color:var(--mid);color:#fff}
+.opt[aria-pressed="true"][data-v="별로"]{background:var(--no);border-color:var(--no);color:#fff}
+textarea{font:inherit;font-size:16px;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);color:var(--ink);resize:vertical}
+.st{font-size:12px;color:var(--muted);min-height:1.1em}.st.ok{color:var(--ok)}.st.err{color:var(--no)}
+button:focus-visible,textarea:focus-visible,.stage:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:520px){.row{gap:6px}.body{padding:7px 8px 9px}.body h3{font-size:14px}.body p:not(.r){font-size:12px}}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <h1>직사각형과 살아 있는 인장</h1>
+    <p class="lead">주인공은 주홍 직사각형, 사역마는 고에티아 악마들처럼 <b>각자의 인장(문양)</b>이 살아 움직이는 존재야. 얼굴 대신 인장마다 <b>눈 하나</b>가 있어. 생김새 대신 움직임, 소리, 한마디로 성격을 줬어.</p>
+    <p class="hint">그림을 누르면 반응하고 한마디 해. 여러 번 눌러봐.</p>
+    <div class="bar"><button class="toggle" id="snd" type="button" aria-pressed="true">소리 켜짐</button><button class="toggle" id="mot" type="button" aria-pressed="false">움직임 멈추기</button></div>
+  </header>
+
+  <section aria-labelledby="s1"><h2 id="s1">주인공</h2>
+    <div class="card"><div class="stage tall" data-who="mage" tabindex="0" role="button" aria-label="주인공 직사각형 누르기"></div>
+      <div class="body"><h3>3급 마법산업기능사</h3><p>주홍 직사각형. 몸에 새긴 금빛 문양이 마나에 따라 빛나. 표정 대신 <b>찌그러졌다 펴지는 몸짓</b>으로 기분을 보여줘.</p><p class="r">착장은 몸의 문양, 모자 실루엣, 망토 띠로 바꿔.</p></div></div>
+    <div class="rate" data-key="seal-mage"><h3>주인공 어때?</h3></div>
+  </section>
+
+  <section aria-labelledby="s2"><h2 id="s2">같은 인장의 기사 → 백작 → 왕</h2><p class="hint">불의 인장 "잿불". 작위가 오를수록 고리가 늘고, 빛이 세지고, 성격도 바뀌어.</p>
+    <div class="row">
+      <div class="card"><div class="stage" data-who="emberK" tabindex="0" role="button" aria-label="잿불 기사 누르기"></div><div class="body"><h3>잿불 · 기사</h3><p>작고 성급해. 통통 튀어.</p></div></div>
+      <div class="card"><div class="stage" data-who="emberE" tabindex="0" role="button" aria-label="잿불 백작 누르기"></div><div class="body"><h3>잿불 · 백작</h3><p>고리가 생기고 조금 의젓해졌어.</p></div></div>
+      <div class="card"><div class="stage" data-who="emberG" tabindex="0" role="button" aria-label="잿불 왕 누르기"></div><div class="body"><h3>잿불 · 왕</h3><p>세 겹 고리, 왕관 가시, 시종 인장들.</p></div></div>
+    </div>
+    <div class="rate" data-key="seal-ember"><h3>인장이 진화하는 느낌 어때?</h3></div>
+  </section>
+
+  <section aria-labelledby="s3"><h2 id="s3">성격이 다른 인장, 그리고 적</h2>
+    <div class="row">
+      <div class="card"><div class="stage" data-who="sleepy" tabindex="0" role="button" aria-label="느림보 누르기"></div><div class="body"><h3>느림보 · 물</h3><p>늘 졸려. 천천히 가라앉았다 떠올라.</p></div></div>
+      <div class="card"><div class="stage" data-who="spiky" tabindex="0" role="button" aria-label="톱니 누르기"></div><div class="body"><h3>톱니 · 바람</h3><p>까칠해. 가만히 못 있고 덜덜 떨려.</p></div></div>
+      <div class="card"><div class="stage" data-who="foe" tabindex="0" role="button" aria-label="검은 인장 누르기"></div><div class="body"><h3>검은 인장 · 적</h3><p>부서진 고리, 붉은 눈, 지직거려.</p></div></div>
+    </div>
+    <div class="rate" data-key="seal-cast"><h3>성격 차이가 느껴져?</h3></div>
+  </section>
+
+  <section aria-labelledby="s4"><h2 id="s4">7×7 판 위에서</h2><p class="hint">직사각형은 입체 상자로, 인장은 칸 위에 떠 있어. 붉은 칸은 적이 다음 턴에 때릴 곳.</p>
+    <div class="card"><div class="stage board" data-who="board" tabindex="0" role="button" aria-label="판 장면 누르기"></div></div>
+    <div class="rate" data-key="seal-board"><h3>판 위 모습 어때?</h3></div>
+  </section>
+
+  <section aria-labelledby="s5"><h2 id="s5">전체 한마디</h2>
+    <div class="rate" data-key="seal-overall" data-noopts="1"><h3>이 방향으로 계속 갈까? 바꿀 건?</h3></div>
+  </section>
+</div>
+
+<script>
+(() => {
+'use strict';
+const TAU = Math.PI * 2, clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t;
+const eout = t => 1 - Math.pow(1 - t, 3);
+let paused = false, soundOn = true;
+try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) paused = true; } catch (e) {}
+
+/* ---------- 소리: 캐릭터마다 다른 짧은 울림 ---------- */
+let AC = null;
+function tone(kind){
+  if (!soundOn) return;
+  try { if (!AC){ const K = window.AudioContext || window.webkitAudioContext; if (!K) return; AC = new K(); } if (AC.state === 'suspended') AC.resume(); } catch (e) { return; }
+  const t = AC.currentTime, out = AC.createGain(); out.gain.value = .22; out.connect(AC.destination);
+  const note = (type, f0, f1, s, d, v) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t + s); o.frequency.exponentialRampToValueAtTime(f1, t + s + d); g.gain.setValueAtTime(.0001, t + s); g.gain.exponentialRampToValueAtTime(v, t + s + .01); g.gain.exponentialRampToValueAtTime(.0001, t + s + d); o.connect(g); g.connect(out); o.start(t + s); o.stop(t + s + d + .02); };
+  const S = {
+    mage: () => { note('square', 220, 330, 0, .09, .25); note('triangle', 440, 660, .07, .14, .3); },
+    emberK: () => { note('square', 520, 900, 0, .07, .3); note('square', 700, 1200, .06, .07, .25); },
+    emberE: () => { note('triangle', 392, 523, 0, .16, .4); note('sine', 784, 784, .1, .25, .2); },
+    emberG: () => { [196, 247, 294, 392].forEach((f, i) => note('triangle', f, f, i * .05, .9, .22)); note('sine', 98, 70, 0, .9, .5); },
+    sleepy: () => { note('sine', 330, 180, 0, .5, .35); note('sine', 660, 500, .3, .4, .12); },
+    spiky: () => { note('sawtooth', 900, 300, 0, .08, .2); note('sawtooth', 1100, 400, .06, .08, .18); note('square', 1300, 500, .12, .06, .15); },
+    foe: () => { note('sawtooth', 120, 60, 0, .35, .35); note('square', 90, 80, .05, .3, .15); },
+    board: () => { note('triangle', 523, 784, 0, .2, .3); },
+  };
+  (S[kind] || S.board)();
+}
+
+/* ---------- 그리기 도우미 ---------- */
+function glow(x, build, col, w, a = 1){
+  x.save(); x.globalCompositeOperation = 'lighter'; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); build(); x.strokeStyle = col;
+  x.globalAlpha = .14 * a; x.lineWidth = w * 6; x.stroke(); x.globalAlpha = .32 * a; x.lineWidth = w * 2.6; x.stroke(); x.globalAlpha = a; x.lineWidth = w; x.strokeStyle = '#fff8ee'; x.stroke();
+  x.globalAlpha = .55 * a; x.lineWidth = w * 1.4; x.strokeStyle = col; x.stroke(); x.restore();
+}
+function halo(x, cx, cy, r, col, a){ x.save(); x.globalCompositeOperation = 'lighter'; const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); x.globalAlpha = a; x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, TAU); x.fill(); x.restore(); }
+function dot(x, cx, cy, r, col, a = 1){ halo(x, cx, cy, r * 4, col, .5 * a); x.save(); x.globalCompositeOperation = 'lighter'; x.globalAlpha = a; x.fillStyle = '#fff8ee'; x.beginPath(); x.arc(cx, cy, r, 0, TAU); x.fill(); x.restore(); }
+const ringP = (x, r, a0 = 0, a1 = TAU) => () => x.arc(0, 0, r, a0, a1);
+function backdrop(x, W, H, tint){
+  const g = x.createRadialGradient(W / 2, H * .45, 0, W / 2, H * .45, W * .8); g.addColorStop(0, tint); g.addColorStop(1, '#09080c'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.save(); x.strokeStyle = 'rgba(255,255,255,.05)'; x.lineWidth = .6; for (const r of [W * .42, W * .36]){ x.beginPath(); x.arc(W / 2, H * .47, r, 0, TAU); x.stroke(); } x.restore();
+}
+function shadow(x, cx, cy, rx, a){ x.save(); x.fillStyle = `rgba(0,0,0,${a})`; x.beginPath(); x.ellipse(cx, cy, rx, rx * .22, 0, 0, TAU); x.fill(); x.restore(); }
+/* 인장의 눈: 아몬드 + 눈동자. open 0~1, look -1~1 */
+function sealEye(x, s, col, open, lookX, lookY, a = 1){
+  const w = 12 * s, h = 7 * s * Math.max(.06, open);
+  glow(x, () => { x.moveTo(-w, 0); x.quadraticCurveTo(0, -h * 1.6, w, 0); x.quadraticCurveTo(0, h * 1.6, -w, 0); }, col, 1.6 * s, a);
+  if (open > .25) dot(x, lookX * w * .45, lookY * h * .4, 2.6 * s * Math.min(1, open), col, a);
+}
+/* 파티클 */
+function emit(arr, n, f){ for (let i = 0; i < n; i++) arr.push(f(i)); }
+function stepParts(x, arr, dt, col){
+  x.save(); x.globalCompositeOperation = 'lighter';
+  for (const p of arr){ p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += (p.g || 0) * dt; p.vx *= .98; const a = clamp(p.life / p.max); x.globalAlpha = a; x.fillStyle = p.col || col; x.beginPath(); x.arc(p.x, p.y, p.r * (p.shrink ? a : 1), 0, TAU); x.fill(); }
+  x.restore(); for (let i = arr.length - 1; i >= 0; i--) if (arr[i].life <= 0) arr.splice(i, 1);
+}
+
+/* ---------- 캐릭터들 ---------- */
+const LINES = {
+  mage: ['3급 실기, 오늘은 붙는다.', '마나 충전 완료.', '…방금 직사각형이라고 했냐?', '설계도부터 펴자.', '낙성 한 번 보여줄까?'],
+  emberK: ['주인님! 태울 거 있습니까!', '작지만 뜨겁습니다!', '기사 잿불, 출동!', '앗 뜨거, 아 내가 뜨겁구나.'],
+  emberE: ['기사 시절 얘긴 하지 마.', '불은 천천히 키우는 거야.', '고리 하나 늘었다고 다른 사람 된 거 아냐.'],
+  emberG: ['무릎 꿇어라. 아, 너 말고.', '왕관이 무겁군.', '내 시종들이 너를 지킬 것이다.', '…가끔은 기사 시절이 그립다.'],
+  sleepy: ['…5분만 더…', '물 많이 마셔…', '…으응? 불렀어…?', '나 지금 일하는 중이야… 꿈에서…'],
+  spiky: ['건드리지 마.', '뭘 봐?', '바람 불 때 부르라고.', '…고마워. 한 번만 말한다.'],
+  foe: ['…끼긱…', '네 인장… 내놔…', '지지직—', '부서진 건 나도 마찬가지야…'],
+  board: ['적이 다음 턴에 붉은 칸을 때려.', '잿불이 앞을 막고, 나는 영창.', '느림보는… 자는 중.'],
+};
+const ROT = {}; const say = (el, who) => { const b = el.querySelector('.say'); const arr = LINES[who]; ROT[who] = ((ROT[who] ?? -1) + 1) % arr.length; b.textContent = arr[ROT[who]]; b.classList.add('on'); clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove('on'), 2400); };
+
+const CHAR = {};
+/* 주인공: 주홍 직사각형. 찌그러졌다 펴지기(스쿼시·스트레치)로 감정 */
+CHAR.mage = { tint: '#2a1a1e', init(s){ s.parts = []; }, draw(x, W, H, t, s, dt){
+  backdrop(x, W, H, this.tint);
+  const k = s.react >= 0 ? clamp((t - s.react) / .9) : 1;
+  let sq = 1 + Math.sin(t * 2) * .012, hop = 0, lean = Math.sin(t * .7) * .02;
+  if (k < 1){ if (k < .15){ sq = 1 - .22 * eout(k / .15); } else if (k < .55){ const u = (k - .15) / .4; hop = Math.sin(u * Math.PI) * 26; sq = 1 + .12 * Math.sin(u * Math.PI); } else { const u = (k - .55) / .45; sq = 1 - .1 * Math.sin(u * Math.PI) * (1 - u); } }
+  const cx = W / 2, gy = H * .84, bw = W * .2, bh = H * .5;
+  shadow(x, cx, gy, bw * (1 - hop / 80), .55);
+  const charge = .55 + .45 * Math.sin(t * 1.3) ** 2 + (k < 1 ? (1 - k) * 1.5 : 0);
+  halo(x, cx, gy - bh * .5 - hop, bh * .9, '#ff5a2a', .18 + .12 * charge);
+  x.save(); x.translate(cx, gy - hop); x.rotate(lean); x.scale(1 / Math.sqrt(sq), sq);
+  const g = x.createLinearGradient(-bw / 2, -bh, bw / 2, 0); g.addColorStop(0, '#ff6a40'); g.addColorStop(.55, '#e0482e'); g.addColorStop(1, '#b8341f'); x.fillStyle = g; x.fillRect(-bw / 2, -bh, bw, bh);
+  x.fillStyle = 'rgba(60,10,0,.22)'; x.fillRect(0, -bh, bw / 2, bh);
+  x.fillStyle = 'rgba(255,230,200,.35)'; x.fillRect(-bw / 2, -bh, bw, 2.5);
+  const gold = '#ffc860', a = clamp(.4 + charge * .5);
+  glow(x, () => { x.moveTo(0, -bh * .82); x.lineTo(0, -bh * .28); x.moveTo(-bw * .26, -bh * .6); x.lineTo(bw * .26, -bh * .6); }, gold, 1.4, a);
+  glow(x, () => { x.arc(0, -bh * .6, bw * .17, 0, TAU); }, gold, 1.1, a);
+  glow(x, () => { x.moveTo(-bw * .3, -bh * .18); x.lineTo(bw * .3, -bh * .18); }, gold, .9, a * .7);
+  x.restore();
+  if (k < .2 && !s.burst){ s.burst = 1; emit(s.parts, 18, i => { const an = i / 18 * TAU; return { x: cx, y: gy - bh * .55, vx: Math.cos(an) * 60, vy: Math.sin(an) * 60 - 20, life: .7, max: .7, r: 1.6, shrink: 1, col: '#ffc860' }; }); }
+  if (k >= 1) s.burst = 0;
+  if (Math.random() < dt * 3) s.parts.push({ x: cx + (Math.random() - .5) * bw, y: gy - Math.random() * bh, vx: 0, vy: -12, life: 1.4, max: 1.4, r: 1, shrink: 1, col: '#ff8a50' });
+  stepParts(x, s.parts, dt, '#ffc860');
+} };
+
+/* 잿불 인장: 기사(1) → 백작(2) → 왕(3) */
+function emberSeal(level){ return { tint: level === 3 ? '#2e2010' : '#24180e', init(s){ s.parts = []; s.blinkAt = 2 + Math.random() * 3; }, draw(x, W, H, t, s, dt){
+  backdrop(x, W, H, this.tint);
+  const col = '#ffb43a', k = s.react >= 0 ? clamp((t - s.react) / (level === 3 ? 1.4 : .8)) : 1;
+  const sp = level === 1 ? 4.2 : level === 2 ? 2 : 1.1, amp = level === 1 ? 7 : level === 2 ? 5 : 4;
+  let by = Math.sin(t * sp) * amp, sc = (W / 200) * (level === 1 ? .78 : level === 2 ? .9 : .8);
+  if (k < 1){ if (level === 1){ by -= Math.sin(k * Math.PI) * 30; } else sc *= 1 + .12 * Math.sin(k * Math.PI); }
+  const cx = W / 2, cy = H * .47 + by;
+  shadow(x, cx, H * .9, W * .22 * (1 - by / 60), .5);
+  halo(x, cx, cy, W * (.3 + level * .08), col, .35 + .15 * Math.sin(t * 3));
+  x.save(); x.translate(cx, cy); x.scale(sc, sc);
+  if (level === 1) x.rotate(Math.sin(t * sp * .5) * .12);
+  // 몸통 인장: 세로 창 + 갈고리 두 개 + 원
+  glow(x, () => { x.moveTo(0, -58); x.lineTo(0, 40); x.moveTo(-24, -20); x.quadraticCurveTo(-30, 8, -12, 22); x.moveTo(24, -20); x.quadraticCurveTo(30, 8, 12, 22); x.moveTo(-10, 40); x.lineTo(10, 40); }, col, 2.2);
+  glow(x, ringP(x, 30), col, 2);
+  glow(x, () => { x.moveTo(-6, -58); x.lineTo(0, -68); x.lineTo(6, -58); }, col, 2);
+  if (level >= 2){
+    x.save(); x.rotate(t * .35); glow(x, ringP(x, 52), col, 1.6); for (let i = 0; i < 12; i++){ const a = i / 12 * TAU; glow(x, () => { x.moveTo(Math.cos(a) * 52, Math.sin(a) * 52); x.lineTo(Math.cos(a) * (i % 3 ? 57 : 62), Math.sin(a) * (i % 3 ? 57 : 62)); }, col, 1.2, .8); } x.restore();
+    glow(x, () => { x.arc(0, -44, 12, Math.PI * .15, Math.PI * .85); }, col, 1.6);
+  }
+  if (level === 3){
+    x.save(); x.rotate(-t * .22); glow(x, ringP(x, 74), col, 1.4, .9); for (let i = 0; i < 7; i++){ const a = i / 7 * TAU; glow(x, () => { x.moveTo(Math.cos(a - .1) * 74, Math.sin(a - .1) * 74); x.lineTo(Math.cos(a) * 86, Math.sin(a) * 86); x.lineTo(Math.cos(a + .1) * 74, Math.sin(a + .1) * 74); }, col, 1.4); } x.restore();
+    x.save(); x.rotate(t * .12); glow(x, () => { for (let i = 0; i <= 7; i++){ const a = -Math.PI / 2 + i * 3 * TAU / 7; i ? x.lineTo(Math.cos(a) * 66, Math.sin(a) * 66) : x.moveTo(Math.cos(a) * 66, Math.sin(a) * 66); } }, col, 1, .55); x.restore();
+    for (let i = 0; i < 3; i++){ const a = t * .6 + i * TAU / 3, ox = Math.cos(a) * 92, oy = Math.sin(a) * 30 + 8; x.save(); x.translate(ox, oy); x.scale(.28, .28); glow(x, ringP(x, 30), col, 3, .8); glow(x, () => { x.moveTo(0, -40); x.lineTo(0, 30); }, col, 3, .8); x.restore(); }
+    glow(x, () => { x.moveTo(-16, -80); x.lineTo(-10, -96); x.lineTo(-4, -84); x.lineTo(0, -100); x.lineTo(4, -84); x.lineTo(10, -96); x.lineTo(16, -80); }, '#ffe08a', 1.8);
+  }
+  // 눈
+  let open = 1; s.blinkAt -= dt; if (s.blinkAt < 0){ open = clamp(Math.abs(s.blinkAt + .09) / .09); if (s.blinkAt < -.18){ s.blinkAt = 2 + Math.random() * 3; } }
+  if (k < .4 && level === 2) open = 1.3;
+  const lx = Math.sin(t * (level === 1 ? 1.7 : .7)) * (level === 3 ? .3 : .8), ly = level === 3 ? .1 : Math.cos(t * 1.1) * .3;
+  x.save(); x.translate(0, -4); sealEye(x, level === 3 ? 1.1 : 1, col, open * (level === 3 ? .75 : 1), lx, ly); x.restore();
+  x.restore();
+  if (k < .15 && !s.burst){ s.burst = 1; emit(s.parts, level * 16, i => { const a = Math.random() * TAU, v = 40 + Math.random() * 60 * level; return { x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, g: 60, life: .9, max: .9, r: 1.6, shrink: 1, col: '#ffd070' }; }); }
+  if (k >= 1) s.burst = 0;
+  if (Math.random() < dt * (4 + level * 4)) s.parts.push({ x: cx + (Math.random() - .5) * W * .3, y: cy + 20, vx: (Math.random() - .5) * 10, vy: -25 - Math.random() * 25, life: 1.2, max: 1.2, r: 1 + Math.random(), shrink: 1, col: '#ff9a3a' });
+  stepParts(x, s.parts, dt, col);
+  if (level === 3 && k < 1){ x.save(); x.globalCompositeOperation = 'lighter'; x.strokeStyle = '#ffd070'; x.globalAlpha = 1 - k; x.lineWidth = 3 * (1 - k); x.beginPath(); x.arc(cx, cy, W * .1 + W * .5 * eout(k), 0, TAU); x.stroke(); x.restore(); }
+} }; }
+CHAR.emberK = emberSeal(1); CHAR.emberE = emberSeal(2); CHAR.emberG = emberSeal(3);
+
+/* 느림보: 물. 느릿하게 가라앉았다 떠오름, 눈은 거의 감김 */
+CHAR.sleepy = { tint: '#0e2030', init(s){ s.parts = []; }, draw(x, W, H, t, s, dt){
+  backdrop(x, W, H, this.tint);
+  const col = '#5ad0ff', k = s.react >= 0 ? clamp((t - s.react) / 1.6) : 1, sc = W / 200 * .9;
+  const sag = Math.sin(t * .8), cx = W / 2, cy = H * .5 + sag * 6 + (k < 1 ? -Math.sin(k * Math.PI) * 8 : 0);
+  shadow(x, cx, H * .9, W * .22, .5); halo(x, cx, cy, W * .34, col, .28);
+  x.save(); x.translate(cx, cy); x.scale(sc * (1 + sag * .03), sc * (1 - sag * .04)); x.rotate(Math.sin(t * .5) * .06 + .1);
+  glow(x, ringP(x, 40), col, 1.8);
+  glow(x, () => { x.moveTo(-40, 8); x.quadraticCurveTo(-20, -6, 0, 8); x.quadraticCurveTo(20, 22, 40, 8); }, col, 1.6);
+  glow(x, () => { x.moveTo(-28, 28); x.quadraticCurveTo(-14, 20, 0, 28); x.quadraticCurveTo(14, 36, 28, 28); }, col, 1.2, .7);
+  glow(x, () => { x.moveTo(0, -40); x.lineTo(0, -60); x.moveTo(-8, -54); x.lineTo(8, -54); }, col, 1.6);
+  x.save(); x.rotate(-t * .12); glow(x, ringP(x, 52, .2, TAU - .9), col, 1, .6); x.restore();
+  const open = k < 1 ? (k < .5 ? 1.2 : lerp(1.2, .12, (k - .5) / .5)) : .12 + .05 * Math.sin(t * .6);
+  x.save(); x.translate(0, -14); sealEye(x, 1, col, open, 0, .6); x.restore();
+  if (k >= 1 || k > .6){ x.save(); x.globalAlpha = .55 + .45 * Math.sin(t * 2); x.fillStyle = '#bfefff'; x.font = '700 13px "IBM Plex Sans KR", sans-serif'; const zz = (t * .7) % 1; x.fillText('z', 30 + zz * 12, -40 - zz * 20); x.font = '700 9px "IBM Plex Sans KR", sans-serif'; x.fillText('z', 44 + zz * 8, -56 - zz * 14); x.restore(); }
+  x.restore();
+  if (Math.random() < dt * 2.5) s.parts.push({ x: cx + (Math.random() - .5) * W * .25, y: cy + 30, vx: 0, vy: -18, life: 2, max: 2, r: 1.5 + Math.random() * 1.5, col: 'rgba(120,220,255,.6)' });
+  if (k < .1 && !s.burst){ s.burst = 1; emit(s.parts, 10, i => ({ x: cx + (Math.random() - .5) * 30, y: cy, vx: (Math.random() - .5) * 40, vy: -30 - Math.random() * 30, life: 1.2, max: 1.2, r: 2, col: '#9ae4ff' })); }
+  if (k >= 1) s.burst = 0;
+  stepParts(x, s.parts, dt, col);
+} };
+
+/* 톱니: 바람. 덜덜 떨고 빨리 돎, 누르면 가시가 확 돋음 */
+CHAR.spiky = { tint: '#10241a', init(s){ s.parts = []; s.blinkAt = 1.5; }, draw(x, W, H, t, s, dt){
+  backdrop(x, W, H, this.tint);
+  const col = '#7aff9a', k = s.react >= 0 ? clamp((t - s.react) / .7) : 1, sc = W / 200 * .85;
+  const jit = (k < 1 ? 4 * (1 - k) : .9), cx = W / 2 + (Math.random() - .5) * jit, cy = H * .48 + (Math.random() - .5) * jit + Math.sin(t * 6) * 2;
+  shadow(x, cx, H * .9, W * .2, .5); halo(x, cx, cy, W * .32, col, .25);
+  x.save(); x.translate(cx, cy); x.scale(sc, sc);
+  const spike = 1 + (k < 1 ? .5 * Math.sin(k * Math.PI) : 0);
+  x.save(); x.rotate(t * 1.6);
+  glow(x, () => { for (let i = 0; i <= 3; i++){ const a = -Math.PI / 2 + i * TAU / 3; i ? x.lineTo(Math.cos(a) * 44, Math.sin(a) * 44) : x.moveTo(Math.cos(a) * 44, Math.sin(a) * 44); } }, col, 2);
+  for (let i = 0; i < 9; i++){ const a = i / 9 * TAU; glow(x, () => { x.moveTo(Math.cos(a) * 50, Math.sin(a) * 50); x.lineTo(Math.cos(a + .12) * 50 * (1.2 * spike), Math.sin(a + .12) * 50 * (1.2 * spike)); }, col, 1.6); }
+  glow(x, ringP(x, 50), col, 1.2, .8);
+  x.restore();
+  x.save(); x.rotate(-t * 2.4); glow(x, () => { x.moveTo(-26, 0); x.lineTo(26, 0); x.moveTo(-14, -18); x.lineTo(14, 18); }, col, 1.2, .6); x.restore();
+  let open = .7; s.blinkAt -= dt; if (s.blinkAt < 0){ open = .05; if (s.blinkAt < -.1) s.blinkAt = 1 + Math.random() * 2; }
+  x.save(); x.translate(0, 0); x.rotate(-.18); glow(x, () => { x.moveTo(-14, -12); x.lineTo(-2, -8); x.moveTo(14, -12); x.lineTo(2, -8); }, col, 1.6); sealEye(x, .95, col, open * (k < 1 ? 1.2 : 1), Math.sin(t * 9) * .5, 0); x.restore();
+  x.restore();
+  if (Math.random() < dt * 6){ const a = Math.random() * TAU; s.parts.push({ x: cx + Math.cos(a) * 50, y: cy + Math.sin(a) * 50, vx: -Math.sin(a) * 80, vy: Math.cos(a) * 80, life: .5, max: .5, r: 1.2, shrink: 1, col: '#b0ffc0' }); }
+  stepParts(x, s.parts, dt, col);
+} };
+
+/* 검은 인장: 적. 부서진 고리, 붉은 눈, 지직거림 */
+CHAR.foe = { tint: '#2a0c10', init(s){ s.parts = []; }, draw(x, W, H, t, s, dt){
+  backdrop(x, W, H, this.tint);
+  const col = '#ff3a3a', k = s.react >= 0 ? clamp((t - s.react) / .6) : 1, sc = W / 200 * .9;
+  const glitch = Math.random() < .06 ? (Math.random() - .5) * 10 : 0;
+  const cx = W / 2 + glitch + (k < 1 ? Math.sin(k * Math.PI) * 14 : 0), cy = H * .48 + Math.sin(t * 2.2) * 3;
+  shadow(x, cx, H * .9, W * .22, .6); halo(x, cx, cy, W * .3, '#ff2a2a', .2 + (k < 1 ? .3 : 0));
+  x.save(); x.translate(cx, cy); x.scale(sc, sc);
+  x.save(); x.fillStyle = '#060406'; x.beginPath(); for (let i = 0; i < 14; i++){ const a = i / 14 * TAU, r = (i % 2 ? 38 : 50) + Math.sin(t * 3 + i) * 3; i ? x.lineTo(Math.cos(a) * r, Math.sin(a) * r) : x.moveTo(Math.cos(a) * r, Math.sin(a) * r); } x.closePath(); x.fill(); x.restore();
+  x.save(); x.rotate(t * .5); for (let i = 0; i < 4; i++){ const a0 = i / 4 * TAU + .15, a1 = a0 + TAU / 4 - .55; glow(x, ringP(x, 56 + (i % 2) * 3, a0, a1), '#a01818', 1.6, .9); } x.restore();
+  glow(x, () => { x.moveTo(-30, -30); x.lineTo(30, 30); x.moveTo(30, -30); x.lineTo(-30, 30); }, '#7a1010', 1.4, .6);
+  const op = k < 1 ? 1.3 : .8 + .2 * Math.sin(t * 5);
+  sealEye(x, 1.15, col, op, Math.sin(t * .9) * .6, 0);
+  x.restore();
+  if (glitch){ x.save(); x.globalCompositeOperation = 'lighter'; x.fillStyle = 'rgba(255,40,40,.18)'; x.fillRect(0, cy - 4 + glitch, W, 3); x.restore(); }
+  if (Math.random() < dt * 4) s.parts.push({ x: cx + (Math.random() - .5) * 60, y: cy + 40, vx: 0, vy: -20, life: 1.3, max: 1.3, r: 1.2, shrink: 1, col: '#ff4a3a' });
+  stepParts(x, s.parts, dt, col);
+} };
+
+/* 7×7 판: 직사각형은 입체 상자, 인장은 칸 위에 떠 있음 */
+const SHAPE = ['XX...XX', 'X.....X', '.......', '.......', '.......', 'X.....X', 'XX...XX'];
+CHAR.board = { init(s){ s.parts = []; }, draw(x, W, H, t, s, dt){
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#141220'); g.addColorStop(1, '#08070c'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const tw = W / 7.6, th = tw / 2, ox = W / 2, oy = H * .2, tc = (c, r) => [ox + (c - r) * tw / 2, oy + (c + r) * th / 2 + th / 2];
+  const danger = new Set(['2,1', '3,1', '4,1', '3,2']);
+  for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++){ if (SHAPE[r][c] === 'X') continue; const [px, py] = tc(c, r);
+    x.beginPath(); x.moveTo(px, py - th / 2); x.lineTo(px + tw / 2, py); x.lineTo(px, py + th / 2); x.lineTo(px - tw / 2, py); x.closePath();
+    x.fillStyle = (r + c) % 2 ? '#1e1b2a' : '#232032'; x.fill(); x.strokeStyle = '#33304a'; x.lineWidth = 1; x.stroke();
+    if (danger.has(c + ',' + r)){ x.fillStyle = `rgba(255,50,50,${.18 + .1 * Math.sin(t * 4)})`; x.fill(); }
+    if (r === 6 || SHAPE[r + 1][c] === 'X'){ x.fillStyle = '#100e18'; x.beginPath(); x.moveTo(px - tw / 2, py); x.lineTo(px, py + th / 2); x.lineTo(px, py + th / 2 + 6); x.lineTo(px - tw / 2, py + 6); x.fill(); }
+    if (c === 6 || SHAPE[r][c + 1] === 'X'){ x.fillStyle = '#0c0a14'; x.beginPath(); x.moveTo(px + tw / 2, py); x.lineTo(px, py + th / 2); x.lineTo(px, py + th / 2 + 6); x.lineTo(px + tw / 2, py + 6); x.fill(); }
+  }
+  const items = [['foe', 2, 1], ['foe', 4, 1], ['spiky', 5, 3], ['emberK', 2, 3], ['mage', 3, 5], ['sleepy', 5, 5]].sort((a, b) => (a[1] + a[2]) - (b[1] + b[2]));
+  const k = s.react >= 0 ? clamp((t - s.react) / 1) : 1;
+  for (const [who, c, r] of items){ const [px, py] = tc(c, r);
+    x.save(); x.strokeStyle = who === 'foe' ? 'rgba(255,60,60,.8)' : 'rgba(90,200,255,.8)'; x.lineWidth = 1.6; x.beginPath(); x.ellipse(px, py, tw * .32, th * .32, 0, 0, TAU); x.stroke(); x.restore();
+    if (who === 'mage'){
+      const hop = k < 1 ? Math.sin(k * Math.PI) * 10 : 0, bw = tw * .32, bh = tw * .72, d = bw * .45, y0 = py - hop;
+      x.fillStyle = 'rgba(0,0,0,.5)'; x.beginPath(); x.ellipse(px, py, bw, bw * .35, 0, 0, TAU); x.fill();
+      x.fillStyle = '#e0482e'; x.fillRect(px - bw / 2, y0 - bh, bw, bh);
+      x.fillStyle = '#a8301c'; x.beginPath(); x.moveTo(px + bw / 2, y0 - bh); x.lineTo(px + bw / 2 + d, y0 - bh - d * .5); x.lineTo(px + bw / 2 + d, y0 - d * .5); x.lineTo(px + bw / 2, y0); x.fill();
+      x.fillStyle = '#ff7a50'; x.beginPath(); x.moveTo(px - bw / 2, y0 - bh); x.lineTo(px - bw / 2 + d, y0 - bh - d * .5); x.lineTo(px + bw / 2 + d, y0 - bh - d * .5); x.lineTo(px + bw / 2, y0 - bh); x.fill();
+      glow(x, () => { x.moveTo(px, y0 - bh * .85); x.lineTo(px, y0 - bh * .3); x.moveTo(px - bw * .25, y0 - bh * .6); x.lineTo(px + bw * .25, y0 - bh * .6); }, '#ffc860', 1, .8);
+      x.save(); x.globalCompositeOperation = 'lighter'; x.strokeStyle = '#ffb040'; x.globalAlpha = .7; x.setLineDash([4, 4]); x.lineDashOffset = -t * 10; x.lineWidth = 1.4; x.beginPath(); x.ellipse(px, py, tw * .9, th * .9, 0, 0, TAU); x.stroke(); x.restore();
+    } else {
+      const col = { foe: '#ff3a3a', emberK: '#ffb43a', sleepy: '#5ad0ff', spiky: '#7aff9a' }[who], hy = py - tw * .62 + Math.sin(t * 2 + c) * 3;
+      x.fillStyle = 'rgba(0,0,0,.45)'; x.beginPath(); x.ellipse(px, py, tw * .22, tw * .07, 0, 0, TAU); x.fill();
+      halo(x, px, hy, tw * .5, col, .3);
+      x.save(); x.translate(px, hy); x.scale(tw / 200, tw / 200); x.rotate(who === 'spiky' ? t * 1.6 : 0);
+      if (who === 'foe'){ x.fillStyle = '#060406'; x.beginPath(); for (let i = 0; i < 14; i++){ const a = i / 14 * TAU, rr = i % 2 ? 50 : 66; i ? x.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : x.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); } x.closePath(); x.fill(); }
+      glow(x, ringP(x, 52), col, 5);
+      if (who === 'emberK') glow(x, () => { x.moveTo(0, -78); x.lineTo(0, 50); }, col, 5);
+      if (who === 'spiky') glow(x, () => { for (let i = 0; i <= 3; i++){ const a = -Math.PI / 2 + i * TAU / 3; i ? x.lineTo(Math.cos(a) * 60, Math.sin(a) * 60) : x.moveTo(Math.cos(a) * 60, Math.sin(a) * 60); } }, col, 5);
+      if (who === 'sleepy') glow(x, () => { x.moveTo(-50, 10); x.quadraticCurveTo(0, -10, 50, 10); }, col, 5);
+      x.restore();
+      x.save(); x.translate(px, hy); x.scale(tw / 120, tw / 120); sealEye(x, 1, col, who === 'sleepy' ? .15 : 1, Math.sin(t + c) * .6, 0); x.restore();
+    }
+  }
+  if (Math.random() < dt * 5){ const [px, py] = tc(3, 1); s.parts.push({ x: px + (Math.random() - .5) * tw * 2, y: py, vx: 0, vy: -16, life: 1.2, max: 1.2, r: 1.1, shrink: 1, col: '#ff5a4a' }); }
+  stepParts(x, s.parts, dt, '#fff');
+} };
+
+/* ---------- 무대 연결 ---------- */
+const stages = [];
+document.querySelectorAll('.stage').forEach(el => {
+  const who = el.dataset.who, cv = document.createElement('canvas'), b = document.createElement('div'); b.className = 'say'; b.setAttribute('aria-live', 'polite');
+  const tp = document.createElement('span'); tp.className = 'tap'; tp.textContent = '눌러봐';
+  el.append(cv, b, tp);
+  const st = { el, who, cv, x: cv.getContext('2d'), s: { react: -1 }, vis: false, W: 0, H: 0 };
+  CHAR[who].init(st.s); stages.push(st);
+  const act = () => { st.s.react = clock; tp.style.display = 'none'; say(el, who); tone(who); };
+  el.addEventListener('click', act); el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); act(); } });
+});
+const fit = st => { const r = st.el.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1); st.W = r.width; st.H = r.height; st.cv.width = Math.max(1, Math.round(r.width * dpr)); st.cv.height = Math.max(1, Math.round(r.height * dpr)); st.x.setTransform(dpr, 0, 0, dpr, 0, 0); };
+stages.forEach(fit); addEventListener('resize', () => { stages.forEach(fit); drawnOnce = false; });
+if ('IntersectionObserver' in window){ const io = new IntersectionObserver(es => es.forEach(e => { const st = stages.find(s => s.el === e.target); if (st) st.vis = e.isIntersecting; }), { rootMargin: '100px' }); stages.forEach(st => io.observe(st.el)); } else stages.forEach(st => st.vis = true);
+let clock = 0, last = performance.now();
+var drawnOnce = false;
+function frame(now){
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (!paused) clock += dt;
+  for (const st of stages){ if (!st.vis && drawnOnce) continue; if (paused && drawnOnce && st.s.react < 0) continue; st.x.clearRect(0, 0, st.W, st.H); CHAR[st.who].draw(st.x, st.W, st.H, clock, st.s, paused ? 0 : dt); }
+  drawnOnce = true; requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+const sb = document.getElementById('snd'), mb = document.getElementById('mot');
+sb.addEventListener('click', () => { soundOn = !soundOn; sb.setAttribute('aria-pressed', String(soundOn)); sb.textContent = soundOn ? '소리 켜짐' : '소리 꺼짐'; });
+const setP = p => { paused = p; mb.setAttribute('aria-pressed', String(p)); mb.textContent = p ? '움직임 다시 켜기' : '움직임 멈추기'; drawnOnce = false; };
+mb.addEventListener('click', () => setP(!paused)); setP(paused);
+
+/* ---------- 평가 저장 ---------- */
+const state = {}, LS = 'mahocukai.seal.draft', ui = {}, busy = {}, again = {}, timers = {};
+try { Object.assign(state, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
+const saveDraft = () => { try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} };
+let db = null, writable = true;
+async function save(key){
+  saveDraft(); if (!db || !writable) return; if (busy[key]){ again[key] = true; return; } busy[key] = true; const u = ui[key];
+  u.st.className = 'st'; u.st.textContent = '저장 중…';
+  try { const s = state[key]; await db.doc('answers/' + key).set({ q: key, title: u.title, choice: s.choice || '', note: s.note || '', updatedAt: new Date().toISOString() }); u.st.className = 'st ok'; u.st.textContent = '저장됨'; }
+  catch (e) { if (e && e.code === 'invalid_argument') writable = false; u.st.className = 'st err'; u.st.textContent = '저장이 안 됐어. 채팅으로 알려줘.'; }
+  busy[key] = false; if (again[key]){ again[key] = false; save(key); }
+}
+document.querySelectorAll('.rate').forEach(box => {
+  const key = box.dataset.key, title = box.querySelector('h3').textContent; if (!state[key]) state[key] = { choice: '', note: '' };
+  let btns = [];
+  if (!box.dataset.noopts){ const o = document.createElement('div'); o.className = 'opts'; o.setAttribute('role', 'group'); o.setAttribute('aria-label', title);
+    btns = ['좋아', '애매', '별로'].map(v => { const b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.dataset.v = v; b.textContent = v; b.setAttribute('aria-pressed', String(state[key].choice === v));
+      b.addEventListener('click', () => { const s = state[key]; s.choice = s.choice === v ? '' : v; btns.forEach(x => x.setAttribute('aria-pressed', String(s.choice === x.dataset.v))); save(key); }); return b; });
+    o.append(...btns); box.appendChild(o); }
+  const ta = document.createElement('textarea'); ta.rows = box.dataset.noopts ? 3 : 1; ta.placeholder = '한마디 (선택)'; ta.value = state[key].note || ''; ta.setAttribute('aria-label', title + ' 메모');
+  ta.addEventListener('input', () => { state[key].note = ta.value; clearTimeout(timers[key]); timers[key] = setTimeout(() => { timers[key] = null; save(key); }, 900); });
+  ta.addEventListener('blur', () => { if (timers[key]){ clearTimeout(timers[key]); timers[key] = null; save(key); } });
+  const st = document.createElement('p'); st.className = 'st'; st.setAttribute('aria-live', 'polite'); box.append(ta, st);
+  ui[key] = { btns, ta, st, title };
+});
+(async () => {
+  try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+  if (!db) return;
+  db.collection('answers').onSnapshot(snap => { snap.docs.forEach(d => { const v = d.data(), key = d.id; if (!v || !ui[key] || busy[key] || timers[key]) return;
+    state[key] = { choice: typeof v.choice === 'string' ? v.choice : '', note: typeof v.note === 'string' ? v.note : '' };
+    ui[key].btns.forEach(b => b.setAttribute('aria-pressed', String(state[key].choice === b.dataset.v))); if (document.activeElement !== ui[key].ta) ui[key].ta.value = state[key].note; }); saveDraft(); }, () => {});
+})();
+window.__seal = { stages, CHAR };
+})();
+</script>
