@@ -35,7 +35,8 @@ npm run build    # 타입 검사 + 배포용 빌드 (dist/)
 - 오컬티스트 문법 시안 (`prototypes/occultist-grammar.html`): 별로
 - 직사각형과 살아 있는 인장 (`prototypes/rectangle-and-seals.html`): 주홍 직사각형 주인공 + 움직이는 인장 사역마, 누르면 반응·대사·소리
 - 이펙트 강도 비교 (`prototypes/fx-intensity.html`): 세기만 바꾼 것. 사용자 의도와 달라 대체됨
-- 스킬 연출 시연 (`prototypes/skill-choreography.html`): 준비→모으기→멈춤→발사→이동→타격→여운 흐름의 스킬 5개, 타격감, 0.25배속 관찰
+- 스킬 연출 시연 (`prototypes/skill-choreography.html`): "약하고 밋밋하다"로 탈락
+- 대마법 시연 (`prototypes/arcana-spells.html`): 마법진 닦기·조립 + 천류뇌격·일도양단·블랙홀, WebGL 화면 왜곡
 - 대마법 연출 시연 "낙성" (`prototypes/meteor.html`): 3턴 영창 → 컷인 → 하늘 마법진 → 정적 → 낙하 → 충격. 효과음 포함
 - 원석 정제 작업대 (`refine.html`): 폐기. 손 작업은 마탑 + 대의식으로 바뀜. 입력 처리 코드(`src/shared/rotation-input.ts`)는 재사용 예정
 - 종이 사역마 (`prototypes/paper-familiars.html`): 폐기
