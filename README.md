@@ -30,6 +30,7 @@ npm run build    # 타입 검사 + 배포용 빌드 (dist/)
 ## 시제품
 
 - 이펙트 비교 (`prototypes/effect-demo.html`): 혼합 스타일 채택
+- 그림체 시안 19종 (`prototypes/style-board.html`): 주인공·착장·사역마·적·배경 세트 비교
 - 대마법 연출 시연 "낙성" (`prototypes/meteor.html`): 3턴 영창 → 컷인 → 하늘 마법진 → 정적 → 낙하 → 충격. 효과음 포함
 - 원석 정제 작업대 (`refine.html`): 폐기. 손 작업은 마탑 + 대의식으로 바뀜. 입력 처리 코드(`src/shared/rotation-input.ts`)는 재사용 예정
 - 종이 사역마 (`prototypes/paper-familiars.html`): 폐기

@@ -1,0 +1,815 @@
+<title>그림체 시안</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;900&display=swap">
+<style>
+/* Layout: 위에 그림체 고르는 칩 줄(고정), 아래는 "한눈에" 격자 또는 그림체 하나의 상세(주인공·착장 → 사역마 → 적 → 배경 → 평가). 폰 우선 2열. */
+:root{
+  --bg:#f4f2ee; --paper:#ffffff; --ink:#1c1a20; --muted:#625c68; --line:#dcd8d0;
+  --accent:#8a4b2a; --accent-soft:#f3e4d8; --ok:#2f7d55; --mid:#9a7a2a; --no:#a1462e;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --serif:"Noto Serif KR","Apple SD Gothic Neo",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141317; --paper:#1d1b21; --ink:#ece8f0; --muted:#a59fae; --line:#302c36;
+  --accent:#e0a070; --accent-soft:#3a2a20; --ok:#6cc495; --mid:#d8b860; --no:#e48a72; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#141317; --paper:#1d1b21; --ink:#ece8f0; --muted:#a59fae; --line:#302c36;
+  --accent:#e0a070; --accent-soft:#3a2a20; --ok:#6cc495; --mid:#d8b860; --no:#e48a72; color-scheme:dark }
+html,body{background:var(--bg);color:var(--ink)}
+body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding-top:28px;padding-bottom:8px;display:grid;gap:8px}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(26px,6vw,36px);line-height:1.2;margin:0}
+h2{font-family:var(--serif);font-weight:900;font-size:clamp(22px,5vw,28px);line-height:1.25;margin:0}
+h3{font-size:15px;margin:0;font-weight:700;color:var(--muted);letter-spacing:.02em}
+p{margin:0}
+.lead{font-size:15px;color:var(--muted)}
+.lead b{color:var(--ink)}
+nav.chips{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-top:10px;padding-bottom:10px;margin-top:12px}
+nav.chips .row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+nav.chips .row::-webkit-scrollbar{display:none}
+.chip{flex:none;scroll-snap-align:start;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:7px 12px;border-radius:99px;cursor:pointer;white-space:nowrap;display:inline-flex;gap:6px;align-items:center;min-height:36px}
+.chip .n{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-current="true"] .n{color:inherit;opacity:.7}
+.chip i{width:8px;height:8px;border-radius:50%;display:none}
+.chip i.ok{display:block;background:var(--ok)}.chip i.mid{display:block;background:var(--mid)}.chip i.no{display:block;background:var(--no)}
+.chip:focus-visible,button:focus-visible,textarea:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-top:20px;padding-bottom:80px;display:grid;gap:28px}
+.over{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.tile{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;display:grid;text-align:left;padding:0;font:inherit;color:inherit}
+.tile .art{aspect-ratio:1;display:block;background:#111}
+.tile .cap{padding:8px 10px 10px;display:grid;gap:0}
+.tile .cap b{font-size:15px}
+.tile .cap span{font-size:12px;color:var(--muted)}
+.tile .badge{font-size:12px;font-weight:700}
+.badge.ok{color:var(--ok)}.badge.mid{color:var(--mid)}.badge.no{color:var(--no)}
+.art svg,.art canvas{width:100%;height:100%;display:block}
+.detail{display:grid;gap:26px}
+.dhead{display:grid;gap:8px}
+.dhead .num{font-size:13px;color:var(--accent);font-weight:700;letter-spacing:.08em}
+.dhead p.d{font-size:16px}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px}
+@media (max-width:520px){.pc{grid-template-columns:1fr}}
+.pc div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.pc b{display:block;font-size:12px;letter-spacing:.06em}
+.pc .g b{color:var(--ok)}.pc .r b{color:var(--no)}
+.sec{display:grid;gap:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.grid.wide{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:zoom-in;padding:0;font:inherit;color:inherit;text-align:left;display:grid}
+.card .art{display:block;aspect-ratio:1;background:#111}
+.grid.wide .card .art{aspect-ratio:16/9}
+.card .cap{padding:7px 10px 9px;font-size:13px;line-height:1.45}
+.card .cap b{display:block;font-size:14px}
+.card .cap span{color:var(--muted)}
+.rate{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px}
+.rate .opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{font:inherit;font-weight:700;font-size:15px;padding:10px 18px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;min-height:44px}
+.opt[aria-pressed="true"][data-v="좋아"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt[aria-pressed="true"][data-v="애매"]{background:var(--mid);border-color:var(--mid);color:#fff}
+.opt[aria-pressed="true"][data-v="별로"]{background:var(--no);border-color:var(--no);color:#fff}
+textarea{font:inherit;font-size:16px;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);color:var(--ink);resize:vertical}
+.st{font-size:13px;color:var(--muted);min-height:1.2em}
+.st.ok{color:var(--ok)}.st.err{color:var(--no)}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pager button{font:inherit;font-weight:700;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;min-height:48px}
+.pager button:disabled{opacity:.35;cursor:default}
+.honest{background:var(--accent-soft);border-radius:10px;padding:10px 14px;font-size:14px}
+.zoom{position:fixed;inset:0;z-index:20;background:rgba(10,8,12,.92);display:grid;place-items:center;padding:16px;cursor:zoom-out}
+.zoom[hidden]{display:none}
+.zoom .box{width:min(100%,720px);display:grid;gap:10px;color:#eee;text-align:center}
+.zoom .art{width:100%;aspect-ratio:1;max-height:78vh}
+.zoom .art.w{aspect-ratio:16/9}
+.zoom .art svg,.zoom .art canvas{width:100%;height:100%;object-fit:contain}
+.zoom p{font-size:14px;color:#cfc8d8}
+.loading{display:grid;place-items:center;color:#888;font-size:12px;height:100%}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>그림체 시안 19종</h1>
+    <p class="lead">그림체마다 <b>주인공, 착장 3가지, 사역마 3마리, 적 3마리, 배경 3개</b>를 같은 구성으로 그렸어. 위 칩으로 넘기면서 보고, 그림을 누르면 크게 보여. 맨 아래에서 <b>좋아 / 애매 / 별로</b>를 누르면 저장돼.</p>
+    <p class="honest">코드로 그린 시안이라 형태는 단순해. 완성 그림이 아니라 <b>"이 그림체로 가면 이런 느낌"</b>을 보는 용도야. 섞고 싶은 게 있으면 메모에 적어줘. 예: "목판화 선 + 스테인드글라스 색"</p>
+  </header>
+</div>
+<nav class="chips" aria-label="그림체 선택"><div class="wrap"><div class="row" id="chips"></div></div></nav>
+<div class="wrap"><main id="main"></main></div>
+<div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="크게 보기"><div class="box"><div class="art" id="zoomArt"></div><p id="zoomCap"></p></div></div>
+
+<script>
+(() => {
+'use strict';
+/* ================= 색 도우미 ================= */
+const hex2rgb = h => { h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const rgb2hex = ([r, g, b]) => '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+const mix = (a, b, t) => { const A = hex2rgb(a), B = hex2rgb(b); return rgb2hex(A.map((v, i) => v + (B[i] - v) * t)); };
+const lum = h => { const [r, g, b] = hex2rgb(h); return (.299 * r + .587 * g + .114 * b) / 255; };
+function rgb2hsl([r, g, b]){ r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+  if (mx !== mn){ const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6; } return [h, s, l]; }
+function hsl2rgb([h, s, l]){ if (!s) return [l * 255, l * 255, l * 255]; const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const f = t => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; }; return [f(h + 1 / 3) * 255, f(h) * 255, f(h - 1 / 3) * 255]; }
+const adj = (hex, k) => { const [h, s, l] = rgb2hsl(hex2rgb(hex)); return rgb2hex(hsl2rgb([h, Math.min(1, s * (k.s ?? 1)), Math.max(0, Math.min(1, l + (k.l ?? 0)))])); };
+const nearest = (hex, arr) => { const A = hex2rgb(hex); let best = arr[0], bd = 1e9; for (const c of arr){ const B = hex2rgb(c); const d = (A[0] - B[0]) ** 2 * .3 + (A[1] - B[1]) ** 2 * .59 + (A[2] - B[2]) ** 2 * .11; if (d < bd){ bd = d; best = c; } } return best; };
+function rng(s){ return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const TAU = Math.PI * 2;
+
+/* ================= 경로 도우미 ================= */
+const r1 = v => Math.round(v * 10) / 10;
+const D = (s, ...v) => s.reduce((a, str, i) => a + str + (i < v.length ? (typeof v[i] === 'number' ? r1(v[i]) : v[i]) : ''), '');
+const PAIR = /(-?\d*\.?\d+),(-?\d*\.?\d+)/g;
+const mirror = (d, ax = 100) => d.replace(PAIR, (m, x, y) => `${r1(2 * ax - x)},${y}`);
+function E(cx, cy, rx, ry){ const k = .5523, ox = rx * k, oy = ry * k;
+  return D`M${cx - rx},${cy} C${cx - rx},${cy - oy} ${cx - ox},${cy - ry} ${cx},${cy - ry} C${cx + ox},${cy - ry} ${cx + rx},${cy - oy} ${cx + rx},${cy} C${cx + rx},${cy + oy} ${cx + ox},${cy + ry} ${cx},${cy + ry} C${cx - ox},${cy + ry} ${cx - rx},${cy + oy} ${cx - rx},${cy}Z`; }
+const C = (cx, cy, r) => E(cx, cy, r, r);
+const RECT = (x, y, w, h) => D`M${x},${y} L${x + w},${y} L${x + w},${y + h} L${x},${y + h}Z`;
+function STAR(cx, cy, r, n = 5, k = .45){ let d = ''; for (let i = 0; i < n * 2; i++){ const a = -Math.PI / 2 + i * Math.PI / n, rr = i % 2 ? r * k : r; d += (i ? 'L' : 'M') + r1(cx + Math.cos(a) * rr) + ',' + r1(cy + Math.sin(a) * rr) + ' '; } return d + 'Z'; }
+function bbox(d){ let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; d.replace(PAIR, (m, x, y) => { x = +x; y = +y; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }); return { x0, y0, x1, y1 }; }
+
+/* ================= 기본 색 (그림체마다 이걸 바꿔 씀) ================= */
+const REF = {
+  skin:'#e9c6a1', hair:'#4a3426', robe:'#34447e', robe2:'#8a2f3a', hat:'#2d3a6e', trim:'#d6a843', metal:'#b9b2a6', gem:'#59c3e8',
+  dark:'#1d1a22', cloth:'#ece4d2', cloth2:'#d6ccb8', moss:'#3e6a3a', leather:'#6e4a30', wood:'#6b4a2e',
+  fur:'#26222c', fur2:'#4a4352', scale:'#b5482c', belly:'#e3a35a', fire:'#ff9a3c', eye:'#ffd34d', eyeR:'#ff3b30', glow:'#ffe8a0',
+  bone:'#e6dcc5', stone:'#8a8580', stone2:'#5c5853', crack:'#2a2725', wing:'#4a3040', imp:'#b5432f', lich:'#2b2236',
+  book1:'#7b2e3a', book2:'#2f5d50', book3:'#b08a3e', sky:'#1b2250', sky2:'#48407a', moon:'#f3ecd2', far:'#2c3358', mid:'#2a2840',
+  grass:'#2f4a3a', floor:'#4d4640', light:'#fff1c8', crystal:'#7fd6e8', crystal2:'#b58cf0', water:'#2a5a78', cave:'#16141e'
+};
+const GLOW = new Set(['eye', 'eyeR', 'glow', 'fire', 'gem', 'crystal', 'crystal2', 'moon', 'light']);
+const PROP = { n: { h: 1, b: 1 }, c: { h: 1.5, b: .7 }, t: { h: .85, b: 1.12 }, s: { h: 1.2, b: .88 } };
+function colorOf(st, role){
+  let c = st.col && st.col[role];
+  if (!c){ c = REF[role] || '#888888'; if (st.xf) c = adj(c, st.xf); }
+  if (st.quant) c = nearest(c, st.quant);
+  return c;
+}
+
+/* ================= 그림체 19종 ================= */
+const STYLES = [
+ { id:'manu', name:'채색 필사본', d:'중세 마법서 삽화처럼. 금박 테두리, 선명한 파랑과 주홍.', g:'정통 마법 느낌이 제일 강해. 자격증, 마도서 세계관과 바로 붙어.', r:'장식이 많아서 7×7 전투 화면에선 복잡해질 수 있어.',
+   mode:'flat', line:{w:1.6,c:'#3b2415'}, gold:1, diaper:1, back:'#efe2c2', fx:['halo','paper'], halo:'#fff8e4', frame:'manu', prop:'n',
+   col:{robe:'#24399a',hat:'#24399a',robe2:'#b8322a',moss:'#3f7a3a',sky:'#24399a',sky2:'#3c58b6',far:'#4b7a46',grass:'#6a8f3c',cave:'#3b2f4a',mid:'#4b3d5e',stone:'#b9ab90',stone2:'#8f8068',floor:'#a8916e',wood:'#7a4a28',imp:'#c0392b',lich:'#3b2a5a',skin:'#f2d3b3',cloth:'#f6efdc',crystal:'#5aa0d8',crystal2:'#8a5ac8',water:'#24399a',leather:'#7a4a28',fur:'#2a2440',fur2:'#4a4070',wing:'#5a2a3a',scale:'#c0392b',belly:'#e8b04a'} },
+ { id:'glass', name:'스테인드글라스', d:'성당 창문처럼 굵은 납선과 보석 같은 색 유리.', g:'빛나는 이펙트랑 잘 어울리고, 성스러운 느낌이 확 나.', r:'작은 캐릭터는 굵은 선에 묻혀서 표정이 안 보일 수 있어.',
+   mode:'flat', glass:1, sheen:1, line:{w:4.5,c:'#120e12'}, back:'#120e12', fx:['shards'], frame:'arch', prop:'n', xf:{s:1.35,l:.03},
+   col:{robe:'#1f4fb8',hat:'#1f4fb8',robe2:'#c4252e',trim:'#f2b632',gem:'#2fd0e0',moss:'#2f9a4a',skin:'#f3c99a',sky:'#1c3c94',sky2:'#5a2a96',cloth:'#f4ecd0',fire:'#ff8a1c',stone:'#7a8aa0',stone2:'#4a5a78',far:'#2a5a7a',grass:'#2f7a3a',fur:'#2a2a5a',fur2:'#4a4a8a',lich:'#4a2a7a',imp:'#d0402a',cave:'#1a1a3a',mid:'#2a2a5a',floor:'#7a5a3a',wood:'#8a5a2a',dark:'#221a30'} },
+ { id:'wood', name:'목판화', d:'검은 잉크와 종이, 그리고 빨강 한 가지만.', g:'강렬하고 독특해. 이펙트만 컬러로 터지면 대비가 엄청 커.', r:'색이 거의 없어서 원소(불물바람땅) 구분은 다른 방법이 필요해.',
+   mode:'hatch', ink:'#17120f', paper:'#efe6d2', hatch:{gap:4.6,w:1.9,rot:45}, line:{w:2.8}, spot:{c:'#b5302a', roles:['robe2','fire','eye','eyeR','imp','gem','scale']}, filter:'rough', back:'#efe6d2', fx:['paper'], prop:'n' },
+ { id:'engr', name:'연금술 동판화', d:'옛 연금술 책에 실린 펜 선 음영 그림.', g:'신비롭고 학구적이야. "자격증 공부하는 마법사" 컨셉과 잘 맞아.', r:'선이 가늘어서 폰 화면에선 뭉개지고 어두워 보일 수 있어.',
+   mode:'hatch', ink:'#3a2716', paper:'#eadab8', hatch:{gap:2.5,w:.7,rot:-35}, line:{w:1.1}, back:'#eadab8', fx:['paper'], frame:'plate', prop:'t' },
+ { id:'tarot', name:'아르누보 타로', d:'타로 카드처럼 곡선 장식, 차분한 색, 아래 이름판.', g:'사역마 카드, 뽑기 연출에 딱이야. 모으는 맛이 살아.', r:'카드 느낌이 강해서 전투 장면은 정적으로 보일 수 있어.',
+   mode:'flat', line:{w:2.1,c:'#2b2018'}, back:'#d8c497', fx:['rays'], frame:'tarot', prop:'t',
+   col:{robe:'#3e5d6b',hat:'#3e5d6b',robe2:'#a0523a',trim:'#c49a4a',moss:'#6b7d4a',skin:'#ecd2b0',sky:'#d9c79a',sky2:'#b99c6a',far:'#8a9a6a',grass:'#7a8a5a',cloth:'#f1e7cf',fur:'#3a3438',fur2:'#5a5258',gem:'#5a8a8a',fire:'#d9783a',imp:'#b0583a',lich:'#4a3e4a',stone:'#b5a88a',stone2:'#8a7d66',cave:'#4a4048',mid:'#6a5e5a',floor:'#a08a66',wood:'#7a5a3a',crystal:'#8ab0a8',crystal2:'#a890a8',water:'#5a7a7a',eye:'#e0a040',eyeR:'#c0502a',scale:'#a0523a',belly:'#d9a86a',dark:'#2b2420',moon:'#f4ead0',light:'#f6ecd0'} },
+ { id:'sil', name:'그림자극', d:'노을 앞에 검은 실루엣. 눈과 마법만 빛나.', g:'분위기가 최고고, 이펙트가 엄청 돋보여. 그리기도 쉬워.', r:'착장, 사역마 구분을 실루엣 모양만으로 해야 해.',
+   mode:'sil', ink:'#0c0910', back:['#f7b25a','#8a2f5a'], fx:['sun'], skyG:['#f9c46a','#a8385a'], tones:['#f4a35a','#d06a4a','#9a3a4a','#5a1f3a','#2a0f22','#0c0910'], prop:'n',
+   col:{eye:'#fff2b0',eyeR:'#ffe080',glow:'#ffd27a',fire:'#ffb84a',gem:'#fff0c0',crystal:'#ffe0a0',crystal2:'#ffc0a0',moon:'#fff0c8',light:'#ffe6b0'} },
+ { id:'pix', name:'16비트 픽셀', d:'옛 게임기 도트 그림. 머리가 큰 비율.', g:'귀엽고 작은 화면에서도 잘 읽혀. 움직임 만들기도 쉬운 편.', r:'흔한 스타일이라 "우리 게임만의 얼굴"이 약할 수 있어.',
+   mode:'flat', line:{w:5,c:'#1a1424'}, shade:{dx:7,dy:5,a:.32}, back:'#2a2340', fx:['halo'], halo:'#4a3f6a', post:'pixel', prop:'c', xf:{s:1.25,l:.04} },
+ { id:'toon', name:'굵은 외곽선 카툰', d:'두꺼운 선, 그림자 한 단계, 큰 머리.', g:'폰에서도 또렷하고 경쾌해. 사역마 성격이 잘 드러나.', r:'정통 마법의 무게감이 약해질 수 있어.',
+   mode:'flat', line:{w:5,c:'#1b1420'}, shade:{dx:7,dy:6,a:.28}, back:'#ffefd2', fx:['halo'], halo:'#ffffff', prop:'c', xf:{s:1.45,l:.08},
+   col:{robe:'#3d5af1',hat:'#3d5af1',robe2:'#ff4d6d',trim:'#ffc93c',skin:'#ffd9b8',moss:'#3cc47a',fur:'#3a3550',imp:'#ff5a3c',lich:'#5a3a8a'} },
+ { id:'geo', name:'기하학 미니멀', d:'지금 방향. 주인공은 직사각형, 장식 최소.', g:'이펙트가 주인공이 되고, 만들기 제일 빨라. 낙성 연출과 같은 결.', r:'사역마 뽑기의 "애착"이 약할 수 있어.',
+   geo:1, mode:'flat', line:{w:0}, shade:{half:1,a:.22}, back:'#141218', fx:['halo'], halo:'#2c2834', prop:'n', xf:{s:.55,l:.04},
+   col:{robe:'#ece4d2',hat:'#ece4d2',cloth:'#f4efe4',skin:'#e8dccb',dark:'#0e0c12',moss:'#c8d0b8',robe2:'#d8b8a8'} },
+ { id:'neon', name:'빛 선화', d:'어둠 속에서 빛나는 선으로만 그려.', g:'마법진 그리기와 한 몸처럼 보여. 화면이 늘 마법 같아.', r:'오래 보면 눈이 피곤하고, 모든 게 마법 같아서 강약이 약해져.',
+   mode:'neon', back:'#07060d', fx:['circle'], filter:'neon', xf:{s:1.4,l:.18}, prop:'n',
+   col:{dark:'#9a8ac8',fur:'#9a8ac8',fur2:'#b8a8e8',hair:'#c0a0ff',lich:'#a070ff',stone:'#9ab0c8',stone2:'#6a80a8',cave:'#3a3a6a',mid:'#3a3a6a',sky:'#0a0a20',sky2:'#20154a',crack:'#6a80a8',far:'#5a6aa8',grass:'#4a8a6a',floor:'#8a7a6a',wing:'#c080b0'} },
+ { id:'water', name:'수채 동화책', d:'번지는 물감과 종이 결. 선 없이 색으로만.', g:'따뜻하고, 손 작업(마탑) 모드의 차분함과 잘 어울려.', r:'전투의 날카로움, 타격감이 약하게 느껴질 수 있어.',
+   mode:'wash', filter:'water', back:'#f7f1e5', fx:['paper','blot'], prop:'s', xf:{s:.85,l:.1} },
+ { id:'ink', name:'수묵', d:'먹의 농담과 번짐, 빨간 낙관 하나.', g:'붓으로 마법진을 그리는 느낌. 영창이 멋있어 보여.', r:'정통 서양 마법이랑은 결이 달라. 섞는 재미 아니면 어색할 수도.',
+   mode:'tone', tones:['#f3efe6','#d6d0c4','#a9a297','#78726a','#4a4642','#1c1a18'], line:{w:1.8,c:'#1c1a18'}, filter:'ink', spot:{c:'#b8322a', roles:['robe2','fire','eyeR']}, back:'#f3efe6', fx:['paper'], frame:'seal', prop:'t' },
+ { id:'chalk', name:'분필 칠판', d:'칠판에 분필로 그린 마법 수업.', g:'자격증 공부 컨셉이랑 딱이고, 유머가 살아.', r:'화려함에 한계가 있어. 대마법 연출과 온도 차가 커.',
+   mode:'chalk', filter:'chalk', back:'#22342c', fx:['board'], xf:{s:1.15,l:.2}, prop:'n', line:{w:2},
+   col:{dark:'#e8e4d8',fur:'#d8d4ea',fur2:'#bab4d0',hair:'#e8d8c0',lich:'#c8b8e8',sky:'#22342c',sky2:'#2a3e34',cave:'#22342c',stone2:'#b8c0b8',mid:'#90a098',far:'#a8c0a0',floor:'#d8c8a8',wood:'#e0b890',crack:'#e8e4d8',robe:'#9ab8f0',hat:'#9ab8f0',wing:'#d8a8c0',leather:'#e0b890'} },
+ { id:'goth', name:'고딕 다크', d:'짙은 그림자, 무거운 선, 낮은 채도.', g:'긴장감이 있고 보스가 진짜 무서워 보여.', r:'어두워서 애니 보면서 하는 모드엔 무거울 수 있어.',
+   mode:'flat', line:{w:3.2,c:'#0a0808'}, shade:{dx:11,dy:9,a:.6}, filter:'rough', back:'#1b1716', fx:['halo','vignette'], halo:'#3a2e2a', xf:{s:.45,l:-.06}, prop:'t',
+   col:{eye:'#ffcc55',eyeR:'#ff3020',fire:'#e86a20',gem:'#7ad0e0',glow:'#ffd08a',crystal:'#7ab8c8',moon:'#d8d0b8',light:'#e8d8b0'} },
+ { id:'pastel', name:'파스텔 동화', d:'말랑한 파스텔, 큰 머리, 부드러운 선.', g:'사역마가 귀여워서 뽑기 애착이 커져.', r:'대마법 연출이랑 온도 차가 클 수 있어.',
+   mode:'flat', line:{w:2.6,c:'auto'}, shade:{dx:6,dy:5,a:.12}, back:'#fdf1ee', fx:['halo','dots'], halo:'#ffffff', xf:{s:.6,l:.2}, prop:'c',
+   col:{skin:'#f9dcc8',bone:'#f4ecdc',dark:'#6a5a7a',fur:'#6a5a8a',fur2:'#9a8ab0',lich:'#9a8ac0',hair:'#a07a6a',eye:'#ffcf5a',eyeR:'#ff7a8a',sky:'#9ab0e0',sky2:'#e8b8d0',cave:'#7a7098',mid:'#9a90b8'} },
+ { id:'print', name:'옛날 인쇄물', d:'70년대 오컬트 책처럼 색 몇 개가 살짝 어긋나고 망점이 보여.', g:'개성이 엄청 강하고, AI 그림 느낌과 정반대야.', r:'호불호가 갈릴 수 있어.',
+   mode:'print', ink:'#1d1a1a', paper:'#f1e6cf', line:{w:1.8}, quant:['#f1e6cf','#d2452f','#2e6a8e','#e8b93a','#1d1a1a'], back:'#f1e6cf', fx:['paper'], prop:'n' },
+ { id:'blue', name:'청화백자', d:'흰 자기 위에 코발트 파랑 하나로.', g:'고급스럽고 차분해. 손 작업 모드에 특히 어울려.', r:'색이 하나라 원소 구분이 어려워.',
+   mode:'tone', tones:['#fbfaf6','#dfe7f3','#a9bddd','#5f80b6','#2e4f8e','#172f68'], line:{w:1.6,c:'#1d3a7a'}, back:'#fbfaf6', fx:['halo'], halo:'#ffffff', frame:'porc', prop:'n' },
+ { id:'stitch', name:'자수', d:'천 위에 실로 한 땀씩 수놓은 느낌.', g:'공방에서 직접 만드는 느낌. 따뜻하고 수집욕이 생겨.', r:'빠른 움직임, 타격감 표현은 어려워.',
+   mode:'stitch', back:'#e6d9bf', fx:['weave'], frame:'hoop', xf:{s:1.1,l:.02}, prop:'s' },
+ { id:'mosaic', name:'모자이크', d:'비잔틴 성당의 금빛 타일 벽화.', g:'성스럽고 화려해. "왕" 등급 사역마나 승급 화면에 잘 어울려.', r:'작은 화면에선 디테일이 날아가.',
+   mode:'flat', line:{w:4,c:'#2a2018'}, back:'#c9a23c', fx:['halo'], halo:'#f0d27a', post:'mosaic', xf:{s:1.2}, prop:'n' },
+];
+
+/* ================= 펜: 그림체에 따라 같은 모양을 다르게 칠함 ================= */
+let UID = 0;
+function Pen(st, kind, W, H, meta){
+  const id = 'g' + (++UID), defs = [], out = [], back = [], front = [], used = new Set();
+  let n = 0; const nid = () => id + '_' + (n++);
+  const mode = st.mode || 'flat', isBg = kind === 'bg', R = rng(UID * 13 + 7);
+  const lw0 = st.line ? st.line.w * (isBg ? .6 : 1) : 0;
+  const ink = st.ink || '#1a1414', paper = st.paper || '#efe6d2';
+  const col = role => { const c = colorOf(st, role); used.add(c); return c; };
+  const cache = {};
+  const pat = (key, make) => { if (!cache[key]){ const pid = nid(); defs.push(make(pid)); cache[key] = pid; } return `url(#${cache[key]})`; };
+  const levelOf = role => { const l = lum(REF[role] || '#888888'); return l > .72 ? 0 : l > .5 ? 1 : l > .32 ? 2 : l > .16 ? 3 : 4; };
+  const toneOf = role => { const T = st.tones, l = lum(REF[role] || '#888888'); return T[Math.max(0, Math.min(T.length - 1, Math.floor((1 - l) * T.length * 1.02)))]; };
+  const spotOf = role => st.spot && st.spot.roles.includes(role) ? st.spot.c : null;
+  function hatchFill(level){
+    if (level <= 0) return paper; if (level >= 4) return ink;
+    const h = st.hatch, g = h.gap * (level === 1 ? 1.8 : 1);
+    return pat('h' + level, pid => `<pattern id="${pid}" patternUnits="userSpaceOnUse" width="${g}" height="${g}" patternTransform="rotate(${h.rot})"><rect width="${g}" height="${g}" fill="${paper}"/><line x1="${g / 2}" y1="0" x2="${g / 2}" y2="${g}" stroke="${ink}" stroke-width="${h.w}"/>${level === 3 ? `<line x1="0" y1="${g / 2}" x2="${g}" y2="${g / 2}" stroke="${ink}" stroke-width="${h.w}"/>` : ''}</pattern>`);
+  }
+  const goldUrl = () => pat('gold', pid => `<linearGradient id="${pid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8e39a"/><stop offset=".45" stop-color="#c8901e"/><stop offset=".7" stop-color="#f3d777"/><stop offset="1" stop-color="#a8741a"/></linearGradient>`);
+  const satin = c => pat('sa' + c, pid => `<pattern id="${pid}" patternUnits="userSpaceOnUse" width="3" height="3" patternTransform="rotate(62)"><rect width="3" height="3" fill="${c}"/><line x1="1.5" y1="0" x2="1.5" y2="3" stroke="${mix(c, '#000000', .2)}" stroke-width=".8"/></pattern>`);
+  const scrib = c => pat('sc' + c, pid => `<pattern id="${pid}" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(32)"><line x1="2.5" y1="0" x2="2.5" y2="5" stroke="${c}" stroke-width="1.4"/></pattern>`);
+  const dots = () => pat('dots', pid => `<pattern id="${pid}" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(15)"><circle cx="2" cy="2" r="1.15" fill="${ink}"/></pattern>`);
+  const lineCol = c => st.line && st.line.c && st.line.c !== 'auto' ? st.line.c : mix(c, '#000000', .42);
+
+  function fillSVG(d, role, o){
+    const fr = o.evenodd ? ' fill-rule="evenodd"' : '', op = o.alpha != null ? ` opacity="${o.alpha}"` : '';
+    const lw = lw0 * (o.lw ?? 1), glowy = GLOW.has(role);
+    const outline = (c, extra = '') => lw && !o.noLine ? `<path d="${d}" fill="none" stroke="${c}" stroke-width="${lw}" stroke-linejoin="round" stroke-linecap="round"${fr}${op}${extra}/>` : '';
+    if (mode === 'flat'){
+      const c = col(role), fill = st.gold && (role === 'trim' || role === 'metal') ? goldUrl() : c;
+      const needClip = (st.shade && !o.noShade && !glowy) || st.glass || st.sheen;
+      if (!needClip || o.alpha != null) return `<path d="${d}" fill="${fill}"${fr}${op}/>` + outline(lineCol(c));
+      const cid = nid(); defs.push(`<clipPath id="${cid}"><path d="${d}"${fr}/></clipPath>`);
+      const b = bbox(d); let s = `<g clip-path="url(#${cid})">`;
+      if (st.shade && !o.noShade && !glowy){
+        const sh = st.shade;
+        if (sh.half){ s += `<path d="${d}" fill="${fill}"${fr}/><rect x="${r1((b.x0 + b.x1) / 2)}" y="${b.y0 - 2}" width="${r1(b.x1 - b.x0)}" height="${r1(b.y1 - b.y0 + 4)}" fill="#000" opacity="${sh.a}"/>`; }
+        else { s += `<path d="${d}" fill="${mix(c, '#000000', sh.a)}"${fr}/><path d="${d}" fill="${fill}" transform="translate(${-sh.dx},${-sh.dy})"${fr}/>`; }
+      } else s += `<path d="${d}" fill="${fill}"${fr}/>`;
+      if (st.sheen && !o.noShade){ const gid = nid(); defs.push(`<radialGradient id="${gid}" cx=".3" cy=".25" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`); s += `<rect x="${b.x0}" y="${b.y0}" width="${r1(b.x1 - b.x0)}" height="${r1(b.y1 - b.y0)}" fill="url(#${gid})"/>`; }
+      if (st.glass && (b.x1 - b.x0) * (b.y1 - b.y0) > 260){ const k = (b.x1 - b.x0) * (b.y1 - b.y0) > 2000 ? 2 : 1;
+        for (let i = 0; i < k; i++){ const ax = b.x0 + R() * (b.x1 - b.x0), bx = b.x0 + R() * (b.x1 - b.x0); s += `<line x1="${r1(ax)}" y1="${b.y0}" x2="${r1(bx)}" y2="${b.y1}" stroke="${st.line.c}" stroke-width="${r1(lw * .5)}"/>`; } }
+      return s + '</g>' + outline(lineCol(c));
+    }
+    if (mode === 'hatch'){ const sp = spotOf(role); const f = sp || hatchFill(glowy ? 0 : levelOf(role)); used.add(ink); return `<path d="${d}" fill="${f}"${fr}${op}/>` + outline(ink); }
+    if (mode === 'tone'){ const f = spotOf(role) || toneOf(role); used.add(f); return `<path d="${d}" fill="${f}"${fr}${op}/>` + outline(st.line.c); }
+    if (mode === 'sil'){ const f = isBg ? (GLOW.has(role) ? col(role) : toneOf(role)) : (glowy ? col(role) : ink); return `<path d="${d}" fill="${f}"${fr}${op}/>`; }
+    if (mode === 'neon'){ const c = col(role); return `<path d="${d}" fill="${c}" fill-opacity="${glowy ? .55 : .09}"${fr}${op}/><path d="${d}" fill="none" stroke="${c}" stroke-width="${isBg ? 1.2 : 1.7}" stroke-linejoin="round"${fr}${op}/>`; }
+    if (mode === 'wash'){ const c = col(role); const a = (o.alpha ?? 1) * .84; return `<path d="${d}" fill="${c}" opacity="${a}"${fr}/>` + (o.noLine ? '' : `<path d="${d}" fill="none" stroke="${mix(c, '#000000', .35)}" stroke-width="1.2" opacity="${a * .5}"${fr}/>`); }
+    if (mode === 'stitch'){ const c = col(role); return `<path d="${d}" fill="${satin(c)}"${fr}${op}/>` + (o.noLine ? '' : `<path d="${d}" fill="none" stroke="${mix(c, '#000000', .42)}" stroke-width="${isBg ? 1.4 : 2}" stroke-dasharray="3.2 1.7" stroke-linecap="round"${fr}${op}/>`); }
+    if (mode === 'print'){ const c = col(role); used.add(ink); let s = `<g transform="translate(2.2,1.4)"${op}><path d="${d}" fill="${c}"${fr}/>${lum(c) < .55 && c !== ink ? `<path d="${d}" fill="${dots()}" opacity=".35"${fr}/>` : ''}</g>`; return s + outline(ink); }
+    if (mode === 'chalk'){ const c = col(role); return `<path d="${d}" fill="${c}" fill-opacity="${glowy ? .6 : .3}"${fr}${op}/><path d="${d}" fill="${scrib(c)}" opacity=".55"${fr}${op}/>` + (o.noLine ? '' : `<path d="${d}" fill="none" stroke="${c}" stroke-width="${isBg ? 1.4 : 2.2}" stroke-linejoin="round"${fr}${op}/>`); }
+    return '';
+  }
+  const P = {
+    kind, W, H, used, st,
+    shape(d, role, o = {}){ const s = fillSVG(d, role, o); out.push(o.tf ? `<g transform="${o.tf}">${s}</g>` : s); },
+    dot(x, y, r, role, o = {}){ this.shape(C(x, y, r), role, Object.assign({ noLine: 1, noShade: 1 }, o)); },
+    line(d, role, w = 1.5, o = {}){
+      let c;
+      if (mode === 'hatch') c = (role && spotOf(role)) || ink;
+      else if (mode === 'tone') c = (role && spotOf(role)) || st.line.c;
+      else if (mode === 'sil') c = GLOW.has(role) ? col(role) : ink;
+      else if (mode === 'print') c = ink;
+      else c = role ? col(role) : (st.line && st.line.c) || '#000';
+      used.add(c);
+      const dash = mode === 'stitch' ? ' stroke-dasharray="3 1.6"' : '';
+      out.push(`<path d="${d}" fill="none" stroke="${c}" stroke-width="${r1(w * (mode === 'flat' && lw0 > 3 ? 1.3 : 1))}" stroke-linecap="round" stroke-linejoin="round"${dash}${o.alpha != null ? ` opacity="${o.alpha}"` : ''}/>`);
+    },
+    glow(x, y, r, role = 'glow', a = .7){
+      if (mode === 'hatch' || mode === 'tone' || mode === 'stitch' || mode === 'print') return;
+      const c = col(role), gid = nid(); used.add(mix(c, st.back && typeof st.back === 'string' ? st.back : '#000000', .5));
+      defs.push(`<radialGradient id="${gid}"><stop offset="0" stop-color="${c}" stop-opacity="${mode === 'chalk' ? a * .5 : a}"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>`);
+      out.push(`<circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(r)}" fill="url(#${gid})"/>`);
+    },
+    eye(x, y, r, role = 'eye'){
+      if (mode === 'hatch'){ const sp = spotOf(role); out.push(`<circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(r)}" fill="${sp || paper}" stroke="${ink}" stroke-width="1"/>`); return; }
+      if (mode === 'tone'){ const sp = spotOf(role); out.push(`<circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(r)}" fill="${sp || st.tones[0]}" stroke="${st.line.c}" stroke-width="1"/>`); return; }
+      this.glow(x, y, r * 3.2, role, .8); this.dot(x, y, r, role);
+      if (mode === 'flat' || mode === 'stitch') out.push(`<circle cx="${r1(x - r * .3)}" cy="${r1(y - r * .3)}" r="${r1(r * .35)}" fill="#fff" opacity=".9"/>`);
+    },
+    shadow(x, y, rx, ry){
+      if (mode === 'neon' || mode === 'chalk') return;
+      if (mode === 'hatch'){ out.push(`<path d="${E(x, y, rx, ry)}" fill="${hatchFill(3)}"/>`); return; }
+      const c = mode === 'sil' ? ink : mode === 'tone' ? st.tones[2] : '#000000';
+      out.push(`<path d="${E(x, y, rx, ry)}" fill="${c}" opacity="${mode === 'sil' ? 1 : mode === 'tone' ? .7 : .22}"/>`);
+    },
+    sky(x, y, w, h, ra, rb){
+      let f;
+      if (mode === 'hatch') f = hatchFill(levelOf(ra));
+      else if (mode === 'chalk') return;
+      else if (mode === 'stitch'){ this.shape(RECT(x, y, w, h), ra, { noLine: 1 }); return; }
+      else {
+        let a, b;
+        if (mode === 'tone'){ a = toneOf(ra); b = toneOf(rb); }
+        else if (mode === 'sil'){ [a, b] = st.skyG; }
+        else { a = col(ra); b = col(rb); if (mode === 'neon'){ a = mix(a, '#000000', .7); b = mix(b, '#000000', .6); } }
+        used.add(a); used.add(b); used.add(mix(a, b, .33)); used.add(mix(a, b, .66));
+        const gid = nid(); defs.push(`<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`); f = `url(#${gid})`;
+      }
+      out.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`);
+      if (st.diaper){ const pid = pat('dia', p => `<pattern id="${p}" patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(45)"><rect x="1" y="1" width="10" height="10" fill="none" stroke="#e8c45a" stroke-width=".7" opacity=".55"/><circle cx="6" cy="6" r="1" fill="#e8c45a" opacity=".7"/></pattern>`); out.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${pid}"/>`); }
+      if (mode === 'print'){ out.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${dots()}" opacity=".25"/>`); }
+    },
+    raw(s){ out.push(s); },
+  };
+
+  function backdrop(){
+    const b = st.back, fx = st.fx || [];
+    if (Array.isArray(b)){ const gid = nid(); defs.push(`<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${b[0]}"/><stop offset="1" stop-color="${b[1]}"/></linearGradient>`); back.push(`<rect width="${W}" height="${H}" fill="url(#${gid})"/>`); b.forEach(c => used.add(c)); used.add(mix(b[0], b[1], .5)); }
+    else { back.push(`<rect width="${W}" height="${H}" fill="${b}"/>`); used.add(b); }
+    const cx = W / 2, cy = H * .55;
+    if (fx.includes('halo')){ const gid = nid(); defs.push(`<radialGradient id="${gid}"><stop offset="0" stop-color="${st.halo}" stop-opacity=".9"/><stop offset="1" stop-color="${st.halo}" stop-opacity="0"/></radialGradient>`); back.push(`<circle cx="${cx}" cy="${cy}" r="${H * .55}" fill="url(#${gid})"/>`); used.add(mix(st.halo, typeof b === 'string' ? b : '#000000', .5)); used.add(st.halo); }
+    if (fx.includes('sun')){ back.push(`<circle cx="${cx}" cy="${H * .5}" r="${H * .34}" fill="#ffd98a" opacity=".85"/>`); }
+    if (fx.includes('rays')){ let s = ''; for (let i = 0; i < 36; i++){ const a = i / 36 * TAU; s += `<line x1="${cx}" y1="${cy}" x2="${r1(cx + Math.cos(a) * 300)}" y2="${r1(cy + Math.sin(a) * 300)}" stroke="#f3e6c2" stroke-width="${i % 2 ? 2 : 5}" opacity=".55"/>`; } back.push(s); back.push(`<circle cx="${cx}" cy="${cy}" r="${H * .3}" fill="#efe0b8"/>`); }
+    if (fx.includes('circle')){ back.push(`<g fill="none" stroke="#6a4ad8" opacity=".35" stroke-width="1"><circle cx="${cx}" cy="${cy}" r="${H * .42}"/><circle cx="${cx}" cy="${cy}" r="${H * .38}"/><path d="${STAR(cx, cy, H * .38, 6, .58)}"/></g>`); }
+    if (fx.includes('shards')){ const g = 5, pts = []; const rr = rng(UID);
+      for (let j = 0; j <= g; j++) for (let i = 0; i <= g; i++) pts.push([i / g * W + (i % g ? (rr() - .5) * W / g * .6 : 0), j / g * H + (j % g ? (rr() - .5) * H / g * .6 : 0)]);
+      const cols = ['#1a3a8a', '#24489c', '#2c2a7a', '#3a2a6a', '#1f5a8a', '#203070']; let s = '';
+      for (let j = 0; j < g; j++) for (let i = 0; i < g; i++){ const a = pts[j * (g + 1) + i], b2 = pts[j * (g + 1) + i + 1], c = pts[(j + 1) * (g + 1) + i], d2 = pts[(j + 1) * (g + 1) + i + 1];
+        const t1 = `M${r1(a[0])},${r1(a[1])} L${r1(b2[0])},${r1(b2[1])} L${r1(d2[0])},${r1(d2[1])}Z`, t2 = `M${r1(a[0])},${r1(a[1])} L${r1(d2[0])},${r1(d2[1])} L${r1(c[0])},${r1(c[1])}Z`;
+        [t1, t2].forEach(t => { const cc = cols[(rr() * cols.length) | 0]; used.add(cc); s += `<path d="${t}" fill="${cc}" stroke="#120e12" stroke-width="2.5"/>`; }); }
+      back.push(s); }
+    if (fx.includes('blot')){ const rr = rng(UID + 3); let s = ''; for (let i = 0; i < 5; i++){ const c = ['#f2c6b0', '#c8dcee', '#e8dcae', '#d8c8ea'][i % 4]; s += `<path d="${E(rr() * W, rr() * H, 30 + rr() * 50, 20 + rr() * 40)}" fill="${c}" opacity=".45"/>`; } back.push(s); }
+    if (fx.includes('dots')){ const pid = pat('pd', p => `<pattern id="${p}" patternUnits="userSpaceOnUse" width="16" height="16"><circle cx="4" cy="4" r="1.8" fill="#f6c8d0"/><circle cx="12" cy="12" r="1.8" fill="#cfe0f6"/></pattern>`); back.push(`<rect width="${W}" height="${H}" fill="${pid}" opacity=".8"/>`); }
+    if (fx.includes('weave')){ const pid = pat('wv', p => `<pattern id="${p}" patternUnits="userSpaceOnUse" width="4" height="4"><path d="M0,2 L4,2 M2,0 L2,4" stroke="#cbbb98" stroke-width=".8"/></pattern>`); back.push(`<rect width="${W}" height="${H}" fill="${pid}"/>`); }
+    if (fx.includes('board')){ const rr = rng(UID + 9); let s = ''; for (let i = 0; i < 4; i++) s += `<path d="${E(rr() * W, rr() * H, 40 + rr() * 60, 14 + rr() * 20)}" fill="#e8f0e8" opacity=".05"/>`;
+      s += `<text x="${W - 10}" y="16" text-anchor="end" font-family="IBM Plex Sans KR, sans-serif" font-size="9" fill="#e8f0e8" opacity=".35">제3급 마법산업기능사 · 실기</text>`; back.push(s); }
+    if (fx.includes('paper')){ const fid = nid(); defs.push(`<filter id="${fid}"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="${UID % 50}"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .15  0 0 0 .35 -.05"/></filter>`); front.push(`<rect width="${W}" height="${H}" filter="url(#${fid})" opacity=".6"/>`); }
+    if (fx.includes('vignette')){ const gid = nid(); defs.push(`<radialGradient id="${gid}" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient>`); front.push(`<rect width="${W}" height="${H}" fill="url(#${gid})"/>`); }
+  }
+  function filterDef(){
+    const f = st.filter; if (!f) return '';
+    const fid = nid(), reg = 'x="-8%" y="-8%" width="116%" height="116%"';
+    const map = {
+      rough: `<feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>`,
+      water: `<feTurbulence type="fractalNoise" baseFrequency=".024" numOctaves="3" seed="2" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="7" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".55"/>`,
+      ink: `<feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="7" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="4" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".7"/>`,
+      chalk: `<feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="5" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G" result="d"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -2.4 0 0 0 1.85" result="m"/><feComposite in="d" in2="m" operator="in"/>`,
+      neon: `<feGaussianBlur in="SourceGraphic" stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>`,
+    };
+    defs.push(`<filter id="${fid}" ${reg}>${map[f]}</filter>`); return fid;
+  }
+  function frame(){
+    const f = st.frame; if (!f) return '';
+    const lbl = meta.label || '', num = meta.num || '';
+    if (f === 'manu') return `<rect x="4" y="4" width="${W - 8}" height="${H - 8}" fill="none" stroke="url(#${goldUrl().slice(5, -1)})" stroke-width="5"/><rect x="10" y="10" width="${W - 20}" height="${H - 20}" fill="none" stroke="#b8322a" stroke-width="1"/>` + [[6, 6], [W - 6, 6], [6, H - 6], [W - 6, H - 6]].map(([x, y]) => `<rect x="${x - 5}" y="${y - 5}" width="10" height="10" fill="#24399a" stroke="#c8901e" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="1.8" fill="#f3d777"/>`).join('');
+    if (f === 'plate') return `<rect x="5" y="5" width="${W - 10}" height="${H - 10}" fill="none" stroke="${ink}" stroke-width="1.4"/><rect x="8.5" y="8.5" width="${W - 17}" height="${H - 17}" fill="none" stroke="${ink}" stroke-width=".6"/><text x="${W - 14}" y="${H - 13}" text-anchor="end" font-family="Noto Serif KR, serif" font-size="8" fill="${ink}">그림 ${num}</text>`;
+    if (f === 'tarot'){ const pw = isBg ? 110 : 96; return `<rect x="3" y="3" width="${W - 6}" height="${H - 6}" rx="6" fill="none" stroke="#2b2018" stroke-width="2.5"/><rect x="8" y="8" width="${W - 16}" height="${H - 16}" rx="3" fill="none" stroke="#2b2018" stroke-width="1"/><text x="${W / 2}" y="20" text-anchor="middle" font-family="Noto Serif KR, serif" font-weight="900" font-size="9" fill="#2b2018">${num}</text><rect x="${W / 2 - pw / 2}" y="${H - 26}" width="${pw}" height="18" rx="2" fill="#f1e7cf" stroke="#2b2018" stroke-width="1.5"/><text x="${W / 2}" y="${H - 13.5}" text-anchor="middle" font-family="Noto Serif KR, serif" font-weight="900" font-size="9.5" fill="#2b2018" letter-spacing="1.5">${lbl}</text>`; }
+    if (f === 'porc') return `<rect x="5" y="5" width="${W - 10}" height="${H - 10}" rx="8" fill="none" stroke="#1d3a7a" stroke-width="2.4"/><rect x="10" y="10" width="${W - 20}" height="${H - 20}" rx="5" fill="none" stroke="#1d3a7a" stroke-width=".8"/>` + [[16, 16], [W - 16, 16], [16, H - 16], [W - 16, H - 16]].map(([x, y]) => `<path d="M${x - 4},${y} Q${x},${y - 5} ${x + 4},${y} Q${x},${y + 5} ${x - 4},${y}Z" fill="#5f80b6"/>`).join('');
+    if (f === 'hoop') return isBg ? `<rect x="5" y="5" width="${W - 10}" height="${H - 10}" fill="none" stroke="#8a5a3a" stroke-width="1.6" stroke-dasharray="4 2.4"/>` : `<circle cx="${W / 2}" cy="${H / 2}" r="${W / 2 - 6}" fill="none" stroke="#b58a5a" stroke-width="8"/><circle cx="${W / 2}" cy="${H / 2}" r="${W / 2 - 6}" fill="none" stroke="#8a6238" stroke-width="1"/><rect x="${W / 2 - 7}" y="0" width="14" height="10" rx="2" fill="#9a7a56"/>`;
+    if (f === 'seal') return `<rect x="${W - 30}" y="${H - 32}" width="20" height="22" rx="2" fill="#b8322a"/><text x="${W - 20}" y="${H - 16}" text-anchor="middle" font-family="Noto Serif KR, serif" font-weight="900" font-size="12" fill="#f3efe6">魔</text>`;
+    if (f === 'arch') return isBg ? `<rect x="3" y="3" width="${W - 6}" height="${H - 6}" rx="10" fill="none" stroke="#120e12" stroke-width="7"/>` : `<path d="${ARCH}" fill="none" stroke="#120e12" stroke-width="7"/>`;
+    return '';
+  }
+  P.svg = () => {
+    backdrop();
+    const fid = filterDef(), fr = frame();
+    let body = back.join('') + `<g${fid ? ` filter="url(#${fid})"` : ''}>${out.join('')}</g>` + front.join('');
+    if (st.frame === 'arch'){ const cid = nid(); defs.push(`<clipPath id="${cid}"><path d="${isBg ? `M3,13 Q3,3 13,3 L${W - 13},3 Q${W - 3},3 ${W - 3},13 L${W - 3},${H - 13} Q${W - 3},${H - 3} ${W - 13},${H - 3} L13,${H - 3} Q3,${H - 3} 3,${H - 13}Z` : ARCH}"/></clipPath>`); body = `<rect width="${W}" height="${H}" fill="#120e12"/><g clip-path="url(#${cid})">${body}</g>`; }
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet"><defs>${defs.join('')}</defs>${body}${fr}</svg>`;
+  };
+  return P;
+}
+const ARCH = 'M14,197 L14,72 C14,32 60,8 100,5 C140,8 186,32 186,72 L186,197Z';
+
+/* ================= 주인공 ================= */
+const OUTFITS = [
+  { name:'기본', d:'고깔모자와 긴 로브' },
+  { name:'방랑', d:'후드와 망토, 등불' },
+  { name:'의식', d:'높은 관과 영대(긴 띠)' },
+  { name:'전투', d:'챙 모자, 짧은 망토, 지팡이 대신 완드' },
+];
+function hero(P, st, o){
+  if (st.geo) return heroGeo(P, o);
+  const k = PROP[st.prop || 'n'];
+  const g = 186, cx = 100, hr = 15 * k.h, bl = 100 * k.b, sy = g - bl, hy = sy - hr * .85;
+  const sw = 12 + hr * .25, hw = o === 3 ? 28 : 36, hem = o === 3 ? g - 16 : g;
+  const robe = ['robe', 'moss', 'cloth', 'robe2'][o];
+  const sx = cx + sw + 17, hyR = sy + bl * .38, top = sy - 34 * k.b;
+  P.shadow(cx, g, 48, 7);
+  if (o !== 3) P.shape(D`M${sx - 1.8},${top} L${sx + 1.8},${top} L${sx + 1.8},${g} L${sx - 1.8},${g}Z`, 'wood', { lw: .7 });
+  if (o === 1) P.shape(D`M${cx - sw - 2},${sy + 2} C${cx - hw - 14},${sy + bl * .4} ${cx - hw - 12},${g - 20} ${cx - hw - 8},${g - 2} L${cx + hw + 8},${g - 2} C${cx + hw + 12},${g - 20} ${cx + hw + 14},${sy + bl * .4} ${cx + sw + 2},${sy + 2}Z`, 'leather');
+  if (o === 2) P.shape(D`M${cx - hr * 1.05},${hy - hr * .6} C${cx - hr * 1.6},${hy + hr} ${cx - sw - 8},${sy + bl * .2} ${cx - sw - 10},${sy + bl * .34} L${cx + sw + 10},${sy + bl * .34} C${cx + sw + 8},${sy + bl * .2} ${cx + hr * 1.6},${hy + hr} ${cx + hr * 1.05},${hy - hr * .6}Z`, 'cloth2');
+  if (o === 0 || o === 3) P.shape(D`M${cx - hr * 1.05},${hy - hr * .3} C${cx - hr * 1.3},${hy + hr * .9} ${cx - hr * .9},${hy + hr * 1.4} ${cx - hr * .5},${hy + hr * 1.35} L${cx + hr * .5},${hy + hr * 1.35} C${cx + hr * .9},${hy + hr * 1.4} ${cx + hr * 1.3},${hy + hr * .9} ${cx + hr * 1.05},${hy - hr * .3}Z`, 'hair');
+  if (o === 3){ const bt = D`M${cx - 15},${hem - 4} L${cx - 17},${g - 1} L${cx - 3},${g - 1} L${cx - 5},${hem - 4}Z`; P.shape(bt, 'leather'); P.shape(mirror(bt), 'leather'); }
+  P.shape(D`M${cx - sw},${sy} C${cx - sw - 6},${sy + bl * .4} ${cx - hw + 4},${hem - 18} ${cx - hw},${hem} Q${cx},${hem + 5} ${cx + hw},${hem} C${cx + hw - 4},${hem - 18} ${cx + sw + 6},${sy + bl * .4} ${cx + sw},${sy} Q${cx},${sy - 5} ${cx - sw},${sy}Z`, robe);
+  if (o === 0){ P.shape(D`M${cx - 3},${sy + 3} L${cx - 6},${hem} L${cx + 6},${hem} L${cx + 3},${sy + 3}Z`, 'trim', { lw: .6 }); P.shape(D`M${cx - hw},${hem} Q${cx},${hem + 5} ${cx + hw},${hem} L${cx + hw - 1.5},${hem - 6} Q${cx},${hem - 1} ${cx - hw + 1.5},${hem - 6}Z`, 'trim', { lw: .6 }); }
+  if (o === 2){ const band = D`M${cx - 9},${sy} L${cx - 13},${hem - 6} L${cx - 5},${hem - 6} L${cx - 3},${sy + 2}Z`; P.shape(band, 'robe2'); P.shape(mirror(band), 'robe2');
+    for (let i = 0; i < 3; i++){ const y = sy + bl * (.35 + i * .18); P.line(D`M${cx - 11},${y} L${cx - 6},${y} M${cx - 8.5},${y - 3} L${cx - 8.5},${y + 3}`, 'trim', 1.2); P.line(mirror(D`M${cx - 11},${y} L${cx - 6},${y} M${cx - 8.5},${y - 3} L${cx - 8.5},${y + 3}`), 'trim', 1.2); } }
+  if (o !== 2){ const by = sy + bl * .34; P.shape(D`M${cx - sw - 3},${by} L${cx + sw + 3},${by} L${cx + sw + 3.5},${by + 6} L${cx - sw - 3.5},${by + 6}Z`, 'leather', { lw: .7 }); P.shape(RECT(cx - 3.5, by - .5, 7, 7), 'trim', { lw: .5 });
+    if (o === 3){ P.shape(RECT(cx - sw - 2, by + 5, 7, 11), 'cloth', { lw: .6 }); P.shape(RECT(cx + sw - 6, by + 5, 7, 11), 'cloth', { lw: .6 }); } }
+  const sl = D`M${cx - sw + 2},${sy + 2} C${cx - sw - 10},${sy + 10} ${cx - sw - 16},${sy + bl * .35} ${cx - sw - 20},${sy + bl * .5} L${cx - sw - 4},${sy + bl * .52} C${cx - sw - 2},${sy + bl * .3} ${cx - sw + 4},${sy + bl * .15} ${cx - sw + 6},${sy + 6}Z`;
+  P.shape(sl, robe);
+  P.shape(D`M${cx + sw - 2},${sy + 2} C${cx + sw + 8},${sy + 6} ${cx + sw + 16},${sy + bl * .2} ${cx + sw + 22},${sy + bl * .34} L${cx + sw + 12},${sy + bl * .42} C${cx + sw + 6},${sy + bl * .3} ${cx + sw},${sy + bl * .2} ${cx + sw - 6},${sy + 8}Z`, robe);
+  const lhx = cx - sw - 12, lhy = sy + bl * .53;
+  if (o === 1){ P.line(D`M${lhx},${lhy} L${lhx},${lhy + 10}`, 'metal', 1.2); P.glow(lhx, lhy + 18, 18, 'fire', .6); P.shape(D`M${lhx - 5},${lhy + 10} L${lhx + 5},${lhy + 10} L${lhx + 6},${lhy + 24} L${lhx - 6},${lhy + 24}Z`, 'metal', { lw: .7 }); P.dot(lhx, lhy + 17, 3.2, 'fire'); }
+  P.dot(lhx, lhy, 4.6 * Math.max(1, k.h * .8), 'skin', { noLine: 0 });
+  if (o === 3){ P.shape(D`M${sx - 1.5},${hyR + 2} L${sx + 20},${hyR - 30} L${sx + 22.5},${hyR - 28.5} L${sx + 1.5},${hyR + 4}Z`, 'wood', { lw: .6 }); P.glow(sx + 22, hyR - 32, 16, 'gem'); P.shape(STAR(sx + 22, hyR - 32, 6.5), 'gem', { lw: .6 }); }
+  P.dot(sx, hyR, 4.6 * Math.max(1, k.h * .8), 'skin', { noLine: 0 });
+  if (o === 3) P.shape(D`M${cx - sw - 6},${sy + 2} Q${cx},${sy - 6} ${cx + sw + 6},${sy + 2} L${cx + sw + 10},${sy + bl * .3} L${cx + 4},${sy + bl * .22} L${cx - 4},${sy + bl * .22} L${cx - sw - 10},${sy + bl * .3}Z`, 'dark');
+  if (o === 1){ P.shape(D`M${cx - hr * 1.45},${hy + hr * 1.3} C${cx - hr * 1.7},${hy - hr * .6} ${cx - hr * .9},${hy - hr * 1.8} ${cx},${hy - hr * 1.85} C${cx + hr * .9},${hy - hr * 1.8} ${cx + hr * 1.7},${hy - hr * .6} ${cx + hr * 1.45},${hy + hr * 1.3}Z`, 'leather'); }
+  P.shape(C(cx, hy, hr), 'skin');
+  if (o === 0 || o === 3) P.shape(D`M${cx - hr * .98},${hy - hr * .05} C${cx - hr * .95},${hy - hr * .95} ${cx + hr * .95},${hy - hr * .95} ${cx + hr * .98},${hy - hr * .05} C${cx + hr * .5},${hy - hr * .45} ${cx},${hy - hr * .2} ${cx - hr * .98},${hy - hr * .05}Z`, 'hair', { lw: .6 });
+  const er = hr * (k.h > 1.3 ? .14 : .1);
+  P.shape(E(cx - hr * .36, hy + hr * .18, er, er * 1.3), 'dark', { noLine: 1, noShade: 1 }); P.shape(E(cx + hr * .36, hy + hr * .18, er, er * 1.3), 'dark', { noLine: 1, noShade: 1 });
+  if (o === 0){
+    P.shape(E(cx, hy - hr * .55, hr * 1.9, hr * .38), 'hat');
+    P.shape(D`M${cx - hr * 1.1},${hy - hr * .62} Q${cx - hr * .4},${hy - hr * 2.1} ${cx + hr * .5},${hy - hr * 3.1} Q${cx + hr * 1.5},${hy - hr * 3.4} ${cx + hr * 1.9},${hy - hr * 2.8} Q${cx + hr * 1.1},${hy - hr * 2.7} ${cx + hr * .8},${hy - hr * 1.9} L${cx + hr * 1.15},${hy - hr * .62}Z`, 'hat');
+    P.shape(D`M${cx - hr * 1.06},${hy - hr * .64} L${cx - hr * .9},${hy - hr * 1.02} L${cx + hr * .98},${hy - hr * 1.02} L${cx + hr * 1.12},${hy - hr * .64}Z`, 'trim', { lw: .6 });
+    P.shape(STAR(cx + hr * .2, hy - hr * 1.75, hr * .3), 'gem', { lw: .5 });
+    P.glow(sx, top - 6, 22, 'gem'); P.line(D`M${sx - 8},${top - 13} Q${sx - 13},${top + 4} ${sx},${top + 6} Q${sx + 13},${top + 4} ${sx + 8},${top - 13}`, 'trim', 2.6); P.dot(sx, top - 4, 5.5, 'gem', { noLine: 0 });
+  }
+  if (o === 1){
+    P.shape(D`M${cx - hr * 1.45},${hy + hr * 1.3} C${cx - hr * 1.7},${hy - hr * .6} ${cx - hr * .9},${hy - hr * 1.8} ${cx},${hy - hr * 1.85} C${cx + hr * .9},${hy - hr * 1.8} ${cx + hr * 1.7},${hy - hr * .6} ${cx + hr * 1.45},${hy + hr * 1.3} L${cx + hr * 1.05},${hy + hr * .8} C${cx + hr * 1.08},${hy - hr * .4} ${cx + hr * .6},${hy - hr * 1} ${cx},${hy - hr * 1.02} C${cx - hr * .6},${hy - hr * 1} ${cx - hr * 1.08},${hy - hr * .4} ${cx - hr * 1.05},${hy + hr * .8}Z`, 'leather');
+    P.shape(D`M${cx - hr * .98},${hy - hr * .15} Q${cx},${hy - hr * 1.05} ${cx + hr * .98},${hy - hr * .15} Q${cx},${hy - hr * .55} ${cx - hr * .98},${hy - hr * .15}Z`, 'dark', { noLine: 1, noShade: 1, alpha: .45 });
+    P.dot(cx, sy + 3, 3.6, 'gem', { noLine: 0 });
+    P.line(D`M${sx},${top} Q${sx + 10},${top - 4} ${sx + 9},${top + 8}`, 'wood', 3.4);
+  }
+  if (o === 2){
+    P.shape(D`M${cx - hr * .95},${hy - hr * .55} L${cx - hr * .75},${hy - hr * 2.5} L${cx},${hy - hr * 3.2} L${cx + hr * .75},${hy - hr * 2.5} L${cx + hr * .95},${hy - hr * .55}Z`, 'cloth');
+    P.shape(D`M${cx - hr * .96},${hy - hr * .55} L${cx - hr * .9},${hy - hr * 1} L${cx + hr * .9},${hy - hr * 1} L${cx + hr * .96},${hy - hr * .55}Z`, 'trim', { lw: .6 });
+    P.line(D`M${cx},${hy - hr * 2.9} L${cx},${hy - hr * 1.1}`, 'trim', 1.6);
+    P.glow(cx, hy - hr * 1.85, hr * 1.1, 'gem'); P.dot(cx, hy - hr * 1.85, hr * .22, 'gem', { noLine: 0 });
+    const ring = E(sx, top - 6, 9, 9) + ' ' + E(sx, top - 6, 6, 6); P.glow(sx, top - 6, 20, 'glow', .5); P.shape(ring, 'trim', { evenodd: 1, lw: .5 });
+    for (let i = 0; i < 4; i++){ const a = i / 4 * TAU + .4; P.line(D`M${sx + Math.cos(a) * 6},${top - 6 + Math.sin(a) * 6} L${sx + Math.cos(a) * 2.5},${top - 6 + Math.sin(a) * 2.5}`, 'trim', 1.2); }
+  }
+  if (o === 3){
+    P.shape(E(cx, hy - hr * .6, hr * 2.3, hr * .42), 'dark');
+    P.shape(D`M${cx - hr * 1.05},${hy - hr * .62} C${cx - hr * 1.1},${hy - hr * 2.1} ${cx + hr * 1.1},${hy - hr * 2.1} ${cx + hr * 1.05},${hy - hr * .62}Z`, 'dark');
+    P.shape(D`M${cx - hr * 1.06},${hy - hr * .64} L${cx - hr * 1.04},${hy - hr * .98} L${cx + hr * 1.04},${hy - hr * .98} L${cx + hr * 1.06},${hy - hr * .64}Z`, 'robe2', { lw: .5 });
+    P.shape(D`M${cx + hr * .8},${hy - hr * 1} C${cx + hr * 1.6},${hy - hr * 2.4} ${cx + hr * 2.6},${hy - hr * 2.8} ${cx + hr * 3.2},${hy - hr * 2.6} C${cx + hr * 2.4},${hy - hr * 2.2} ${cx + hr * 1.6},${hy - hr * 1.6} ${cx + hr * 1.1},${hy - hr * .8}Z`, 'fire', { lw: .6 });
+  }
+}
+function heroGeo(P, o){
+  const robe = ['robe', 'moss', 'cloth', 'robe2'][o], bot = o === 3 ? 172 : 186;
+  P.shadow(100, 186, 34, 5);
+  if (o !== 3){ P.shape(RECT(126, 58, 3.5, 128), 'wood'); }
+  if (o === 1) P.shape('M70,100 L130,100 L134,184 L66,184Z', 'leather');
+  if (o === 3){ P.shape(RECT(87, 172, 10, 14), 'leather'); P.shape(RECT(103, 172, 10, 14), 'leather'); }
+  P.shape(RECT(84, 92, 32, bot - 92), robe);
+  if (o === 2){ P.shape(RECT(88, 96, 6, bot - 108), 'robe2'); P.shape(RECT(106, 96, 6, bot - 108), 'robe2'); }
+  if (o === 3){ P.shape('M78,92 L122,92 L118,118 L82,118Z', 'dark'); P.shape(RECT(84, 136, 32, 5), 'leather'); }
+  P.line('M100,110 L100,150 M90,124 L110,124', 'trim', 1.8); P.line(C(100, 124, 6), 'trim', 1.4);
+  P.shape(RECT(91, 101, 5, 3), 'dark', { noShade: 1 }); P.shape(RECT(104, 101, 5, 3), 'dark', { noShade: 1 });
+  if (o === 0){ P.shape('M78,92 L122,92 L108,40 L96,64Z', 'hat'); P.glow(127.7, 52, 18, 'gem'); P.dot(127.7, 52, 5, 'gem'); }
+  if (o === 1){ P.shape('M80,104 L80,90 Q100,66 120,90 L120,104 L114,104 L114,92 Q100,78 86,92 L86,104Z', 'leather'); P.glow(132, 66, 14, 'fire'); }
+  if (o === 2){ P.shape('M86,92 L86,62 L100,44 L114,62 L114,92Z', 'cloth'); P.dot(100, 70, 3.5, 'gem'); P.shape(E(127.7, 52, 8, 8) + ' ' + E(127.7, 52, 5, 5), 'trim', { evenodd: 1 }); }
+  if (o === 3){ P.shape('M72,92 L128,92 L128,86 L72,86Z', 'dark'); P.shape('M86,86 L114,86 L110,66 L90,66Z', 'dark'); P.line('M112,76 Q124,60 134,58', 'fire', 3); P.shape('M118,128 L140,96 L143,98 L121,130Z', 'wood'); P.glow(141, 95, 14, 'gem'); P.shape(STAR(141, 95, 6), 'gem'); }
+}
+
+/* ================= 사역마 ================= */
+const FAMS = [
+  { name:'밤발', rank:'기사', d:'검은 고양이' },
+  { name:'잿불', rank:'백작', d:'불꽃 살라만더' },
+  { name:'천안', rank:'왕', d:'눈 달린 바퀴 천사' },
+];
+function famCat(P){
+  P.shadow(100, 186, 40, 6);
+  P.shape('M128,180 C162,178 168,148 150,128 C146,124 141,129 145,134 C155,150 152,168 126,170Z', 'fur');
+  P.shape('M70,186 C60,150 70,112 92,104 L108,104 C130,112 140,150 130,186Z', 'fur');
+  P.shape('M88,150 C88,130 112,130 112,150 C112,166 88,166 88,150Z', 'fur2', { noLine: 1, alpha: .6 });
+  P.shape('M78,96 C74,82 76,72 80,56 L93,70 C97,68 103,68 107,70 L120,56 C124,72 126,82 122,96 C118,112 82,112 78,96Z', 'fur');
+  P.shape('M82,64 L90,72 L84,76Z', 'fur2', { noLine: 1 }); P.shape(mirror('M82,64 L90,72 L84,76Z'), 'fur2', { noLine: 1 });
+  P.eye(91, 88, 4.2, 'eye'); P.eye(109, 88, 4.2, 'eye');
+  P.shape('M97,96 L103,96 L100,99Z', 'fur2', { noLine: 1 });
+  P.shape('M84,108 Q100,116 116,108 L116,113 Q100,121 84,113Z', 'robe2', { lw: .6 });
+  P.glow(100, 122, 12, 'gem'); P.shape('M100,114 L106,122 L100,130 L94,122Z', 'trim', { lw: .6 }); P.line('M100,118 L100,126', 'dark', 1);
+  P.shape(E(90, 183, 8, 4), 'fur2'); P.shape(E(110, 183, 8, 4), 'fur2');
+  P.glow(58, 70, 8, 'glow', .8); P.glow(146, 92, 6, 'glow', .8); P.glow(52, 120, 5, 'glow', .8);
+}
+function famSalamander(P){
+  P.raw('<g transform="translate(-10,4)">');
+  P.shadow(108, 178, 70, 6);
+  P.shape('M64,148 C40,146 20,158 24,174 C28,186 46,184 44,174 C42,166 50,160 66,160Z', 'scale');
+  const legs = ['M140,150 L146,174 L157,175 L151,148Z', 'M90,156 L83,176 L95,178 L101,154Z'];
+  P.shape('M122,154 L116,175 L127,177 L133,152Z', 'scale'); P.shape('M72,152 L63,171 L74,175 L83,152Z', 'scale');
+  P.shape('M60,150 C70,126 120,118 152,126 C170,130 178,140 170,150 C150,162 90,166 60,150Z', 'scale');
+  legs.forEach(l => P.shape(l, 'scale'));
+  P.shape('M78,154 C100,163 140,159 164,148 C140,154 100,157 78,154Z', 'belly', { lw: .6 });
+  P.shape('M148,126 C160,112 186,114 194,128 C197,138 186,147 168,149 L158,147Z', 'scale');
+  P.eye(178, 127, 3.6, 'eye'); P.line('M170,140 Q182,142 192,136', 'dark', 1.4);
+  for (let i = 0; i < 7; i++){ const x = 70 + i * 14, y = 140 - Math.sin(i / 6 * Math.PI) * 14 + (i > 4 ? 2 : 0), h = 18 + Math.sin(i / 6 * Math.PI) * 18;
+    P.glow(x + 3, y - h * .5, h * .9, 'fire', .45);
+    P.shape(D`M${x - 5},${y} C${x - 7},${y - h * .45} ${x + 1},${y - h * .7} ${x + 2},${y - h} C${x + 9},${y - h * .55} ${x + 12},${y - h * .25} ${x + 8},${y}Z`, 'fire', { lw: .6 });
+    P.shape(D`M${x - 1},${y} C${x - 2},${y - h * .3} ${x + 2},${y - h * .45} ${x + 3},${y - h * .62} C${x + 6},${y - h * .35} ${x + 7},${y - h * .15} ${x + 5},${y}Z`, 'glow', { noLine: 1 }); }
+  [[90, 142], [112, 140], [134, 140], [102, 150], [124, 148]].forEach(([x, y]) => P.dot(x, y, 2.4, 'dark', { alpha: .5 }));
+  P.raw('</g>');
+}
+function famOphanim(P){
+  const cx = 100, cy = 96;
+  P.shadow(100, 186, 30, 4);
+  P.glow(cx, cy, 95, 'glow', .45);
+  const leaf = 'M0,0 C-10,-20 -9,-50 0,-72 C9,-50 10,-20 0,0Z';
+  [55, 82, 110].forEach((a, i) => { const s = 1.1 - i * .12; P.shape(leaf, 'cloth', { tf: `translate(${cx - 8},${cy}) rotate(${-a}) scale(${s})` }); P.shape(leaf, 'cloth', { tf: `translate(${cx + 8},${cy}) rotate(${a}) scale(${s})` }); });
+  const ring = (rx, ry, ang) => { const tf = `translate(${cx},${cy}) rotate(${ang})`; P.shape(E(0, 0, rx, ry) + ' ' + E(0, 0, rx - 7, ry - 7), 'trim', { evenodd: 1, tf });
+    for (let i = 0; i < 6; i++){ const t = i / 6 * TAU + .3, x = Math.cos(t) * (rx - 3.5), y = Math.sin(t) * (ry - 3.5); P.raw(''); P.shape(D`M${x - 4.5},${y} Q${x},${y - 4} ${x + 4.5},${y} Q${x},${y + 4} ${x - 4.5},${y}Z`, 'bone', { tf, lw: .5 }); P.shape(C(x, y, 1.8), 'gem', { tf, noLine: 1 }); } };
+  ring(62, 30, -28); ring(62, 30, 28);
+  P.glow(cx, cy, 34, 'gem', .7);
+  P.shape('M70,96 Q100,72 130,96 Q100,120 70,96Z', 'bone');
+  P.dot(cx, cy, 10, 'gem', { noLine: 0 }); P.dot(cx, cy, 4.2, 'dark'); P.dot(cx - 3, cy - 3, 2, 'light');
+  P.shape(STAR(cx, 30, 9, 4, .35), 'trim', { lw: .6 }); P.glow(cx, 30, 14, 'glow');
+}
+
+/* ================= 적 ================= */
+const FOES = [
+  { name:'임프', rank:'잡몹', d:'떼로 몰려오는 작은 악마' },
+  { name:'석상 파수꾼', rank:'정예', d:'날개 접은 가고일 석상' },
+  { name:'왕관 쓴 리치', rank:'보스', d:'죽지 않는 대마법사' },
+];
+function foeImp(P){
+  P.shadow(100, 186, 34, 5);
+  const wing = 'M84,140 C60,110 36,100 20,104 C30,112 32,120 28,130 C38,128 44,134 44,142 C52,138 60,142 62,150 C70,146 78,146 84,150Z';
+  P.shape(wing, 'wing'); P.shape(mirror(wing), 'wing');
+  P.line('M120,166 C140,172 152,160 158,150', 'imp', 3.2); P.shape('M158,150 L149,149 L163,139 L160,155Z', 'imp', { lw: .6 });
+  const leg = 'M86,166 L84,184 L95,184 L95,168Z'; P.shape(leg, 'imp'); P.shape(mirror(leg), 'imp');
+  P.shape('M76,150 C74,126 126,126 124,150 C124,172 76,172 76,150Z', 'imp');
+  P.shape('M86,152 C86,138 114,138 114,152 C114,164 86,164 86,152Z', 'belly', { noLine: 1, alpha: .7 });
+  const arm = 'M78,140 L64,156 L71,161 L83,148Z'; P.shape(arm, 'imp'); P.shape(mirror(arm), 'imp');
+  const ear = 'M79,108 L60,98 L79,117Z'; P.shape(ear, 'imp'); P.shape(mirror(ear), 'imp');
+  P.shape('M78,118 C74,96 86,86 100,86 C114,86 126,96 122,118 C118,134 82,134 78,118Z', 'imp');
+  const horn = 'M85,93 C78,84 76,74 80,62 C85,73 91,81 95,88Z'; P.shape(horn, 'bone'); P.shape(mirror(horn), 'bone');
+  P.shape('M87,117 Q100,128 113,117 Q100,123 87,117Z', 'dark', { noShade: 1 });
+  P.shape('M92,119 L94,123 L96,120Z M104,120 L106,123 L108,119Z', 'bone', { noLine: 1, noShade: 1 });
+  P.eye(91, 107, 3.6, 'eyeR'); P.eye(109, 107, 3.6, 'eyeR');
+}
+function foeGargoyle(P){
+  P.shadow(100, 188, 54, 5);
+  P.shape('M56,188 L60,166 L140,166 L144,188Z', 'stone2');
+  P.shape('M50,166 L150,166 L145,157 L55,157Z', 'stone');
+  P.line('M70,176 L80,176 M92,176 L108,176 M120,176 L130,176', 'glow', 1.6); P.glow(100, 176, 30, 'glow', .35);
+  const wing = 'M72,112 C54,86 50,58 62,36 C70,56 79,63 90,70 C85,85 84,98 82,108Z'; P.shape(wing, 'stone2'); P.shape(mirror(wing), 'stone2');
+  P.line('M62,40 L72,92 M68,52 L80,98', 'crack', 1);
+  P.shape('M66,157 C60,128 70,100 100,96 C130,100 140,128 134,157Z', 'stone');
+  const arm = 'M74,128 C64,140 64,151 69,159 L83,159 C81,148 82,139 87,133Z'; P.shape(arm, 'stone'); P.shape(mirror(arm), 'stone');
+  [68, 74, 80].forEach(x => { P.shape(D`M${x},159 L${x + 2},164 L${x + 4},159Z`, 'bone', { noLine: 1 }); P.shape(mirror(D`M${x},159 L${x + 2},164 L${x + 4},159Z`), 'bone', { noLine: 1 }); });
+  const horn = 'M84,76 C76,64 69,59 60,59 C68,66 75,73 80,82Z'; P.shape(horn, 'stone2'); P.shape(mirror(horn), 'stone2');
+  P.shape('M80,96 C78,78 88,68 100,68 C112,68 122,78 120,96 C116,109 84,109 80,96Z', 'stone');
+  P.line('M84,82 Q92,78 98,84 M102,84 Q108,78 116,82', 'crack', 1.8);
+  P.shape('M88,97 L112,97 L108,104 L92,104Z', 'dark', { noShade: 1 });
+  P.shape('M91,97 L93,102 L95,97Z M105,97 L107,102 L109,97Z', 'bone', { noLine: 1, noShade: 1 });
+  P.line('M110,110 L104,124 L112,136 L106,150 M86,118 L92,132', 'crack', 1.2);
+  P.eye(92, 87, 3, 'eyeR'); P.eye(108, 87, 3, 'eyeR');
+}
+function foeLich(P){
+  P.raw('<g transform="translate(6,12) scale(.94)">');
+  P.glow(100, 100, 100, 'gem', .28);
+  P.shadow(100, 188, 60, 6);
+  P.shape(RECT(149.5, 22, 4.5, 166), 'wood', { lw: .7 });
+  P.shape('M64,60 C56,100 50,150 40,186 L52,176 L60,186 L72,174 L82,186 L92,176 L100,186 L108,176 L118,186 L128,174 L140,186 L148,176 L160,186 C150,150 144,100 136,60Z', 'lich');
+  P.shape('M92,62 C90,110 88,150 86,184 L100,178 L114,184 C112,150 110,110 108,62Z', 'robe2', { lw: .6 });
+  P.line('M100,76 L100,170', 'gem', 1.2, { alpha: .7 }); [96, 120, 144].forEach(y => P.line(D`M94,${y} L106,${y}`, 'gem', 1.2, { alpha: .7 }));
+  P.shape('M64,64 C48,74 40,88 34,100 L46,106 C52,94 60,84 70,78Z', 'lich');
+  P.shape('M136,64 C150,72 154,84 153,100 L142,101 C142,88 138,80 130,76Z', 'lich');
+  P.glow(36, 86, 30, 'gem', .9); P.dot(36, 86, 9, 'gem', { noLine: 0 }); P.dot(33, 83, 3, 'light');
+  P.line('M38,104 L32,96 M41,103 L37,94 M44,102 L42,94', 'bone', 2.2);
+  P.line('M146,100 L150,94 M149,101 L153,94', 'bone', 2.2);
+  P.shape(C(151.7, 18, 7), 'bone'); P.dot(149, 17, 1.8, 'dark'); P.dot(154.4, 17, 1.8, 'dark');
+  P.shape('M56,60 C70,48 130,48 144,60 L152,38 C130,46 70,46 48,38Z', 'trim');
+  P.shape('M84,46 C82,26 92,16 100,16 C108,16 118,26 116,46 C114,56 106,61 100,61 C94,61 86,56 84,46Z', 'bone');
+  P.shape(E(93, 38, 5, 5.5), 'dark', { noShade: 1 }); P.shape(E(107, 38, 5, 5.5), 'dark', { noShade: 1 });
+  P.eye(93, 38.5, 2.2, 'gem'); P.eye(107, 38.5, 2.2, 'gem');
+  P.shape('M98,46 L102,46 L100,50Z', 'dark', { noLine: 1, noShade: 1 }); P.line('M92,54 L108,54 M95,52 L95,56 M100,52 L100,56 M105,52 L105,56', 'dark', 1);
+  P.shape('M82,26 L83,6 L90,16 L95,1 L100,13 L105,1 L110,16 L117,6 L118,26Z', 'trim');
+  P.dot(100, 18, 2.6, 'eyeR'); P.dot(89, 21, 1.8, 'gem'); P.dot(111, 21, 1.8, 'gem');
+  [[60, 30], [140, 140], [170, 60], [30, 150]].forEach(([x, y], i) => { P.glow(x, y, 10, 'gem', .8); P.line(D`M${x},${y} q${6 - i * 3},${14} ${-4},${26}`, 'gem', 1.2, { alpha: .5 }); });
+  P.raw('</g>');
+}
+
+/* ================= 배경 ================= */
+const BGS = [
+  { name:'환상열석의 밤', d:'선돌이 둘러선 언덕, 달밤' },
+  { name:'무너진 대서고', d:'빛이 드는 거대한 도서관 폐허' },
+  { name:'수정 동굴', d:'빛나는 수정과 지하 호수' },
+];
+function bgStones(P){
+  const W = 320, rr = rng(31);
+  P.sky(0, 0, W, 132, 'sky', 'sky2');
+  for (let i = 0; i < 46; i++) P.dot(rr() * W, rr() * 92, rr() < .15 ? 1.3 : .7, 'moon');
+  P.glow(250, 38, 46, 'moon', .6); P.shape(C(250, 38, 15), 'moon', { noShade: 1 });
+  P.shape('M0,112 C40,98 80,102 120,106 C170,94 220,98 260,102 C290,96 310,100 320,98 L320,180 L0,180Z', 'far');
+  P.shape('M0,130 C80,121 240,121 320,130 L320,180 L0,180Z', 'grass');
+  const st = (x, y, s) => { const w = 9 * s, h = 34 * s * (.85 + rr() * .3); P.shape(D`M${x - w},${y} L${x - w * .8},${y - h} C${x - w * .6},${y - h - 4 * s} ${x + w * .6},${y - h - 4 * s} ${x + w * .8},${y - h} L${x + w},${y}Z`, 'stone', { lw: .8 }); };
+  const ring = []; for (let i = 0; i < 10; i++){ const a = i / 10 * TAU + .3; if (Math.abs(Math.sin(a) + 1) < .15) continue; ring.push({ x: 160 + Math.cos(a) * 118, y: 148 + Math.sin(a) * 22, s: .6 + .45 * ((Math.sin(a) + 1) / 2) }); }
+  ring.sort((a, b) => a.y - b.y);
+  ring.filter(s => s.y < 148).forEach(s => st(s.x, s.y, s.s));
+  st(146, 126, .78); st(174, 126, .78); P.shape('M134,99 L186,99 L187,93 L133,93Z', 'stone', { lw: .8 });
+  P.glow(160, 146, 44, 'glow', .55);
+  P.shape(E(160, 148, 24, 5.5), 'stone2'); P.line(E(160, 148, 36, 8.5), 'glow', 1.4); P.line(E(160, 148, 44, 10.5), 'glow', .8);
+  ring.filter(s => s.y >= 148).forEach(s => st(s.x, s.y, s.s));
+  P.shape('M0,160 C60,152 110,166 170,160 C230,154 280,164 320,158 L320,180 L0,180Z', 'grass', { lw: .5 });
+}
+function bgLibrary(P){
+  const rr = rng(57);
+  P.shape(RECT(0, 0, 320, 180), 'stone2', { noLine: 1 });
+  [110, 160, 210].forEach(x => {
+    const win = D`M${x - 14},108 L${x - 14},40 C${x - 14},26 ${x - 6},20 ${x},15 C${x + 6},20 ${x + 14},26 ${x + 14},40 L${x + 14},108Z`;
+    P.shape(win, 'light'); P.line(D`M${x},18 L${x},108 M${x - 14},62 L${x + 14},62 M${x - 14},86 L${x + 14},86`, 'dark', 1.6); P.glow(x, 62, 40, 'light', .4); });
+  [135, 185].forEach(x => P.shape(RECT(x - 5, 10, 10, 148), 'stone', { lw: .7 }));
+  P.shape(RECT(0, 0, 320, 10), 'stone', { lw: .7 });
+  [110, 160, 210].forEach(x => P.shape(D`M${x - 14},108 L${x + 14},108 L${x + 46},166 L${x + 4},166Z`, 'light', { alpha: .2, noLine: 1, noShade: 1 }));
+  const shelf = (x0, x1) => { P.shape(RECT(x0, 20, x1 - x0, 140), 'wood');
+    for (let s = 0; s < 5; s++){ const by = 46 + s * 27; let x = x0 + 4;
+      while (x < x1 - 8){ const w = 4 + rr() * 4, h = 14 + rr() * 8; P.shape(RECT(x, by - h, w, h), ['book1', 'book2', 'book3', 'cloth', 'robe'][(rr() * 5) | 0], { lw: .5, noShade: 1 }); x += w + .6; if (rr() < .08) x += 6; }
+      P.shape(RECT(x0, by, x1 - x0, 3.5), 'leather', { lw: .5, noShade: 1 }); } };
+  shelf(0, 70); shelf(250, 320);
+  P.shape('M0,158 L320,158 L320,180 L0,180Z', 'floor', { noShade: 1 });
+  for (let i = -7; i <= 7; i++) P.line(D`M${160 + i * 13},158 L${160 + i * 42},180`, 'dark', .7, { alpha: .6 });
+  P.line('M0,166 L320,166 M0,173 L320,173', 'dark', .7, { alpha: .6 });
+  P.shape('M200,170 L252,160 L256,172 L204,181Z', 'stone', { lw: .7 }); P.shape(E(254, 166, 4, 6.5), 'stone2');
+  [[96, 170, -12], [110, 166, 18], [102, 160, -4]].forEach(([x, y, a], i) => P.shape(RECT(-10, -3, 20, 6), ['book1', 'book2', 'book3'][i], { tf: `translate(${x},${y}) rotate(${a})`, lw: .5 }));
+  for (let i = 0; i < 24; i++) P.dot(90 + rr() * 150, 40 + rr() * 110, .6 + rr() * .8, 'light', { alpha: .7 });
+  P.glow(150, 120, 14, 'gem', .7); P.shape('M140,124 L160,124 L158,128 L142,128Z M142,120 L150,116 L158,120 L150,124Z', 'book2', { lw: .5 });
+}
+function bgCave(P){
+  const rr = rng(77);
+  P.shape(RECT(0, 0, 320, 180), 'cave', { noLine: 1 });
+  P.shape('M0,44 C60,24 120,52 160,38 C210,20 270,48 320,32 L320,180 L0,180Z', 'mid', { lw: .5 });
+  let d = 'M0,0 L320,0 L320,16 '; for (let x = 316; x > 0; x -= 14 + rr() * 10){ d += `L${r1(x)},${r1(14 + rr() * 6)} L${r1(x - 4)},${r1(28 + rr() * 26)} L${r1(x - 8)},${r1(14 + rr() * 6)} `; } P.shape(d + 'L0,16Z', 'stone2', { lw: .7 });
+  const cluster = (x, y, s, role) => { P.glow(x, y - 22 * s, 46 * s, role, .55);
+    [[-.5, 1, -18], [0, 1.4, 0], [.55, 1.1, 16], [-.2, .7, -34], [.3, .65, 32]].forEach(([dx, hk, a]) => { const w = 6 * s, h = 34 * s * hk;
+      P.shape(D`M${-w},0 L${-w},${-h} L0,${-h - w * 1.3} L${w},${-h} L${w},0Z`, role, { tf: `translate(${r1(x + dx * 14 * s)},${y}) rotate(${a})`, lw: .7 });
+      P.line(D`M0,0 L0,${-h - w * 1.1}`, 'light', .7, { alpha: .6 }); }); };
+  P.shape('M0,148 C60,138 100,156 160,150 C220,143 260,156 320,144 L320,180 L0,180Z', 'stone2', { lw: .6 });
+  P.shape(E(160, 160, 64, 10), 'water'); P.line('M118,158 L140,158 M150,162 L184,162 M170,156 L196,156', 'crystal', 1, { alpha: .7 });
+  cluster(52, 150, 1.3, 'crystal'); cluster(270, 146, 1.1, 'crystal2'); cluster(206, 152, .7, 'crystal'); cluster(110, 152, .6, 'crystal2');
+  [[24, 172, 16], [300, 170, 18], [236, 176, 10]].forEach(([x, y, r]) => P.shape(D`M${x - r},${y + 6} C${x - r},${y - r * .7} ${x + r},${y - r * .8} ${x + r},${y + 6}Z`, 'stone', { lw: .6 }));
+  for (let i = 0; i < 18; i++) P.dot(20 + rr() * 280, 50 + rr() * 90, .7 + rr(), 'crystal', { alpha: .8 });
+}
+
+/* ================= 그리기 ================= */
+const SUBJ = {
+  hero: [0, 1, 2, 3].map(i => P => hero(P, P.st, i)),
+  fam: [famCat, famSalamander, famOphanim],
+  foe: [foeImp, foeGargoyle, foeLich],
+  bg: [bgStones, bgLibrary, bgCave],
+};
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII'];
+function metaOf(kind, i){
+  if (kind === 'hero') return { label: i ? OUTFITS[i].name + ' 마법사' : '마법사', num: ROMAN[i], cap: i ? `착장 ${i} · ${OUTFITS[i].name}` : '주인공', sub: OUTFITS[i].d };
+  if (kind === 'fam') return { label: FAMS[i].name, num: ROMAN[4 + i], cap: `${FAMS[i].name} · ${FAMS[i].rank}`, sub: FAMS[i].d };
+  if (kind === 'foe') return { label: FOES[i].name, num: ROMAN[7 + i], cap: `${FOES[i].name} · ${FOES[i].rank}`, sub: FOES[i].d };
+  return { label: BGS[i].name, num: ROMAN[10 + i], cap: BGS[i].name, sub: BGS[i].d };
+}
+function renderInto(el, st, kind, i){
+  const W = kind === 'bg' ? 320 : 200, H = kind === 'bg' ? 180 : 200;
+  const P = Pen(st, kind, W, H, metaOf(kind, i));
+  SUBJ[kind][i](P);
+  const svg = P.svg();
+  if (!st.post){ el.innerHTML = svg; return; }
+  el.innerHTML = '<div class="loading">그리는 중…</div>';
+  const img = new Image();
+  img.onload = () => {
+    const pix = st.post === 'pixel';
+    const w = pix ? (W === 200 ? 64 : 104) : (W === 200 ? 44 : 72), h = Math.round(w * H / W);
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
+    x.drawImage(img, 0, 0, w, h);
+    let data = null; try { data = x.getImageData(0, 0, w, h); } catch (e) { data = null; }
+    const pal = [...P.used].map(hex2rgb);
+    const q = (r, g, b) => { let best = pal[0], bd = 1e9; for (const p of pal){ const d = (r - p[0]) ** 2 * .3 + (g - p[1]) ** 2 * .59 + (b - p[2]) ** 2 * .11; if (d < bd){ bd = d; best = p; } } return best; };
+    const outc = document.createElement('canvas');
+    if (pix || !data){
+      if (data && pal.length){ const a = data.data; for (let i2 = 0; i2 < a.length; i2 += 4){ const p = q(a[i2], a[i2 + 1], a[i2 + 2]); a[i2] = p[0]; a[i2 + 1] = p[1]; a[i2 + 2] = p[2]; a[i2 + 3] = 255; } x.putImageData(data, 0, 0); }
+      const s = 6; outc.width = w * s; outc.height = h * s; const o = outc.getContext('2d'); o.imageSmoothingEnabled = false; o.drawImage(c, 0, 0, w * s, h * s);
+    } else {
+      const T = 12, gap = 1.6, rr = rng(w * 7 + h); outc.width = w * T; outc.height = h * T; const o = outc.getContext('2d');
+      o.fillStyle = '#3a2f22'; o.fillRect(0, 0, outc.width, outc.height);
+      const a = data.data;
+      for (let j = 0; j < h; j++) for (let i2 = 0; i2 < w; i2++){ const k2 = (j * w + i2) * 4; const v = (rr() - .5) * 26;
+        o.fillStyle = `rgb(${a[k2] + v | 0},${a[k2 + 1] + v | 0},${a[k2 + 2] + v | 0})`;
+        o.fillRect(i2 * T + gap / 2 + (rr() - .5) * 1.4, j * T + gap / 2 + (rr() - .5) * 1.4, T - gap, T - gap); }
+    }
+    el.replaceChildren(outc);
+  };
+  img.onerror = () => { el.innerHTML = svg; };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+/* ================= 화면 ================= */
+const main = document.getElementById('main'), chips = document.getElementById('chips');
+const state = {}, LS = 'mahocukai.styles.draft';
+try { Object.assign(state, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
+const saveDraft = () => { try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} };
+const cls = v => v === '좋아' ? 'ok' : v === '애매' ? 'mid' : v === '별로' ? 'no' : '';
+let db = null, writable = true, current = 'all';
+
+function buildChips(){
+  chips.replaceChildren();
+  const mk = (id, label, num) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.id = id;
+    if (num) { const n = document.createElement('span'); n.className = 'n'; n.textContent = num; b.appendChild(n); }
+    b.appendChild(document.createTextNode(label)); const dot = document.createElement('i'); dot.className = cls(state['style-' + id]?.choice); b.appendChild(dot);
+    b.setAttribute('aria-current', String(current === id)); b.addEventListener('click', () => go(id)); chips.appendChild(b); };
+  mk('all', '한눈에');
+  STYLES.forEach((s, i) => mk(s.id, s.name, String(i + 1).padStart(2, '0')));
+}
+function go(id, noScroll){
+  current = id; try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  buildChips();
+  const act = chips.querySelector('[aria-current="true"]'); if (act) act.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  id === 'all' ? overview() : detail(STYLES.find(s => s.id === id));
+  if (!noScroll) window.scrollTo({ top: document.querySelector('nav.chips').offsetTop, behavior: 'instant' in window ? 'instant' : 'auto' });
+}
+function overview(){
+  main.replaceChildren();
+  const sec = document.createElement('section'); sec.className = 'sec';
+  const h = document.createElement('h2'); h.textContent = '한눈에 보기'; const p = document.createElement('p'); p.className = 'lead'; p.textContent = '각 그림체의 주인공이야. 누르면 그 그림체 전체 세트로 가.';
+  const grid = document.createElement('div'); grid.className = 'over';
+  STYLES.forEach((s, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tile';
+    const art = document.createElement('div'); art.className = 'art'; b.appendChild(art);
+    const cap = document.createElement('div'); cap.className = 'cap';
+    const t = document.createElement('b'); t.textContent = `${String(i + 1).padStart(2, '0')} ${s.name}`; cap.appendChild(t);
+    const v = state['style-' + s.id]?.choice; const sp = document.createElement('span'); if (v){ sp.className = 'badge ' + cls(v); sp.textContent = v; } else sp.textContent = s.d.split('.')[0]; cap.appendChild(sp);
+    b.appendChild(cap); b.addEventListener('click', () => go(s.id)); grid.appendChild(b);
+    lazy(art, () => renderInto(art, s, 'hero', 0));
+  });
+  sec.append(h, p, grid); main.appendChild(sec);
+}
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ io.unobserve(e.target); const f = e.target.__draw; e.target.__draw = null; f && f(); } }), { rootMargin: '300px' }) : null;
+function lazy(el, f){ if (io){ el.__draw = f; io.observe(el); } else f(); }
+function card(st, kind, i, wide){
+  const m = metaOf(kind, i);
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'card'; b.setAttribute('aria-label', `${m.cap} 크게 보기`);
+  const art = document.createElement('div'); art.className = 'art'; b.appendChild(art);
+  const cap = document.createElement('div'); cap.className = 'cap'; const t = document.createElement('b'); t.textContent = m.cap; const s = document.createElement('span'); s.textContent = m.sub; cap.append(t, s); b.appendChild(cap);
+  b.addEventListener('click', () => zoom(st, kind, i));
+  lazy(art, () => renderInto(art, st, kind, i));
+  return b;
+}
+function section(title, items){ const s = document.createElement('section'); s.className = 'sec'; const h = document.createElement('h3'); h.textContent = title; s.append(h, items); return s; }
+function detail(st){
+  main.replaceChildren();
+  const idx = STYLES.indexOf(st), wrap = document.createElement('div'); wrap.className = 'detail';
+  const hd = document.createElement('div'); hd.className = 'dhead';
+  const num = document.createElement('p'); num.className = 'num'; num.textContent = `${String(idx + 1).padStart(2, '0')} / ${STYLES.length}`;
+  const h = document.createElement('h2'); h.textContent = st.name; const d = document.createElement('p'); d.className = 'd'; d.textContent = st.d;
+  const pc = document.createElement('div'); pc.className = 'pc';
+  const g = document.createElement('div'); g.className = 'g'; g.innerHTML = '<b>좋은 점</b>'; g.appendChild(document.createTextNode(st.g));
+  const r = document.createElement('div'); r.className = 'r'; r.innerHTML = '<b>걱정</b>'; r.appendChild(document.createTextNode(st.r));
+  pc.append(g, r); hd.append(num, h, d, pc); wrap.appendChild(hd);
+  const grid = (kind, n, wide) => { const gEl = document.createElement('div'); gEl.className = 'grid' + (wide ? ' wide' : ''); for (let i = 0; i < n; i++) gEl.appendChild(card(st, kind, i, wide)); return gEl; };
+  wrap.appendChild(section('주인공 · 착장 3가지', grid('hero', 4)));
+  wrap.appendChild(section('사역마 3마리', grid('fam', 3)));
+  wrap.appendChild(section('적 3마리', grid('foe', 3)));
+  wrap.appendChild(section('배경 3개', grid('bg', 3, true)));
+  wrap.appendChild(rateBox(st));
+  const pg = document.createElement('div'); pg.className = 'pager';
+  const prev = document.createElement('button'); prev.type = 'button'; prev.textContent = '← 이전'; prev.disabled = idx === 0; prev.addEventListener('click', () => go(STYLES[idx - 1].id));
+  const next = document.createElement('button'); next.type = 'button'; next.textContent = idx === STYLES.length - 1 ? '한눈에 보기' : '다음 →'; next.addEventListener('click', () => go(idx === STYLES.length - 1 ? 'all' : STYLES[idx + 1].id));
+  pg.append(prev, next); wrap.appendChild(pg);
+  main.appendChild(wrap);
+}
+const busy = {}, again = {}, timers = {};
+let rateUI = null;
+function rateBox(st){
+  const key = 'style-' + st.id, s = state[key] || (state[key] = { choice: '', note: '' });
+  const box = document.createElement('section'); box.className = 'rate'; box.setAttribute('aria-labelledby', 'rate-h');
+  const h = document.createElement('h3'); h.id = 'rate-h'; h.textContent = `"${st.name}" 어때?`;
+  const opts = document.createElement('div'); opts.className = 'opts'; opts.setAttribute('role', 'group');
+  const btns = ['좋아', '애매', '별로'].map(v => { const b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.dataset.v = v; b.textContent = v; b.setAttribute('aria-pressed', String(s.choice === v));
+    b.addEventListener('click', () => { const cur = state[key] || (state[key] = { choice: '', note: '' }); cur.choice = cur.choice === v ? '' : v; btns.forEach(x => x.setAttribute('aria-pressed', String(cur.choice === x.dataset.v))); save(key, st.name); buildChips(); }); return b; });
+  opts.append(...btns);
+  const ta = document.createElement('textarea'); ta.rows = 2; ta.placeholder = '좋은 점, 섞고 싶은 점 (선택)'; ta.value = s.note || ''; ta.setAttribute('aria-label', `${st.name} 메모`);
+  ta.addEventListener('input', () => { (state[key] || (state[key] = { choice: '', note: '' })).note = ta.value; clearTimeout(timers[key]); timers[key] = setTimeout(() => { timers[key] = null; save(key, st.name); }, 900); });
+  ta.addEventListener('blur', () => { if (timers[key]){ clearTimeout(timers[key]); timers[key] = null; save(key, st.name); } });
+  const stEl = document.createElement('p'); stEl.className = 'st'; stEl.setAttribute('aria-live', 'polite');
+  stEl.textContent = db ? '' : '여기선 저장이 안 될 수 있어. 그럼 채팅으로 알려줘.';
+  box.append(h, opts, ta, stEl);
+  rateUI = { key, btns, ta, stEl, s };
+  return box;
+}
+async function save(key, title){
+  saveDraft();
+  if (!db || !writable) return;
+  if (busy[key]){ again[key] = true; return; }
+  busy[key] = true; const u = rateUI && rateUI.key === key ? rateUI : null;
+  if (u){ u.stEl.className = 'st'; u.stEl.textContent = '저장 중…'; }
+  try { const s = state[key]; await db.doc('answers/' + key).set({ q: key, title, choice: s.choice || '', note: s.note || '', updatedAt: new Date().toISOString() });
+    if (u){ u.stEl.className = 'st ok'; u.stEl.textContent = '저장됨'; } }
+  catch (e) { if (u){ u.stEl.className = 'st err'; u.stEl.textContent = e && e.code === 'invalid_argument' ? '이 계정으로는 저장할 수 없어. 채팅으로 알려줘.' : '저장이 안 됐어. 잠시 뒤에 다시 해줘.'; } if (e && e.code === 'invalid_argument') writable = false; }
+  busy[key] = false; if (again[key]){ again[key] = false; save(key, title); }
+}
+
+/* 크게 보기 */
+const zoomEl = document.getElementById('zoom'), zoomArt = document.getElementById('zoomArt'), zoomCap = document.getElementById('zoomCap');
+let lastFocus = null;
+function zoom(st, kind, i){
+  lastFocus = document.activeElement; const m = metaOf(kind, i);
+  zoomArt.className = 'art' + (kind === 'bg' ? ' w' : ''); renderInto(zoomArt, st, kind, i);
+  zoomCap.textContent = `${st.name} · ${m.cap} — ${m.sub}`; zoomEl.hidden = false; zoomEl.tabIndex = -1; zoomEl.focus();
+}
+const closeZoom = () => { zoomEl.hidden = true; zoomArt.replaceChildren(); if (lastFocus) lastFocus.focus(); };
+zoomEl.addEventListener('click', closeZoom);
+addEventListener('keydown', e => { if (e.key === 'Escape' && !zoomEl.hidden) closeZoom(); });
+
+const start = (location.hash || '').slice(1);
+go(STYLES.some(s => s.id === start) ? start : 'all', true);
+
+(async () => {
+  try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+  if (!db) return;
+  if (rateUI) rateUI.stEl.textContent = '';
+  db.collection('answers').onSnapshot(snap => {
+    snap.docs.forEach(d => { const v = d.data(); if (!v || !d.id.startsWith('style-')) return; const key = d.id;
+      if (busy[key] || timers[key]) return;
+      state[key] = { choice: typeof v.choice === 'string' ? v.choice : '', note: typeof v.note === 'string' ? v.note : '' };
+      if (rateUI && rateUI.key === key){ rateUI.s = state[key]; rateUI.btns.forEach(b => b.setAttribute('aria-pressed', String(state[key].choice === b.dataset.v))); if (document.activeElement !== rateUI.ta) rateUI.ta.value = state[key].note; }
+    });
+    saveDraft(); buildChips();
+  }, () => {});
+})();
+window.__S = { STYLES, renderInto };
+})();
+</script>
