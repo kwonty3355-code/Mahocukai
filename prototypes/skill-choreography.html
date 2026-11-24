@@ -1,0 +1,434 @@
+<title>스킬 연출 시연</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@600;900&display=swap">
+<style>
+/* Layout: 위 전장(고정) + 단계 표시 줄 → 스킬 5개 버튼 → 속도 → 스킬 설명 카드와 평가. 폰 우선. */
+:root{
+  --bg:#f2f0ec; --paper:#ffffff; --ink:#1c1a20; --muted:#625c68; --line:#dcd8d0;
+  --accent:#d8432a; --accent-soft:#f6e2dc; --ok:#2f7d55; --mid:#9a7a2a; --no:#a1462e;
+  --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --serif:"Noto Serif KR","Apple SD Gothic Neo",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121114; --paper:#1b1a1e; --ink:#ece8ee; --muted:#a39daa; --line:#2c2930;
+  --accent:#ff7a5a; --accent-soft:#3a2420; --ok:#6cc495; --mid:#d8b860; --no:#e48a72; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#121114; --paper:#1b1a1e; --ink:#ece8ee; --muted:#a39daa; --line:#2c2930;
+  --accent:#ff7a5a; --accent-soft:#3a2420; --ok:#6cc495; --mid:#d8b860; --no:#e48a72; color-scheme:dark }
+html,body{background:var(--bg);color:var(--ink)}
+body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+.wrap{max-width:900px;margin:0 auto;padding:22px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px));display:grid;gap:16px}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(24px,6vw,32px);line-height:1.2;margin:0}
+h2{font-size:15px;color:var(--muted);margin:0;font-weight:700}
+p{margin:0}
+.lead{color:var(--muted);font-size:15px}
+.stage{position:sticky;top:0;z-index:3;background:var(--bg);padding-top:6px;display:grid;gap:6px}
+.cv{position:relative;width:100%;aspect-ratio:16/10;border-radius:14px;overflow:hidden;background:#0a090d;cursor:pointer}
+.cv canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.phases{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.phases span{font-size:11px;text-align:center;padding:4px 0;border-radius:6px;background:var(--paper);border:1px solid var(--line);color:var(--muted);white-space:nowrap;overflow:hidden;transition:background .08s,color .08s}
+.phases span.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.phases span.done{color:var(--ink)}
+.spells{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.spell{font:inherit;font-weight:700;font-size:13px;border:none;border-radius:12px;padding:11px 4px;cursor:pointer;color:#fff;min-height:52px;line-height:1.3}
+.spell small{display:block;font-weight:500;font-size:10px;opacity:.85}
+.spell[aria-pressed="true"]{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--accent)}
+.row2{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden;background:var(--paper)}
+.seg button{font:inherit;font-size:13px;font-weight:600;padding:8px 12px;border:none;background:transparent;color:var(--ink);cursor:pointer;min-height:38px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.ghost{font:inherit;font-size:13px;font-weight:600;padding:8px 13px;border-radius:99px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;min-height:38px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:8px}
+.card h3{margin:0;font-family:var(--serif);font-weight:900;font-size:19px}
+.card .meta{font-size:12px;color:var(--muted)}
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13.5px}
+.steps li{display:grid;grid-template-columns:62px 1fr;gap:8px}
+.steps b{color:var(--accent);font-size:12px}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opt{font:inherit;font-weight:700;font-size:13px;padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;min-height:40px}
+.opt[aria-pressed="true"][data-v="좋아"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt[aria-pressed="true"][data-v="애매"]{background:var(--mid);border-color:var(--mid);color:#fff}
+.opt[aria-pressed="true"][data-v="별로"]{background:var(--no);border-color:var(--no);color:#fff}
+textarea{font:inherit;font-size:16px;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg);color:var(--ink);resize:vertical}
+.st{font-size:12px;color:var(--muted);min-height:1.1em}.st.ok{color:var(--ok)}.st.err{color:var(--no)}
+.hint{font-size:13px;color:var(--muted)}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:520px){.spell{font-size:11.5px;padding:9px 2px}.phases span{font-size:10px}}
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>스킬 연출 시연</h1>
+    <p class="lead">이번엔 번쩍임 크기가 아니라 <b>스킬을 쓰는 동작</b>을 짰어. 모든 스킬이 <b>준비 → 모으기 → 멈춤 → 발사 → 이동 → 타격 → 여운</b> 흐름을 타. 특히 <b>터지기 직전의 짧은 멈춤</b>이 "찍 싸는 것"과 "멋지게 쓰는 것"을 가르는 핵심이래.</p>
+    <p class="hint">스킬 버튼을 누르거나 화면을 눌러. <b>0.25배속</b>으로 보면 동작 하나하나가 보여. 소리 켜고 봐.</p>
+  </header>
+  <div class="stage">
+    <div class="cv" id="cv" role="button" tabindex="0" aria-label="전장 화면. 누르면 고른 스킬 다시 쓰기"></div>
+    <div class="phases" id="phases" aria-hidden="true"></div>
+  </div>
+  <section style="display:grid;gap:8px" aria-labelledby="hs"><h2 id="hs">스킬</h2><div class="spells" id="spells"></div>
+    <div class="row2"><div class="seg" id="speed" role="group" aria-label="속도"></div><button class="ghost" id="snd" type="button" aria-pressed="true">소리 켜짐</button><button class="ghost" id="calm" type="button" aria-pressed="false">번쩍임·흔들림 줄이기</button></div></section>
+  <section id="desc" class="card" aria-live="polite"></section>
+  <section class="card" aria-labelledby="ho"><h2 id="ho">전체 한마디</h2><p class="hint">타격감, 길이, 어떤 스킬이 제일 "멋지게 쓰는" 느낌인지.</p><textarea id="overall" rows="3" placeholder="예: 도장 낙인 최고, 칼바람은 더 빠르게"></textarea><p class="st" id="overallSt" aria-live="polite"></p></section>
+</div>
+
+<script>
+(() => {
+'use strict';
+const TAU = Math.PI * 2, clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t;
+const eout = t => 1 - Math.pow(1 - t, 3), ein = t => t * t * t, eio = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const back = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+const rand = (a, b) => a + Math.random() * (b - a);
+const PH = ['준비', '모으기', '멈춤', '발사', '이동', '타격', '여운'];
+
+/* ---------- 소리: 타격은 3겹(딱-쿵-웅) ---------- */
+let AC = null, master = null, duckG = null, soundOn = true;
+function audio(){ if (!soundOn) return null; try { if (!AC){ const K = window.AudioContext || window.webkitAudioContext; if (!K) return null; AC = new K(); master = AC.createGain(); master.gain.value = .6; duckG = AC.createGain(); duckG.gain.value = 1; const comp = AC.createDynamicsCompressor(); comp.threshold.value = -12; comp.ratio.value = 5; master.connect(duckG); duckG.connect(comp); comp.connect(AC.destination); } if (AC.state === 'suspended') AC.resume(); } catch (e) { return null; } return AC; }
+const nbuf = {}; function nb(d){ const k = Math.ceil(d * 10); if (nbuf[k]) return nbuf[k]; const b = AC.createBuffer(1, AC.sampleRate * (k / 10 + .05), AC.sampleRate), a = b.getChannelData(0); for (let i = 0; i < a.length; i++) a[i] = Math.random() * 2 - 1; return nbuf[k] = b; }
+function osc(type, f0, f1, d, v, s = 0){ if (!audio()) return; const t = AC.currentTime + s, o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + d); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .006); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .03); }
+function noise(type, f0, f1, d, v, q = .8, s = 0, att = .004){ if (!audio()) return; const t = AC.currentTime + s, src = AC.createBufferSource(); src.buffer = nb(d); const f = AC.createBiquadFilter(); f.type = type; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t + d); const g = AC.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + d); src.connect(f); f.connect(g); g.connect(master); src.start(t); src.stop(t + d + .05); }
+function duck(on, len = .05){ if (!AC) return; duckG.gain.cancelScheduledValues(AC.currentTime); duckG.gain.setTargetAtTime(on ? .12 : 1, AC.currentTime, on ? .04 : len); }
+const semi = n => Math.pow(2, n / 12);
+function hitSnd(w, pitch = 0){ const p = semi(pitch) * rand(.96, 1.04);
+  noise('highpass', 3000 * p, 6000 * p, .04, .5 * (.5 + w * .5));
+  osc('sine', 150 * p, 38, .12 + w * .45, Math.min(1, .35 + w * .6));
+  if (w > .5){ noise('lowpass', 2400, 90, .4 + w * .9, .45 * w); osc('triangle', 110, 104, .8 + w, .14 * w); osc('triangle', 117, 112, .9 + w, .1 * w); } }
+const charge = (d, f0 = 300, f1 = 1400) => { noise('bandpass', f0, f1, d, .22, 2.5, 0, d * .8); osc('sine', f0 * .5, f1 * .5, d, .08); };
+const whoosh = (d = .2, f0 = 600, f1 = 4000, v = .35) => noise('bandpass', f0, f1, d, v, 1.4);
+const thunk = (pitch = 0) => { osc('sine', 220 * semi(pitch), 90, .12, .45); noise('lowpass', 1800, 300, .08, .3); };
+const tak = (pitch = 0) => { noise('highpass', 2500 * semi(pitch), 5000, .03, .35); osc('square', 900 * semi(pitch), 700, .04, .08); };
+
+/* ---------- 무대 ---------- */
+const host = document.getElementById('cv'), cv = document.createElement('canvas'), x = cv.getContext('2d'); host.appendChild(cv);
+const buf = document.createElement('canvas'), bx = buf.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+function fit(){ const r = host.getBoundingClientRect(); DPR = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); buf.width = Math.max(1, cv.width >> 2); buf.height = Math.max(1, cv.height >> 2); }
+fit(); addEventListener('resize', fit);
+const SHAPE = ['XX...XX', 'X.....X', '.......', '.......', '.......', 'X.....X', 'XX...XX'];
+const tw = () => W / 6.3;
+const tc = (c, r) => { const t = tw(); return [W / 2 + (c - r) * t / 2, H * .14 + (c + r) * t / 4 + t / 4]; };
+
+/* 스프링: 찌그러짐·흔들림이 자연스럽게 돌아오게 */
+const spring = (v, k = 260, d = 14) => ({ x: v, v: 0, to: v, k, d });
+const sstep = (s, dt) => { const a = -s.k * (s.x - s.to) - s.d * s.v; s.v += a * dt; s.x += s.v * dt; };
+const MAGE = { c: 1, r: 5, ox: spring(0, 200, 18), oy: spring(0, 200, 18), sx: spring(1, 320, 12), sy: spring(1, 320, 12), rot: spring(0, 200, 14), glow: 0, ghosts: [], float: spring(0, 60, 9), talisman: 0, hidden: false };
+const FAM = { x: 0, y: 0, open: 1, spin: 1, show: 0, slit: 0 };
+const FOES = [[4, 2], [5, 1], [5, 3]].map(([c, r], i) => ({ c, r, i, kx: spring(0, 300, 16), ky: spring(0, 300, 16), sq: spring(1, 400, 12), flash: 0, cracks: [] }));
+const S = { real: 0, T: 0, stop: 0, slowUntil: 0, slowScale: 1, trauma: 0, zoom: spring(1, 90, 14), zx: 0, zy: 0, dim: spring(0, 40, 12), letter: spring(0, 60, 14), frameUntil: 0, frameX: 0, frameY: 0, busy: false, phase: -1, speed: 1, calm: false, title: null, combo: null };
+let parts = [], fx = [], nums = [], ev = [];
+
+const at = (t, fn) => ev.push({ t, fn });
+const P = o => { const p = Object.assign({ vx: 0, vy: 0, g: 0, drag: 0, life: 1, r: 2, col: '#fff', add: true, kind: 'dot', shrink: true }, o); p.max = p.life; parts.push(p); };
+const FX = (dur, draw, o = {}) => fx.push(Object.assign({ t0: S.T, dur, draw }, o));
+function phase(i){ S.phase = i; const els = document.getElementById('phases').children; [...els].forEach((e, j) => { e.classList.toggle('on', j === i); e.classList.toggle('done', i >= 0 && j < i); }); }
+
+/* 타격: 숫자는 조사 결과의 시작값 */
+const WEIGHT = { light: { stop: .066, trauma: .2, num: 1, knock: 7 }, mid: { stop: .116, trauma: .35, num: 1.25, knock: 11 }, heavy: { stop: .2, trauma: .6, num: 1.6, knock: 16 }, fin: { stop: .33, trauma: .85, num: 2.1, knock: 22 } };
+function hit(foe, w, col, opt = {}){
+  const W8 = WEIGHT[w]; S.stop = Math.max(S.stop, W8.stop); S.trauma = Math.min(1, S.trauma + W8.trauma * (S.calm ? .35 : 1));
+  const [fx0, fy0] = tc(foe.c, foe.r), cx = fx0, cy = fy0 - tw() * .55;
+  const dir = opt.dir || [1, -.3]; const dl = Math.hypot(dir[0], dir[1]) || 1;
+  foe.kx.v += dir[0] / dl * W8.knock * 22; foe.ky.v += dir[1] / dl * W8.knock * 22; foe.sq.x = .78; foe.flash = .05;
+  if (foe.cracks.length < 6) foe.cracks.push(rand(0, TAU));
+  hitSnd(w === 'light' ? .2 : w === 'mid' ? .45 : w === 'heavy' ? .8 : 1, opt.pitch || 0);
+  if (w === 'heavy' || w === 'fin'){ S.zoom.x = 1 + (w === 'fin' ? .09 : .06); S.zx = cx; S.zy = cy; if (!S.calm){ S.frameUntil = S.real + (w === 'fin' ? .07 : .05); S.frameX = cx; S.frameY = cy; } }
+  if (w === 'fin'){ S.slowUntil = S.real + .5 + W8.stop; S.slowScale = .25; }
+  const n = { light: 14, mid: 26, heavy: 50, fin: 90 }[w];
+  for (let i = 0; i < n; i++){ const a = rand(0, TAU), v = rand(80, 320) * (w === 'fin' ? 1.5 : 1); P({ x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .6 - 60, g: 380, drag: 2.2, life: rand(.3, .7), r: rand(1.2, 2.6), col: Math.random() < .5 ? col : '#fff6e0', kind: 'streak' }); }
+  const rr = tw() * ({ light: .5, mid: .8, heavy: 1.2, fin: 1.8 }[w]);
+  FX(.32, k => { ring(cx, cy, rr * eout(k), col, (1 - k) * 3 + .6, 1 - k); });
+  if (w !== 'light') FX(.45, k => { ring(cx, cy + tw() * .5, rr * 1.4 * eout(k), col, 2 * (1 - k), (1 - k) * .8, .45); });
+  FX(.18, k => halo(cx, cy, rr * (1 + k), '#ffffff', 1 - k));
+  const dmg = Math.round({ light: 340, mid: 820, heavy: 2400, fin: 7800 }[w] * rand(.9, 1.1));
+  nums.push({ x: cx + rand(-10, 10) + (opt.nx || 0), y: cy - tw() * .4 + (opt.ny || 0), v: dmg, t0: S.real, s: W8.num, crit: w === 'fin' || (w === 'heavy' && Math.random() < .5) });
+}
+
+/* ---------- 그리기 도우미 ---------- */
+function halo(cx, cy, r, col, a){ if (r <= 1 || a <= .01) return; x.save(); x.globalCompositeOperation = 'lighter'; const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); x.globalAlpha = Math.min(1, a); x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, TAU); x.fill(); x.restore(); }
+function gl(build, col, w, a = 1){ if (a <= .01) return; x.save(); x.globalCompositeOperation = 'lighter'; x.lineCap = 'round'; x.lineJoin = 'round'; x.beginPath(); build(); x.strokeStyle = col; x.globalAlpha = .16 * a; x.lineWidth = w * 5; x.stroke(); x.globalAlpha = .4 * a; x.lineWidth = w * 2.2; x.stroke(); x.globalAlpha = a; x.lineWidth = w; x.strokeStyle = '#fffaf0'; x.stroke(); x.restore(); }
+function ring(cx, cy, r, col, w, a, flat = .5){ gl(() => x.ellipse(cx, cy, Math.max(.1, r), Math.max(.1, r * flat), 0, 0, TAU), col, w, a); }
+function circle(cx, cy, r, col, prog, spin, a, flat = .5, rot = 0){
+  x.save(); x.translate(cx, cy); x.rotate(rot); x.scale(1, flat);
+  gl(() => x.arc(0, 0, r, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(prog * 1.6)), col, 1.6, a);
+  gl(() => x.arc(0, 0, r * .8, spin, spin + TAU * clamp(prog * 1.6 - .3)), col, 1, a * .8);
+  x.rotate(-spin * 1.4); if (prog > .4) gl(() => { for (let i = 0; i <= 5; i++){ const an = i * 2 * TAU / 5 - Math.PI / 2; i ? x.lineTo(Math.cos(an) * r * .78, Math.sin(an) * r * .78) : x.moveTo(Math.cos(an) * r * .78, Math.sin(an) * r * .78); } }, col, 1, a * clamp((prog - .4) / .4));
+  for (let i = 0; i < 12; i++){ if (i / 12 > prog) break; const an = i / 12 * TAU + spin; gl(() => { x.moveTo(Math.cos(an) * r * .88, Math.sin(an) * r * .88); x.lineTo(Math.cos(an) * r, Math.sin(an) * r); }, col, 1, a * .8); }
+  x.restore();
+}
+function board(){
+  const t = tw(), th = t / 2;
+  for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++){ if (SHAPE[r][c] === 'X') continue; const [px, py] = tc(c, r);
+    x.beginPath(); x.moveTo(px, py - th / 2); x.lineTo(px + t / 2, py); x.lineTo(px, py + th / 2); x.lineTo(px - t / 2, py); x.closePath();
+    x.fillStyle = (r + c) % 2 ? '#1e1b2a' : '#24213a'; x.fill(); x.strokeStyle = '#34304c'; x.lineWidth = 1; x.stroke();
+    if (r === 6 || SHAPE[r + 1][c] === 'X'){ x.fillStyle = '#100e18'; x.beginPath(); x.moveTo(px - t / 2, py); x.lineTo(px, py + th / 2); x.lineTo(px, py + th / 2 + 7); x.lineTo(px - t / 2, py + 7); x.fill(); }
+    if (c === 6 || SHAPE[r][c + 1] === 'X'){ x.fillStyle = '#0b0a12'; x.beginPath(); x.moveTo(px + t / 2, py); x.lineTo(px, py + th / 2); x.lineTo(px, py + th / 2 + 7); x.lineTo(px + t / 2, py + 7); x.fill(); } }
+}
+function magePos(){ const [px, py] = tc(MAGE.c, MAGE.r); return [px + MAGE.ox.x, py + MAGE.oy.x - MAGE.float.x]; }
+function drawRect(px, py, sx, sy, rot, alpha, ink){
+  const t = tw(), bw = t * .3, bh = t * .78;
+  x.save(); x.globalAlpha = alpha; x.translate(px, py); x.rotate(rot); x.scale(sx, sy);
+  if (ink){ x.fillStyle = ink; x.fillRect(-bw / 2, -bh, bw, bh); x.restore(); return; }
+  const g = x.createLinearGradient(-bw / 2, -bh, bw / 2, 0); g.addColorStop(0, '#ff6a40'); g.addColorStop(1, '#c8381f'); x.fillStyle = g; x.fillRect(-bw / 2, -bh, bw, bh);
+  x.fillStyle = 'rgba(60,10,0,.22)'; x.fillRect(0, -bh, bw / 2, bh);
+  x.restore();
+}
+function mage(){
+  if (MAGE.hidden) return;
+  const [px, py] = magePos(), [bx0, by0] = tc(MAGE.c, MAGE.r), t = tw(), bh = t * .78;
+  for (const g of MAGE.ghosts){ const a = clamp(1 - (S.T - g.t) / .22); if (a > 0) drawRect(g.x, g.y, g.sx, g.sy, g.rot, a * .45, 'rgba(255,120,80,.9)'); }
+  MAGE.ghosts = MAGE.ghosts.filter(g => S.T - g.t < .22);
+  x.fillStyle = 'rgba(0,0,0,.5)'; x.beginPath(); x.ellipse(bx0 + MAGE.ox.x, by0 + MAGE.oy.x, t * .26, t * .08, 0, 0, TAU); x.fill();
+  if (MAGE.glow > .02) halo(px, py - bh * .5, bh * (1 + MAGE.glow), '#ff6a3a', MAGE.glow * .6);
+  const tl = MAGE.talisman;
+  drawRect(px, py, MAGE.sx.x * (1 - tl * .35), MAGE.sy.x * (1 + tl * .9) * (1 + Math.sin(S.real * 2.2) * .012), MAGE.rot.x, 1);
+  const sy2 = MAGE.sy.x * (1 + tl * .9), bw = t * .3 * MAGE.sx.x * (1 - tl * .35);
+  x.save(); x.translate(px, py); x.rotate(MAGE.rot.x);
+  const a = .45 + MAGE.glow * .55;
+  if (tl > .2){ x.globalAlpha = clamp((tl - .2) / .5); x.fillStyle = '#ffd88a'; x.font = `900 ${Math.round(bw * .62)}px "Noto Serif KR", serif`; x.textAlign = 'center'; ['勅', '令', '天', '罰'].forEach((ch, i) => { x.fillText(ch, 0, -bh * sy2 * (.82 - i * .2)); }); x.globalAlpha = 1; }
+  else gl(() => { x.moveTo(0, -bh * sy2 * .84); x.lineTo(0, -bh * sy2 * .3); x.moveTo(-bw * .26, -bh * sy2 * .6); x.lineTo(bw * .26, -bh * sy2 * .6); }, '#ffc860', 1, a);
+  x.restore();
+}
+function fam(){
+  if (FAM.show < .02) return; const [mx, my] = magePos(), t = tw(), fxp = mx - t * .55, fyp = my - t * 1.25 + Math.sin(S.real * 3) * 3, col = '#7aff9a', a = FAM.show;
+  halo(fxp, fyp, t * .5, col, .35 * a);
+  x.save(); x.translate(fxp, fyp); x.scale(t / 170, t / 170); x.rotate(S.real * FAM.spin);
+  gl(() => { for (let i = 0; i <= 3; i++){ const an = -Math.PI / 2 + i * TAU / 3; i ? x.lineTo(Math.cos(an) * 44, Math.sin(an) * 44) : x.moveTo(Math.cos(an) * 44, Math.sin(an) * 44); } }, col, 3, a);
+  for (let i = 0; i < 9; i++){ const an = i / 9 * TAU; gl(() => { x.moveTo(Math.cos(an) * 50, Math.sin(an) * 50); x.lineTo(Math.cos(an + .12) * 60, Math.sin(an + .12) * 60); }, col, 2.4, a); }
+  x.restore(); x.save(); x.translate(fxp, fyp); x.scale(t / 120, t / 120);
+  const h = 7 * Math.max(.06, FAM.open); gl(() => { x.moveTo(-12, 0); x.quadraticCurveTo(0, -h * 1.6, 12, 0); x.quadraticCurveTo(0, h * 1.6, -12, 0); }, col, 2.2, a);
+  if (FAM.open > .2){ x.save(); x.globalCompositeOperation = 'lighter'; x.fillStyle = '#f0fff4'; x.globalAlpha = a; x.beginPath(); x.ellipse(0, 0, 2.8 * (1 - FAM.slit * .7), 3.2, 0, 0, TAU); x.fill(); x.restore(); }
+  x.restore(); FAM.pos = [fxp, fyp];
+}
+function foe(f){
+  const [px, py] = tc(f.c, f.r), t = tw(), r = t * .26, hx = px + f.kx.x, hy = py - t * .55 + Math.sin(S.real * 2 + f.i) * 3 + f.ky.x;
+  x.fillStyle = 'rgba(0,0,0,.45)'; x.beginPath(); x.ellipse(px + f.kx.x * .5, py, r * .9, r * .3, 0, 0, TAU); x.fill();
+  x.save(); x.translate(hx, hy); x.scale(1 / Math.sqrt(f.sq.x), f.sq.x);
+  x.fillStyle = f.flash > 0 ? '#ffffff' : '#07050a'; x.beginPath(); for (let i = 0; i < 14; i++){ const a = i / 14 * TAU, rr = r * (i % 2 ? .78 : 1); i ? x.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : x.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); } x.closePath(); x.fill();
+  x.restore();
+  if (f.flash <= 0){ gl(() => x.arc(hx, hy, r * 1.1, S.real * .6, S.real * .6 + 4.4), '#c02020', 1.2, .8);
+    gl(() => { x.moveTo(hx - r * .4, hy); x.quadraticCurveTo(hx, hy - r * .35, hx + r * .4, hy); x.quadraticCurveTo(hx, hy + r * .35, hx - r * .4, hy); }, '#ff3a3a', 1, 1);
+    for (const a of f.cracks) gl(() => { x.moveTo(hx + Math.cos(a) * r * .3, hy + Math.sin(a) * r * .3); x.lineTo(hx + Math.cos(a + .2) * r * .7, hy + Math.sin(a + .2) * r * .7); x.lineTo(hx + Math.cos(a - .1) * r, hy + Math.sin(a - .1) * r); }, '#ff6a4a', .7, .7); }
+}
+function foeXY(f){ const [px, py] = tc(f.c, f.r); return [px + f.kx.x, py - tw() * .55 + f.ky.x]; }
+function lightning(x0, y0, x1, y1, disp, col, w, a, seed){
+  const pts = [[x0, y0], [x1, y1]]; let d = disp; const rr = mulberry(seed);
+  for (let it = 0; it < 6; it++){ const np = []; for (let i = 0; i < pts.length - 1; i++){ const [ax, ay] = pts[i], [bx2, by2] = pts[i + 1]; np.push(pts[i]); const mx = (ax + bx2) / 2, my = (ay + by2) / 2, nx = -(by2 - ay), ny = bx2 - ax, l = Math.hypot(nx, ny) || 1, o = (rr() - .5) * d; np.push([mx + nx / l * o, my + ny / l * o]); } np.push(pts[pts.length - 1]); pts.splice(0, pts.length, ...np); d *= .55; }
+  gl(() => { pts.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)); }, col, w, a);
+  for (let b = 0; b < 3; b++){ const i = 8 + Math.floor(rr() * (pts.length - 16)); const [sx, sy] = pts[i]; const an = Math.atan2(y1 - y0, x1 - x0) + (rr() - .5) * 1.6, L = rr() * 40 + 20; let cx2 = sx, cy2 = sy; gl(() => { x.moveTo(sx, sy); for (let k = 0; k < 5; k++){ cx2 += Math.cos(an + (rr() - .5)) * L / 5; cy2 += Math.sin(an + (rr() - .5)) * L / 5; x.lineTo(cx2, cy2); } }, col, w * .5, a * .7); }
+}
+function mulberry(s){ return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* ---------- 스킬 5개 ---------- */
+const SPELLS = [
+ { id: 'stamp', name: '도장 낙인', el: '땅 · 연타', col: '#ff5a3a', bg: '#b8341f', len: '약 2.4초',
+   desc: '직사각형이 곧 도장이야. 세 번 콩콩 뛰며 땅에 작은 인장을 찍어 적까지 길을 내고, 하늘에 거대한 인장이 떠오른 뒤 쾅 내리찍어.',
+   steps: [['준비', '몸을 한껏 찌그러뜨려 힘을 모음'], ['모으기', '콩·콩·콩 세 번 뛰며 인장 길 찍기 (음이 한 칸씩 올라감)'], ['멈춤', '하늘의 거대 인장이 커지고, 소리가 죽음'], ['발사', '몸을 확 늘이며 내리찍기 지시'], ['타격', '0.2초 멈칫, 한지 반전 컷, 인주 튀김, 바닥에 인장 자국'], ['여운', '인장 길이 차례로 다시 빛나고 사그라짐']],
+   run(){ const f = FOES[0], [mx, my] = tc(MAGE.c, MAGE.r), [tx, ty] = tc(f.c, f.r), col = this.col;
+     phase(0); MAGE.sy.to = .74; MAGE.sx.to = 1.18; MAGE.glow = .3;
+     const marks = [.25, .5, .75].map(k => [lerp(mx, tx, k), lerp(my, ty, k)]);
+     [0, 1, 2].forEach(i => { const t0 = .2 + i * .17;
+       at(t0, () => { if (i === 0) phase(1); MAGE.sy.to = 1; MAGE.sx.to = 1; MAGE.oy.v = -520; MAGE.sy.x = 1.22; MAGE.sx.x = .86; whoosh(.1, 800, 2000, .12); });
+       at(t0 + .13, () => { MAGE.sy.x = .8; MAGE.sx.x = 1.2; thunk(i * 2); const [sx, sy] = marks[i]; S.trauma = Math.min(1, S.trauma + .08);
+         FX(2.2, (k, age) => { const pop = age < .08 ? back(age / .08) : 1, glow = age > 1.25 + i * .07 && age < 1.6 + i * .07 ? 1 : .55, fade = 1 - clamp((age - 1.7) / .5); x.save(); x.translate(sx, sy); x.scale(1, .5); x.rotate(Math.PI / 4); const s = tw() * .22 * pop; gl(() => x.rect(-s, -s, s * 2, s * 2), col, 1.6, glow * fade); gl(() => { x.moveTo(-s * .5, 0); x.lineTo(s * .5, 0); x.moveTo(0, -s * .5); x.lineTo(0, s * .5); }, col, 1.2, glow * fade); x.restore(); });
+         for (let k = 0; k < 10; k++) P({ x: sx, y: sy, vx: rand(-80, 80), vy: rand(-90, -20), g: 300, life: .4, r: 1.4, col: '#ff8a5a' }); }); });
+     at(.72, () => { phase(2); MAGE.sy.to = .7; MAGE.sx.to = 1.25; MAGE.glow = 1; charge(.3, 200, 900); duck(true);
+       FX(1.6, (k, age) => { const grow = eout(clamp(age / .28)), drop = clamp((age - .3) / .1), y = lerp(ty - tw() * 1.5, ty - tw() * .3, ein(drop)), s = tw() * .75 * grow * (1 + drop * .2), fade = age > .42 ? 0 : 1, rot = age * (1 - drop) * 1.5;
+         if (fade <= 0) return; x.save(); x.translate(tx, y); x.rotate(rot); x.fillStyle = 'rgba(200,40,20,.25)'; x.fillRect(-s, -s, s * 2, s * 2); gl(() => x.rect(-s, -s, s * 2, s * 2), col, 2.4, 1); gl(() => x.rect(-s * .82, -s * .82, s * 1.64, s * 1.64), col, 1.2, .8);
+         x.fillStyle = '#fff0e0'; x.font = `900 ${Math.round(s * 1.1)}px "Noto Serif KR", serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.globalCompositeOperation = 'lighter'; x.fillText('印', 0, s * .05); x.restore();
+         if (drop > 0) for (let k = 0; k < 4; k++){ x.save(); x.globalCompositeOperation = 'lighter'; x.globalAlpha = .4; x.fillStyle = col; x.fillRect(tx - s + k * s * .66, y - s * 3, 2, s * 2); x.restore(); } }); });
+     at(1.0, () => { phase(3); MAGE.sy.x = 1.3; MAGE.sx.x = .8; MAGE.sy.to = 1; MAGE.sx.to = 1; whoosh(.12, 400, 3000, .3); duck(false, .01); });
+     at(1.1, () => { phase(5); hit(f, 'heavy', col, { dir: [0, 1] }); f.sq.x = .55; MAGE.glow = .4;
+       for (let k = 0; k < 40; k++){ const a = rand(-Math.PI, 0); P({ x: tx + rand(-10, 10), y: ty, vx: Math.cos(a) * rand(80, 260), vy: Math.sin(a) * rand(60, 220), g: 500, life: rand(.5, .9), r: rand(1.6, 3.4), col: '#a8180c', add: false, kind: 'drop' }); }
+       FX(2, (k, age) => { const a = 1 - clamp((age - 1.2) / .8); x.save(); x.translate(tx, ty); x.scale(1, .5); x.rotate(Math.PI / 4); const s = tw() * .55; x.fillStyle = `rgba(190,30,15,${.45 * a})`; x.fillRect(-s, -s, s * 2, s * 2); x.strokeStyle = `rgba(255,120,80,${.8 * a})`; x.lineWidth = 2; x.strokeRect(-s, -s, s * 2, s * 2); x.restore(); }); });
+     at(1.35, () => phase(6)); at(1.45, () => { MAGE.glow = .2; }); return 2.6; } },
+ { id: 'battery', name: '연쇄 법진 포격', el: '불 · 관통', col: '#ff8a2a', bg: '#c8561e', len: '약 2.3초',
+   desc: '적까지 마법진 네 개를 일렬로 세워. 진들이 점점 빨리 돌다가 딱 멈추는 순간, 불덩이가 진을 하나씩 뚫고 지날 때마다 커지고 빨라져.',
+   steps: [['준비', '뒤로 젖히며 움츠림'], ['모으기', '마법진 4개가 0.08초 간격으로 차례로 그려지고 회전이 빨라짐'], ['멈춤', '회전이 "딱" 멈추고 정적'], ['발사', '앞으로 늘어나며 쏨'], ['이동', '진을 지날 때마다 펑, 음이 올라가고 탄이 커짐'], ['타격', '0.2초 멈칫, 폭발, 불꽃 비'], ['여운', '진들이 불씨로 부서져 흩날림']],
+   run(){ const f = FOES[0], [mx, my] = magePos(), [tx, ty] = foeXY(f), col = this.col, sy0 = my - tw() * .45;
+     phase(0); MAGE.rot.to = -.18; MAGE.sx.to = 1.1; MAGE.sy.to = .86;
+     const C = [.22, .42, .62, .82].map(k => ({ x: lerp(mx, tx, k), y: lerp(sy0, ty, k), spin: 0, sp: 1, stop: false, hit: false, k }));
+     at(.2, () => { phase(1); MAGE.glow = .6; charge(.5, 300, 1600);
+       C.forEach((c, i) => at(.2 + i * .08, () => { tak(i * 2); FX(2.1, (k, age) => { const prog = clamp(age / .25), since = c.hit ? S.T - c.hitT : 0, a = c.hit ? clamp(1 - since / .35) : 1; if (!c.stop) { c.sp = Math.min(14, c.sp + .14); c.spin += c.sp * .016; }
+         const r = tw() * (.32 + c.k * .18) * (1 + since * 2); circle(c.x, c.y, r, col, prog, c.spin, a, .3 + .15 * c.k, -.5);
+         if (c.hit && since < .3) halo(c.x, c.y, r * 1.6, '#ffd0a0', 1 - since / .3); }); })); });
+     at(.65, () => { phase(2); C.forEach(c => c.stop = true); duck(true); MAGE.sx.to = 1.15; MAGE.sy.to = .8; MAGE.glow = 1; });
+     at(.85, () => { phase(3); duck(false, .01); MAGE.rot.to = 0; MAGE.rot.v = 9; MAGE.sx.x = 1.3; MAGE.sy.x = .85; MAGE.sx.to = 1; MAGE.sy.to = 1; MAGE.ox.v = -180; whoosh(.2, 500, 3500, .4);
+       FX(.12, k => halo(mx + tw() * .2, sy0, tw() * (1.2 - k), '#fff0c0', 1 - k));
+       const path = [[mx + tw() * .2, sy0], ...C.map(c => [c.x, c.y]), [tx, ty]], segT = [0, .07, .12, .16, .19, .21];
+       at(.85, () => phase(4));
+       FX(.24, (k, age) => { let i = 0; while (i < segT.length - 2 && age > segT[i + 1]) i++; const u = clamp((age - segT[i]) / (segT[i + 1] - segT[i])), px = lerp(path[i][0], path[i + 1][0], u), py = lerp(path[i][1], path[i + 1][1], u), size = 6 + i * 3;
+         halo(px, py, size * 4, col, .9); halo(px, py, size * 1.6, '#fff4d0', 1); for (let q = 0; q < 3; q++) P({ x: px, y: py, vx: rand(-40, 40), vy: rand(-40, 40), life: .3, r: size * .4, col });
+         C.forEach((c, j) => { if (!c.hit && i > j){ c.hit = true; c.hitT = S.T; osc('triangle', 440 * semi(j * 2), 660 * semi(j * 2), .08, .25); S.trauma = Math.min(1, S.trauma + .06); } }); });
+     });
+     at(1.07, () => { phase(5); hit(f, 'heavy', col, { dir: [1, -.2] }); MAGE.glow = .3;
+       FX(.6, k => { halo(tx, ty, tw() * 1.8 * eout(k), '#ffb060', (1 - k) * 1.2); halo(tx, ty, tw() * .9, '#fff', (1 - k)); });
+       for (let k = 0; k < 30; k++) P({ x: tx + rand(-30, 30), y: ty + rand(-10, 10), vx: rand(-20, 20), vy: rand(-50, -10), drag: .5, life: rand(1, 1.8), r: rand(4, 9), col: 'rgba(60,40,50,.55)', add: false, kind: 'smoke' });
+       FOES.slice(1).forEach(o => { o.kx.v += 90; o.sq.x = .9; }); });
+     at(1.35, () => { phase(6); C.forEach(c => { for (let k = 0; k < 14; k++) P({ x: c.x + rand(-14, 14), y: c.y + rand(-20, 20), vx: rand(-20, 20), vy: rand(-60, -10), g: -20, life: rand(.6, 1.2), r: 1.4, col }); }); });
+     return 2.4; } },
+ { id: 'wind', name: '칼바람 사연격', el: '바람 · 4연타', col: '#7affa8', bg: '#2a8a52', len: '약 2.4초',
+   desc: '몸을 낮췄다가 잔상을 남기며 순식간에 파고들어. 베기 세 번이 점점 높은 소리로 박히고, 한 박자 쉰 뒤 마지막 X자 베기에서 슬로모션.',
+   steps: [['준비', '낮게 웅크리고 발밑에 먼지'], ['멈춤', '0.08초 짧은 숨 고르기'], ['발사', '잔상 남기며 돌진 (몸이 옆으로 늘어남)'], ['타격', '베기 3번, 0.1초 간격, 음이 한 칸씩 올라감'], ['모으기', '공중에서 한 박자 멈칫'], ['타격', '마지막 X자 베기: 0.33초 멈칫, 0.25배 슬로, 4 HIT'], ['여운', '잔상 남기며 제자리로 미끄러져 복귀']],
+   run(){ const f = FOES[0], [mx, my] = tc(MAGE.c, MAGE.r), [tx0, ty0] = tc(f.c, f.r), [tx, ty] = foeXY(f), col = this.col, dx = tx0 - mx - tw() * .45, dy = ty0 - my + tw() * .1;
+     phase(0); MAGE.sy.to = .72; MAGE.sx.to = 1.25; MAGE.rot.to = -.12; for (let k = 0; k < 12; k++) P({ x: mx + rand(-14, 14), y: my, vx: rand(-60, 60), vy: rand(-30, -5), life: .5, r: rand(2, 4), col: 'rgba(160,160,180,.4)', add: false, kind: 'smoke' });
+     at(.18, () => { phase(2); MAGE.glow = .5; });
+     at(.26, () => { phase(3); whoosh(.14, 900, 6000, .45); MAGE.sy.x = .7; MAGE.sx.x = 1.6; MAGE.rot.to = 0;
+       FX(.12, (k) => { const e = eout(k); MAGE.ox.x = dx * e; MAGE.oy.x = dy * e; const [px, py] = magePos(); MAGE.ghosts.push({ x: px, y: py, sx: MAGE.sx.x, sy: MAGE.sy.x, rot: 0, t: S.T }); for (let q = 0; q < 3; q++){ x.save(); x.globalCompositeOperation = 'lighter'; x.globalAlpha = .5; x.fillStyle = col; x.fillRect(px - rand(20, 80), py - rand(5, tw() * .7), rand(30, 70), 1.5); x.restore(); } });
+       MAGE.ox.to = dx; MAGE.oy.to = dy; MAGE.sx.to = 1; MAGE.sy.to = 1; });
+     const slash = (a, big, pitch) => { const r = tw() * (big ? 1.1 : .75); FX(.22, k => { const s = eout(clamp(k * 1.6)); x.save(); x.translate(tx, ty); x.rotate(a); gl(() => { x.arc(0, 0, r, -1.2, -1.2 + 2.4 * s); }, col, (big ? 4 : 2.6) * (1 - k) + .6, 1 - k * .6); x.restore(); }); };
+     [[.4, -.6, 0], [.5, 2.4, 1], [.6, .9, 2]].forEach(([t, a, p], i) => at(t, () => { phase(5); slash(a, false); hit(f, i < 2 ? 'light' : 'mid', col, { dir: [Math.cos(a), Math.sin(a) * .4], pitch: p * 2, nx: (i - 1) * 22, ny: -i * 10 }); MAGE.oy.v = -120 - i * 60; MAGE.sx.x = i % 2 ? .8 : 1.25; S.combo = { n: i + 1, t: S.real }; whoosh(.06, 2000, 7000, .25); }));
+     at(.66, () => { phase(4); MAGE.oy.to = dy - tw() * .9; MAGE.sy.to = .78; MAGE.glow = 1; duck(true); });
+     at(.9, () => { phase(5); duck(false, .01); slash(-.8, true); slash(.8 + Math.PI, true); hit(f, 'fin', col, { dir: [1, .2], ny: -24 }); S.combo = { n: 4, t: S.real, big: 1 }; MAGE.sy.x = 1.3; MAGE.sx.x = .8; MAGE.oy.to = dy;
+       FX(.5, k => ring(tx, ty, tw() * 2.2 * eout(k), col, 2 * (1 - k), 1 - k, .5)); });
+     at(1.5, () => { phase(6); MAGE.ox.to = 0; MAGE.oy.to = 0; MAGE.sx.x = 1.4; MAGE.sy.x = .75; MAGE.glow = .2; whoosh(.12, 700, 3000, .2);
+       FX(.25, () => { const [px, py] = magePos(); MAGE.ghosts.push({ x: px, y: py, sx: 1.2, sy: .85, rot: 0, t: S.T }); }); });
+     at(1.72, () => { for (let k = 0; k < 10; k++) P({ x: mx + rand(-10, 10), y: my, vx: rand(20, 90), vy: rand(-30, -5), life: .5, r: rand(2, 4), col: 'rgba(160,160,180,.4)', add: false, kind: 'smoke' }); });
+     return 2.5; } },
+ { id: 'storm', name: '사역마 · 연쇄 낙뢰', el: '사역마 톱니 · 3연쇄', col: '#bfe4ff', bg: '#3a5aa8', len: '약 2.4초',
+   desc: '사역마 톱니가 나서. 눈을 번쩍 떴다가 가늘게 좁히면 하늘이 어두워지고, 정적 뒤 벼락이 꽂혀서 옆 적들로 차례로 튀어.',
+   steps: [['준비', '사역마가 떠오르며 눈을 크게 뜸'], ['모으기', '하늘이 어두워지고 주위에 잔번개, 눈이 가늘어짐'], ['멈춤', '0.2초 완전한 정적'], ['타격', '벼락: 하얀 두 프레임, 0.12초 멈칫'], ['이동', '0.1초 간격으로 다음 적에게 연쇄, 음이 올라감'], ['여운', '바닥에 잔불꽃, 하늘이 밝아지고 사역마가 눈을 깜빡']],
+   run(){ const col = this.col;
+     phase(0); FAM.show = 0; FAM.open = 1; FAM.spin = 1; FAM.slit = 0;
+     FX(2.5, (k, age) => { FAM.show = Math.min(1, age / .2) * (1 - clamp((age - 2.1) / .4)); });
+     at(.05, () => { FAM.open = 1.5; osc('triangle', 660, 990, .12, .2); });
+     at(.3, () => { phase(1); S.dim.to = .55; charge(.5, 150, 900); FAM.spin = 6;
+       FX(.6, (k) => { if (FAM.pos && Math.random() < .5) lightning(FAM.pos[0], FAM.pos[1], FAM.pos[0] + rand(-50, 50), FAM.pos[1] + rand(-40, 40), 20, col, 1, .8, Math.random() * 1e6 | 0); FAM.open = lerp(1.5, .35, k); FAM.slit = k; }); });
+     at(.9, () => { phase(2); duck(true); FAM.spin = 0; });
+     const targets = [FOES[0], FOES[1], FOES[2]];
+     at(1.1, () => { phase(5); duck(false, .01); const f = targets[0], [tx, ty] = foeXY(f), seed = Math.random() * 1e6 | 0;
+       noise('highpass', 1500, 8000, .25, .8); hit(f, 'heavy', col, { dir: [0, 1] }); if (!S.calm){ S.flashW = S.real + .035; }
+       FX(.35, k => { lightning(tx + 20, -10, tx, ty, 60, col, 3 * (1 - k) + 1, 1 - k, seed); halo(tx, ty, tw() * 1.5, '#e0f4ff', (1 - k)); }); });
+     [1, 2].forEach((j, n) => at(1.22 + n * .11, () => { phase(4); const a = targets[j - 1], b = targets[j], [ax, ay] = foeXY(a), [bx2, by2] = foeXY(b), seed = Math.random() * 1e6 | 0;
+       FX(.3, k => lightning(ax, ay, bx2, by2, 30, col, 2 * (1 - k) + .8, 1 - k, seed)); hit(b, 'mid', col, { dir: [bx2 - ax, by2 - ay], pitch: 3 + n * 3 }); }));
+     at(1.5, () => { phase(6); S.dim.to = 0; FAM.open = .05; });
+     at(1.6, () => { FAM.open = 1; FAM.slit = 0; FAM.spin = 1;
+       targets.forEach(t => { const [px, py] = tc(t.c, t.r); for (let k = 0; k < 6; k++) P({ x: px + rand(-14, 14), y: py, vx: rand(-30, 30), vy: rand(-80, -20), g: 200, life: rand(.4, .8), r: 1.3, col }); }); });
+     return 2.5; } },
+ { id: 'sig', name: '부적 해방 · 천벌', el: '필살 · 처음엔 길게', col: '#ffcf6a', bg: '#7a2a8a', len: '약 4.6초',
+   desc: '필살기. 직사각형이 떠올라 부적으로 "풀리고", 작은 부적 일곱 장이 날아가 적을 둘러싸. 하나씩 불붙고 바닥에 진이 이어진 뒤, 정적 속에서 안으로 접혀 터져.',
+   steps: [['준비', '화면 위아래가 검게 닫히고 몸이 떠오름'], ['모으기', '몸이 길게 늘어나 부적이 됨 (勅令天罰), 부적 7장 차례로 발사'], ['모으기', '부적이 하나씩 점화, 칠각성 진이 이어지고 카메라가 다가감'], ['멈춤', '0.3초 정적, 진이 가장 밝은 순간'], ['발사', '부적들이 안으로 접혀 듦'], ['타격', '반전 컷, 0.33초 멈칫, 0.25배 슬로, 빛기둥, "천벌" 도장'], ['여운', '재가 흩날리고, 몸이 내려앉으며 원래 모양으로']],
+   run(){ const f = FOES[0], [tx, ty0] = tc(f.c, f.r), [, tyy] = foeXY(f), col = this.col, red = '#ff5a3a';
+     phase(0); S.letter.to = 1; S.dim.to = .45; MAGE.sy.to = .75; osc('sine', 70, 40, 1.2, .5); noise('bandpass', 300, 1200, 1, .15, 1.5, 0, .5);
+     at(.25, () => { MAGE.sy.to = 1; MAGE.sy.x = 1.3; MAGE.float.to = tw() * .45; MAGE.glow = .6; whoosh(.3, 300, 1200, .2); });
+     at(.6, () => { phase(1); FX(.5, k => { MAGE.talisman = eout(k); }); charge(.5, 200, 800); });
+     const ring7 = Array.from({ length: 7 }, (_, i) => { const a = -Math.PI / 2 + i / 7 * TAU; return { x: tx + Math.cos(a) * tw() * 1.25, y: ty0 + Math.sin(a) * tw() * .62, lit: -1, landed: false }; });
+     ring7.forEach((r, i) => at(1.1 + i * .07, () => { const [mx, my] = magePos(), sx0 = mx, sy0 = my - tw() * .9;
+       FX(4, (k, age) => { const u = clamp(age / .3), px = lerp(sx0, r.x, eout(u)), py = lerp(sy0, r.y, eout(u)) - Math.sin(u * Math.PI) * tw() * 1.1, fold = r.fold || 0;
+         if (u >= 1 && !r.landed){ r.landed = true; tak(i); for (let q = 0; q < 5; q++) P({ x: r.x, y: r.y, vx: rand(-40, 40), vy: rand(-50, -10), g: 200, life: .3, r: 1.2, col: red }); }
+         if (r.gone) return; const fx2 = lerp(px, tx, ein(fold)), fy2 = lerp(py, tyy, ein(fold)), w = tw() * .12, h = tw() * .38;
+         x.save(); x.translate(fx2, fy2); x.rotate(u < 1 ? age * 18 : Math.sin(S.real * 3 + i) * .05); x.fillStyle = '#f2e2b8'; x.fillRect(-w / 2, -h, w, h); x.fillStyle = '#c8321f'; x.fillRect(-w / 2 + 2, -h + 3, w - 4, 2); x.fillRect(-w * .15, -h * .8, w * .3, h * .55); x.restore();
+         if (r.lit >= 0){ const fl = 1 + Math.sin(S.real * 30 + i) * .15; halo(fx2, fy2 - h, tw() * .35 * fl, col, .8); gl(() => { x.moveTo(fx2, fy2 - h); x.quadraticCurveTo(fx2 - 4, fy2 - h - 10, fx2 + 1, fy2 - h - 16 * fl); }, '#ffb040', 2, .9); } }); }));
+     at(1.7, () => { phase(1); S.zoom.to = 1.1; S.zx = tx; S.zy = ty0; ring7.forEach((r, i) => at(1.7 + i * .1, () => { r.lit = 1; osc('triangle', 330 * semi(i * 2), 340 * semi(i * 2), .3, .14); }));
+       FX(2.2, (k, age) => { const prog = clamp((age - .5) / .7), a = 1 - clamp((age - 1.45) / .2); if (prog <= 0) return; gl(() => { for (let i = 0; i <= 7; i++){ const r = ring7[(i * 3) % 7]; i ? x.lineTo(r.x, r.y) : x.moveTo(r.x, r.y); } }, col, 1.6, a * prog); circle(tx, ty0, tw() * 1.4, col, prog, S.real * .8, a, .5); }); });
+     at(3.0, () => { phase(2); duck(true); S.zoom.to = 1.16; MAGE.sy.to = .85; for (let k = 0; k < 40; k++){ const a = rand(0, TAU), d = tw() * 2.2; P({ x: tx + Math.cos(a) * d, y: ty0 + Math.sin(a) * d * .5, vx: -Math.cos(a) * d * 2.5, vy: -Math.sin(a) * d * 1.25, life: .35, r: 1.5, col }); } });
+     at(3.3, () => { phase(3); duck(false, .01); MAGE.sy.x = 1.35; MAGE.rot.v = 6; whoosh(.15, 300, 4000, .4); ring7.forEach(r => { FX(.16, k => { r.fold = k; if (k >= .98) r.gone = true; }); }); });
+     at(3.46, () => { phase(5); ring7.forEach(r => r.gone = true); S.zoom.to = 1; FOES.forEach((o, i) => hit(o, i ? 'heavy' : 'fin', col, { dir: [foeXY(o)[0] - tx || 1, -.5], nx: i ? 0 : 0, ny: i ? 0 : -30 }));
+       noise('highpass', 2000, 9000, .5, .6); osc('sine', 60, 25, 2.2, 1);
+       FX(1.6, k => { const up = k < .08 ? k / .08 : 1 - clamp((k - .4) / .6), w = tw() * .9 * up * (1 + Math.sin(S.real * 50) * .05); const g = x.createLinearGradient(tx - w, 0, tx + w, 0); g.addColorStop(0, 'rgba(255,220,140,0)'); g.addColorStop(.35, col); g.addColorStop(.5, '#fff'); g.addColorStop(.65, col); g.addColorStop(1, 'rgba(255,220,140,0)'); x.save(); x.globalCompositeOperation = 'lighter'; x.globalAlpha = up; x.fillStyle = g; x.fillRect(tx - w, -40, w * 2, ty0 + 40); x.restore(); halo(tx, ty0, w * 3, col, up); });
+       [0, .08, .18].forEach((d, i) => FX(.8 + d, (k, age) => { const kk = clamp((age - d) / .8); if (kk <= 0) return; ring(tx, ty0, tw() * (1 + 3 * eout(kk)), col, 3 * (1 - kk) + .5, 1 - kk, .5); }));
+       for (let k = 0; k < 60; k++) P({ x: tx + rand(-tw() * 2, tw() * 2), y: rand(-20, ty0), vx: rand(-15, 15), vy: rand(20, 60), life: rand(1.5, 3), r: rand(1.5, 3), col: 'rgba(60,40,30,.7)', add: false, kind: 'ash', shrink: false });
+       S.title = { t: S.real, text: '天罰' }; });
+     at(3.9, () => { phase(6); MAGE.talisman = 1; FX(.5, k => { MAGE.talisman = 1 - eout(k); }); MAGE.float.to = 0; S.dim.to = 0; MAGE.glow = .2; });
+     at(4.3, () => { S.letter.to = 0; MAGE.sy.x = .8; });
+     return 4.8; } },
+];
+
+/* ---------- 실행 ---------- */
+let current = 0;
+function cast(i){
+  if (S.busy) return; current = i; S.busy = true; parts = []; fx = []; nums = []; ev = []; S.T = 0; S.title = null; S.combo = null; S.flashW = 0;
+  MAGE.ox.x = MAGE.ox.to = 0; MAGE.oy.x = MAGE.oy.to = 0; MAGE.talisman = 0; MAGE.float.to = 0; FOES.forEach(f => { f.cracks = []; f.flash = 0; });
+  audio(); const end = SPELLS[i].run(); at(end, () => { S.busy = false; phase(-1); MAGE.glow = 0; MAGE.sx.to = 1; MAGE.sy.to = 1; MAGE.rot.to = 0; });
+  document.querySelectorAll('.spell').forEach((b, j) => b.setAttribute('aria-pressed', String(j === i))); showDesc(i);
+}
+/* ---------- 루프 ---------- */
+let last = performance.now();
+function frame(now){
+  const rdt = Math.min(.05, (now - last) / 1000); last = now; S.real += rdt;
+  let dt = rdt * S.speed;
+  if (S.stop > 0){ S.stop -= rdt; dt = 0; }
+  else if (S.real < S.slowUntil) dt *= S.slowScale;
+  S.T += dt;
+  const due = ev.filter(e => e.t <= S.T); ev = ev.filter(e => e.t > S.T); due.sort((a, b) => a.t - b.t).forEach(e => e.fn());
+  [MAGE.ox, MAGE.oy, MAGE.sx, MAGE.sy, MAGE.rot, MAGE.float].forEach(s => sstep(s, dt)); FOES.forEach(f => { sstep(f.kx, dt); sstep(f.ky, dt); sstep(f.sq, dt); f.flash -= dt; });
+  sstep(S.zoom, rdt); sstep(S.dim, rdt); sstep(S.letter, rdt); MAGE.glow *= Math.exp(-dt * .8);
+  S.trauma = Math.max(0, S.trauma - rdt * 2);
+  const sh = S.trauma * S.trauma, amp = H * .022 * (S.calm ? .3 : 1), tt = S.real * 30;
+  const sx = amp * sh * (Math.sin(tt * 1.3) * .6 + Math.sin(tt * 2.7 + 1) * .4), sy = amp * sh * (Math.sin(tt * 1.7 + 2) * .6 + Math.sin(tt * 3.1) * .4), srot = .045 * sh * Math.sin(tt * 1.1) * (S.calm ? .3 : 1);
+  x.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#16131f'); g.addColorStop(1, '#07060a'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.save(); x.translate(W / 2 + sx, H / 2 + sy); x.rotate(srot); x.translate(-W / 2, -H / 2);
+  const z = S.zoom.x; if (Math.abs(z - 1) > .001){ x.translate(S.zx, S.zy); x.scale(z, z); x.translate(-S.zx, -S.zy); }
+  board();
+  for (const e of fx.filter(e => e.under)) e.draw(clamp((S.T - e.t0) / e.dur), S.T - e.t0);
+  FOES.slice().sort((a, b) => (a.c + a.r) - (b.c + b.r)).forEach(foe); mage(); fam();
+  fx = fx.filter(e => { const age = S.T - e.t0; if (age > e.dur) return false; if (!e.under) e.draw(clamp(age / e.dur), age); return true; });
+  for (const p of parts){ p.life -= dt; const dr = Math.exp(-p.drag * dt); p.vx *= dr; p.vy *= dr; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; if (p.kind === 'smoke') p.r += dt * 10; }
+  parts = parts.filter(p => p.life > 0);
+  x.save(); for (const p of parts){ const a = clamp(p.life / p.max); x.globalCompositeOperation = p.add ? 'lighter' : 'source-over'; x.globalAlpha = p.kind === 'smoke' ? a * .6 : a; x.fillStyle = p.col; x.strokeStyle = p.col;
+    if (p.kind === 'streak'){ x.lineWidth = p.r; x.lineCap = 'round'; x.beginPath(); x.moveTo(p.x, p.y); x.lineTo(p.x - p.vx * .035, p.y - p.vy * .035); x.stroke(); }
+    else if (p.kind === 'ash'){ x.fillRect(p.x, p.y, p.r, p.r * .6); } else { x.beginPath(); x.arc(p.x, p.y, p.r * (p.shrink ? Math.max(.25, a) : 1), 0, TAU); x.fill(); } } x.restore();
+  x.restore();
+  if (S.dim.x > .01){ x.fillStyle = `rgba(4,3,10,${S.dim.x})`; x.fillRect(0, 0, W, H); x.save(); x.translate(W / 2 + sx, H / 2 + sy); x.translate(-W / 2, -H / 2); if (Math.abs(z - 1) > .001){ x.translate(S.zx, S.zy); x.scale(z, z); x.translate(-S.zx, -S.zy); } FOES.forEach(foe); mage(); fam(); x.restore(); }
+  // 빛 번짐
+  bx.globalCompositeOperation = 'copy'; bx.drawImage(cv, 0, 0, buf.width, buf.height); x.save(); x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'lighter'; x.globalAlpha = .35; x.drawImage(buf, 0, 0, cv.width, cv.height); x.restore();
+  x.setTransform(DPR, 0, 0, DPR, 0, 0);
+  // 피해 숫자: 0.3 → 1.35 → 1.0 으로 튀어나옴
+  for (const n of nums){ const age = S.real - n.t0; if (age > 1.4) continue; const pop = age < .08 ? lerp(.3, 1.35, age / .08) : age < .16 ? lerp(1.35, 1, (age - .08) / .08) : 1, a = age > 1.05 ? 1 - (age - 1.05) / .35 : 1, size = Math.round(15 * n.s * pop * (n.crit ? 1.2 : 1));
+    x.save(); x.globalAlpha = a; x.font = `900 ${size}px "Noto Serif KR", serif`; x.textAlign = 'center'; x.lineJoin = 'round'; x.lineWidth = Math.max(3, size * .2); x.strokeStyle = '#1a0805'; const s = n.v.toLocaleString('ko-KR'), yy = n.y - age * 16 + sy; x.strokeText(s, n.x + sx, yy); x.fillStyle = n.crit ? '#ffe08a' : '#fff4e6'; x.fillText(s, n.x + sx, yy);
+    if (n.crit){ x.font = `900 ${Math.round(size * .42)}px "Noto Serif KR", serif`; x.lineWidth = 3; x.strokeText('치명', n.x + sx, yy - size * .85); x.fillStyle = '#ff6b3d'; x.fillText('치명', n.x + sx, yy - size * .85); } x.restore(); }
+  if (S.combo){ const age = S.real - S.combo.t; if (age < 1.2){ const pop = age < .06 ? lerp(1.8, 1, age / .06) : 1, a = age > .9 ? 1 - (age - .9) / .3 : 1; x.save(); x.globalAlpha = a; x.translate(W * .82, H * .3); x.rotate(-.08); x.scale(pop, pop); x.textAlign = 'center'; x.font = `900 ${Math.round(H * (S.combo.big ? .13 : .09))}px "Noto Serif KR", serif`; x.lineWidth = 6; x.strokeStyle = '#0a1a10'; x.strokeText(S.combo.n + ' HIT', 0, 0); x.fillStyle = S.combo.big ? '#fff07a' : '#c8ffd8'; x.fillText(S.combo.n + ' HIT', 0, 0); x.restore(); } }
+  if (S.title){ const age = S.real - S.title.t; if (age < 1.6){ const pop = age < .1 ? lerp(2.4, 1, eout(age / .1)) : 1, a = age > 1.2 ? 1 - (age - 1.2) / .4 : 1, s = H * .15; x.save(); x.globalAlpha = a; x.translate(W * .26, H * .26); x.rotate(-.1); x.scale(pop, pop); x.fillStyle = 'rgba(200,40,20,.88)'; x.fillRect(-s * 1.15, -s * .62, s * 2.3, s * 1.24); x.strokeStyle = '#ffe0c0'; x.lineWidth = 3; x.strokeRect(-s * 1.05, -s * .52, s * 2.1, s * 1.04); x.fillStyle = '#fff4e6'; x.font = `900 ${Math.round(s * .8)}px "Noto Serif KR", serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(S.title.text, 0, s * .04); x.restore(); } }
+  if (S.letter.x > .01){ const h = H * .1 * S.letter.x; x.fillStyle = '#000'; x.fillRect(0, 0, W, h); x.fillRect(0, H - h, W, h); }
+  if (S.flashW && S.real < S.flashW){ x.fillStyle = 'rgba(240,248,255,.9)'; x.fillRect(0, 0, W, H); }
+  // 한지 반전 컷: 종이색 바탕에 먹색 실루엣, 주홍만 남김
+  if (S.real < S.frameUntil){ x.fillStyle = '#efe6d2'; x.fillRect(0, 0, W, H); x.fillStyle = '#16100c'; x.beginPath(); for (let i = 0; i < 36; i++){ const a = i * Math.PI / 18, r = (i % 2 ? .25 : 1) * H * .55 * rand(.7, 1.1); x.lineTo(S.frameX + Math.cos(a) * r, S.frameY + Math.sin(a) * r); } x.fill();
+    x.fillStyle = '#efe6d2'; x.beginPath(); x.arc(S.frameX, S.frameY, tw() * .35, 0, TAU); x.fill(); const [mx, my] = magePos(); drawRect(mx, my, 1, 1, 0, 1, '#d8381f'); FOES.forEach(f => { const [fx2, fy2] = foeXY(f); x.fillStyle = '#16100c'; x.beginPath(); x.arc(fx2, fy2, tw() * .26, 0, TAU); x.fill(); }); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- 화면 ---------- */
+const phEl = document.getElementById('phases'); PH.forEach(p => { const s = document.createElement('span'); s.textContent = p; phEl.appendChild(s); });
+const spEl = document.getElementById('spells');
+SPELLS.forEach((sp, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'spell'; b.style.background = sp.bg; b.textContent = sp.name; const s = document.createElement('small'); s.textContent = sp.el; b.appendChild(s); b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => cast(i)); spEl.appendChild(b); });
+host.addEventListener('click', () => cast(current)); host.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); cast(current); } });
+const spd = document.getElementById('speed'); [[.25, '0.25배'], [.5, '0.5배'], [1, '1배'], [2, '2배']].forEach(([v, l]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = l; b.setAttribute('aria-pressed', String(v === 1)); b.addEventListener('click', () => { S.speed = v; [...spd.children].forEach(c => c.setAttribute('aria-pressed', String(c === b))); }); spd.appendChild(b); });
+const sb = document.getElementById('snd'); sb.addEventListener('click', () => { soundOn = !soundOn; sb.setAttribute('aria-pressed', String(soundOn)); sb.textContent = soundOn ? '소리 켜짐' : '소리 꺼짐'; });
+const cb = document.getElementById('calm'); cb.addEventListener('click', () => { S.calm = !S.calm; cb.setAttribute('aria-pressed', String(S.calm)); });
+try { if (matchMedia('(prefers-reduced-motion: reduce)').matches){ S.calm = true; cb.setAttribute('aria-pressed', 'true'); } } catch (e) {}
+
+/* 설명 + 평가 */
+const state = {}, LS = 'mahocukai.skills.draft', busyS = {}, again = {}, timers = {}; let db = null; const ui = {};
+try { Object.assign(state, JSON.parse(localStorage.getItem(LS) || '{}')); } catch (e) {}
+const saveDraft = () => { try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} };
+async function save(key, title){ saveDraft(); if (!db) return; if (busyS[key]){ again[key] = true; return; } busyS[key] = true; const st = ui[key] && ui[key].st; if (st){ st.className = 'st'; st.textContent = '저장 중…'; }
+  try { const s = state[key]; await db.doc('answers/' + key).set({ q: key, title, choice: s.choice || '', note: s.note || '', updatedAt: new Date().toISOString() }); if (st){ st.className = 'st ok'; st.textContent = '저장됨'; } } catch (e) { if (st){ st.className = 'st err'; st.textContent = '저장이 안 됐어. 채팅으로 알려줘.'; } }
+  busyS[key] = false; if (again[key]){ again[key] = false; save(key, title); } }
+const desc = document.getElementById('desc');
+function showDesc(i){
+  const sp = SPELLS[i], key = 'skill-' + sp.id; if (!state[key]) state[key] = { choice: '', note: '' };
+  desc.replaceChildren();
+  const h = document.createElement('h3'); h.textContent = sp.name; const m = document.createElement('p'); m.className = 'meta'; m.textContent = `${sp.el} · 연출 ${sp.len}`; const d = document.createElement('p'); d.textContent = sp.desc;
+  const ol = document.createElement('ul'); ol.className = 'steps'; sp.steps.forEach(([a, b]) => { const li = document.createElement('li'); const bb = document.createElement('b'); bb.textContent = a; li.append(bb, document.createTextNode(b)); ol.appendChild(li); });
+  const o = document.createElement('div'); o.className = 'opts'; o.setAttribute('role', 'group'); o.setAttribute('aria-label', sp.name + ' 평가');
+  const btns = ['좋아', '애매', '별로'].map(v => { const b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.dataset.v = v; b.textContent = v; b.setAttribute('aria-pressed', String(state[key].choice === v)); b.addEventListener('click', () => { const s = state[key]; s.choice = s.choice === v ? '' : v; btns.forEach(z => z.setAttribute('aria-pressed', String(s.choice === z.dataset.v))); save(key, sp.name); }); return b; });
+  o.append(...btns);
+  const ta = document.createElement('textarea'); ta.rows = 2; ta.placeholder = `${sp.name} 한마디 (선택)`; ta.value = state[key].note || ''; ta.setAttribute('aria-label', sp.name + ' 메모');
+  ta.addEventListener('input', () => { state[key].note = ta.value; clearTimeout(timers[key]); timers[key] = setTimeout(() => { timers[key] = null; save(key, sp.name); }, 900); });
+  ta.addEventListener('blur', () => { if (timers[key]){ clearTimeout(timers[key]); timers[key] = null; save(key, sp.name); } });
+  const st = document.createElement('p'); st.className = 'st'; st.setAttribute('aria-live', 'polite');
+  desc.append(h, m, d, ol, o, ta, st); ui[key] = { btns, ta, st };
+}
+showDesc(0);
+const ov = document.getElementById('overall'), ok = 'skill-overall'; if (!state[ok]) state[ok] = { choice: '', note: '' }; ov.value = state[ok].note || ''; ui[ok] = { btns: [], ta: ov, st: document.getElementById('overallSt') };
+ov.addEventListener('input', () => { state[ok].note = ov.value; clearTimeout(timers[ok]); timers[ok] = setTimeout(() => { timers[ok] = null; save(ok, '전체 한마디'); }, 900); });
+ov.addEventListener('blur', () => { if (timers[ok]){ clearTimeout(timers[ok]); timers[ok] = null; save(ok, '전체 한마디'); } });
+(async () => { try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; } if (!db) return;
+  db.collection('answers').onSnapshot(snap => { snap.docs.forEach(d => { const v = d.data(), key = d.id; if (!v || !key.startsWith('skill-') || busyS[key] || timers[key]) return; state[key] = { choice: typeof v.choice === 'string' ? v.choice : '', note: typeof v.note === 'string' ? v.note : '' };
+    if (ui[key]){ ui[key].btns.forEach(b => b.setAttribute('aria-pressed', String(state[key].choice === b.dataset.v))); if (document.activeElement !== ui[key].ta) ui[key].ta.value = state[key].note; } }); saveDraft(); }, () => {}); })();
+window.__sk = { cast, S, SPELLS };
+})();
+</script>
