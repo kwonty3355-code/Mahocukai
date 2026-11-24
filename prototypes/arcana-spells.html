@@ -349,8 +349,8 @@ function drawTitle(){
 }
 /* ================= 스킬 1: 천류뇌격 — 하늘 마법진에서 뇌룡이 나와 한 바퀴 돌고 포효, 내리꽂음 ================= */
 const DRAGON = { on: false, t0: 0, cx: 0, cy: 0, R: 0, f: .32, tx: 0, ty: 0, jaw: 0, roar: 0 };
-const DSEG = [[0, 1, .7, eout], [1, 3, 1.9, t => t], [3, 4, .55, eio], [4, 4.6, 1.25, eout], [4.6, 5, .24, ein], [5, 7.4, .4, t => t]];
-function dragonS(age){ let t = age; for (const [a, b, d, e] of DSEG){ if (t <= d) return a + (b - a) * e(clamp(t / d)); t -= d; } return 7.4; }
+const DSEG = [[0, 1, .9, eout], [1, 3, 2.3, t => t], [3, 4, .6, eio], [4, 4.05, 1.7, eout], [4.05, 4.45, .24, ein], [4.45, 6.85, .45, t => t]];
+function dragonS(age){ let t = age; for (const [a, b, d, e] of DSEG){ if (t <= d) return a + (b - a) * e(clamp(t / d)); t -= d; } return 6.85; }
 function dragonP(s){
   const D = DRAGON, Rr = D.R * 1.08, th0 = Math.PI * .85;
   if (s <= 0) return [D.cx, D.cy];
@@ -358,49 +358,98 @@ function dragonP(s){
   if (s < 3){ const th = th0 + (s - 1) / 2 * TAU; return [D.cx + Math.cos(th) * Rr, D.cy + Math.sin(th) * Rr * D.f - 18 + Math.sin((s - 1) * TAU * 1.5) * 10]; }
   const L = [D.cx + Math.cos(th0) * Rr, D.cy + Math.sin(th0) * Rr * D.f - 18], U = [D.cx + Rr * .1, D.cy - Rr * .5];
   if (s < 4){ const k = eio(s - 3); return [lerp(L[0], U[0], k) + Math.sin(k * Math.PI) * -Rr * .35, lerp(L[1], U[1], k)]; }
-  const rc = Rr * .32, cs = -Math.PI / 2 - .6;
-  if (s < 4.6){ const k = (s - 4) / .6, th = cs + k * TAU * .82; return [U[0] + Math.cos(th) * rc - Math.cos(cs) * rc, U[1] + Math.sin(th) * rc * .7 - Math.sin(cs) * rc * .7]; }
-  const thE = cs + TAU * .82, E = [U[0] + Math.cos(thE) * rc - Math.cos(cs) * rc, U[1] + Math.sin(thE) * rc * .7 - Math.sin(cs) * rc * .7];
-  if (s <= 5){ const k = s - 4.6; return [lerp(E[0], D.tx, k / .4), lerp(E[1], D.ty, k / .4)]; }
+  if (s < 4.05){ const k = (s - 4) / .05; return [U[0] + k * Rr * .08, U[1] - k * Rr * .06]; }
+  const E = [U[0] + Rr * .08, U[1] - Rr * .06];
+  if (s <= 4.45){ const k = (s - 4.05) / .4; return [lerp(E[0], D.tx, k), lerp(E[1], D.ty, k)]; }
   return [D.tx, D.ty];
 }
+/* ================= 뇌룡: 비늘 몸통, 지느러미, 갈기, 네 다리, 가지뿔, 송곳니 ================= */
 function drawDragon(){
-  const D = DRAGON; if (!D.on) return; const age = S.T - D.t0, sh = dragonS(age), N = 90, len = 2.6, Wm = tw() * .27;
-  const pts = []; for (let i = 0; i < N; i++){ const s = sh - i * len / N; if (s <= 0.02 || s > 5) { pts.push(null); continue; } const [px, py] = dragonP(s); pts.push([px, py, s]); }
-  const col = '#7fd4ff', jit = () => rand(-1.6, 1.6);
-  const valid = pts.filter(Boolean); if (valid.length < 2) return;
-  // 몸통
-  const J = pts.map(p => p && [p[0] + jit(), p[1] + jit()]);
-  const wOf = i => { const k = i / N; return Wm * (Math.pow(1 - k, .55) * (.55 + .45 * Math.sin(Math.min(1, k * 5) * Math.PI / 2)) + .08); };
-  const pass = (mode, mul, add, colr, alpha) => { x.save(); x.globalCompositeOperation = mode; x.lineCap = 'round'; x.lineJoin = 'round'; x.strokeStyle = colr; x.globalAlpha = alpha;
-    for (let i = 0; i < N - 1; i++){ const a = J[i], b = J[i + 1]; if (!a || !b) continue; x.lineWidth = wOf(i) * mul + add; x.beginPath(); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); x.stroke(); } x.restore(); };
-  pass('lighter', 3.4, 0, col, .1);
-  pass('lighter', 1.25, 4, col, .85);
-  pass('source-over', 1, 0, '#0b1a33', 1);
-  pass('lighter', .18, 1, '#e8f8ff', .9);
-  for (let i = 2; i < N - 2; i += 2){ const a = J[i], b = J[i + 1]; if (!a || !b) continue; const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l, w = wOf(i) * .5;
-    gl(() => { x.moveTo(a[0] + nx * w * .85, a[1] + ny * w * .85); x.quadraticCurveTo(a[0] + dx / l * w * .5, a[1] + dy / l * w * .5, a[0] - nx * w * .85, a[1] - ny * w * .85); }, col, .9, .55); }
-  // 등 가시와 비늘
-  for (let i = 3; i < N - 4; i += 3){ const a = pts[i], b = pts[i + 1]; if (!a || !b) continue; const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l, k = i / N, w = Wm * (1 - k) + 2;
-    gl(() => { x.moveTo(a[0] + nx * w * .5, a[1] + ny * w * .5); x.lineTo(a[0] + nx * w * 1.5 - dx / l * w * .6, a[1] + ny * w * 1.5 - dy / l * w * .6); x.lineTo(b[0] + nx * w * .5, b[1] + ny * w * .5); }, col, 1, .8); }
-  for (let q = 0; q < 3; q++){ const i = 2 + (Math.random() * (N - 6) | 0), a = pts[i]; if (!a) continue; bolt(a[0], a[1], a[0] + rand(-60, 60), a[1] + rand(-50, 50), 22, col, 1.2, .9, Math.random() * 1e6 | 0, 1, 4); }
-  // 머리
-  const h0 = pts[0], h1 = pts[2]; if (!h0 || !h1) return;
-  const ang = Math.atan2(h0[1] - h1[1], h0[0] - h1[0]), Lh = Wm * 2.6, jaw = D.jaw;
-  x.save(); x.translate(h0[0], h0[1]); x.rotate(ang);
-  halo(Lh * .4, 0, Lh * 1.6, col, .5 + D.roar * .5);
-  const upper = () => { x.moveTo(-Lh * .25, -Wm * .65); x.lineTo(Lh * .55, -Wm * .55); x.lineTo(Lh * 1.05, -Wm * .2); x.lineTo(Lh * 1.02, Wm * .05); x.lineTo(-Lh * .1, Wm * .05); x.closePath(); };
-  const lower = () => { x.save(); x.rotate(jaw); x.moveTo(-Lh * .05, Wm * .05); x.lineTo(Lh * .85, Wm * .1); x.lineTo(Lh * .35, Wm * .55); x.lineTo(-Lh * .15, Wm * .4); x.closePath(); x.restore(); };
-  x.fillStyle = 'rgba(10,30,60,.85)'; x.beginPath(); upper(); x.fill(); x.beginPath(); lower(); x.fill();
-  gl(upper, col, 1.8, 1); x.save(); x.rotate(jaw); gl(() => { x.moveTo(-Lh * .05, Wm * .05); x.lineTo(Lh * .85, Wm * .1); x.lineTo(Lh * .35, Wm * .55); x.lineTo(-Lh * .15, Wm * .4); x.closePath(); }, col, 1.6, 1); x.restore();
-  if (jaw > .1){ halo(Lh * .7, Wm * .2, Lh * (.6 + jaw), '#ffffff', jaw * 1.4); }
-  for (const sd of [-1, 1]) gl(() => { x.moveTo(-Lh * .05, -Wm * .55); x.quadraticCurveTo(-Lh * .6, -Wm * (1.3 + sd * .2), -Lh * 1.1, -Wm * (1.9 + sd * .4)); x.moveTo(-Lh * .4, -Wm * 1.0); x.lineTo(-Lh * .55, -Wm * (1.5 + sd * .25)); }, col, 1.6, 1);
-  const wv = S.real * 9; for (const sd of [-1, 1]) gl(() => { x.moveTo(Lh * .9, -Wm * .1 * sd); x.bezierCurveTo(Lh * .2, sd * Wm * (1.4 + Math.sin(wv) * .4), -Lh * .9, sd * Wm * (.4 + Math.cos(wv) * .5), -Lh * 2, sd * Wm * (1.6 + Math.sin(wv + 1) * .6)); }, col, 1, .85);
-  for (let i = 0; i < 5; i++) gl(() => { x.moveTo(-Lh * (.1 + i * .12), -Wm * .55); x.lineTo(-Lh * (.3 + i * .14), -Wm * (1 + (i % 2) * .4)); }, col, 1.2, .8);
-  x.save(); x.globalCompositeOperation = 'lighter'; x.fillStyle = '#ffffff'; x.beginPath(); x.ellipse(Lh * .38, -Wm * .28, Wm * .22, Wm * .12, 0, 0, TAU); x.fill(); x.restore(); halo(Lh * .38, -Wm * .28, Wm * .9, '#bfefff', 1);
+  const D = DRAGON; if (!D.on) return;
+  const age = S.T - D.t0, sh = dragonS(age), N = 120, len = 2.9, Wm = tw() * .46, col = '#7fd4ff', dark = '#081631';
+  // 1) 척추 위의 점들 + 파도치는 몸
+  const raw = []; for (let i = 0; i < N; i++){ const s = sh - i * len / N; if (s <= .02 || s > 4.45){ raw.push(null); continue; } const [px, py] = dragonP(s); raw.push([px, py]); }
+  const pts = raw.map((p, i) => { if (!p) return null; const a = raw[Math.max(0, i - 2)] || p, b = raw[Math.min(N - 1, i + 2)] || p; let tx = a[0] - b[0], ty = a[1] - b[1]; const l = Math.hypot(tx, ty) || 1; tx /= l; ty /= l;
+    const k = i / N, wave = Math.sin(k * 13 - S.real * 5) * Wm * .26 * clamp(k / .12) * (1 - k * .4); return { x: p[0] - ty * wave, y: p[1] + tx * wave, tx, ty, nx: -ty, ny: tx, k }; });
+  const wOf = k => Wm * (k < .05 ? .55 + k * 6 : k < .5 ? .85 + .15 * Math.sin((k - .05) / .45 * Math.PI) : Math.max(.08, 1 - (k - .5) / .5 * .92));
+  const seg = []; let cur = []; pts.forEach(p => { if (p) cur.push(p); else if (cur.length){ seg.push(cur); cur = []; } }); if (cur.length) seg.push(cur);
+  const body = seg.sort((a, b) => b.length - a.length)[0]; if (!body || body.length < 4) return;
+  // 바깥 빛
+  x.save(); x.globalCompositeOperation = 'lighter'; x.lineCap = 'round'; x.lineJoin = 'round'; x.strokeStyle = col;
+  for (const [mul, al] of [[2.6, .06], [1.5, .1]]){ x.globalAlpha = al; x.lineWidth = Wm * mul; x.beginPath(); body.forEach((p, i) => i ? x.lineTo(p.x, p.y) : x.moveTo(p.x, p.y)); x.stroke(); }
   x.restore();
+  // 다리 (몸 뒤쪽)
+  const legAt = [.14, .19, .5, .56];
+  legAt.forEach((lk, j) => { const p = body.find(q => q.k >= lk); if (!p) return; const sd = j % 2 ? 1 : -1, w = wOf(p.k), reach = Math.sin(S.real * 3 + j * 1.7) * .5;
+    const bx = p.x + p.nx * sd * w * .35, by = p.y + p.ny * sd * w * .35, kx = bx + (p.nx * sd * 1.1 - p.tx * .6) * w * 1.1, ky = by + (p.ny * sd * 1.1 - p.ty * .6) * w * 1.1 + reach * w * .3, fx = kx + (p.nx * sd * .5 + p.tx * (.3 + reach * .4)) * w * 1.0, fy = ky + (p.ny * sd * .5 + p.ty * (.3 + reach * .4)) * w * 1.0;
+    x.save(); x.lineCap = 'round'; x.lineJoin = 'round'; x.strokeStyle = dark; x.lineWidth = w * .5; x.beginPath(); x.moveTo(bx, by); x.lineTo(kx, ky); x.lineTo(fx, fy); x.stroke(); x.restore();
+    gl(() => { x.moveTo(bx, by); x.lineTo(kx, ky); x.lineTo(fx, fy); }, col, 1.4, .9);
+    for (let c = -1; c <= 1; c++){ const an = Math.atan2(fy - ky, fx - kx) + c * .55; gl(() => { x.moveTo(fx, fy); x.quadraticCurveTo(fx + Math.cos(an) * w * .35, fy + Math.sin(an) * w * .35, fx + Math.cos(an + .9) * w * .45, fy + Math.sin(an + .9) * w * .45); }, '#e8f8ff', 1.3, 1); } });
+  // 몸통 면
+  const L = body.map(p => [p.x + p.nx * wOf(p.k) / 2, p.y + p.ny * wOf(p.k) / 2]), R = body.map(p => [p.x - p.nx * wOf(p.k) / 2, p.y - p.ny * wOf(p.k) / 2]);
+  const outline = () => { L.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)); for (let i = R.length - 1; i >= 0; i--) x.lineTo(R[i][0], R[i][1]); x.closePath(); };
+  x.save(); x.beginPath(); outline(); x.fillStyle = dark; x.fill(); x.clip();
+  // 배 비늘(밝은 판) 한쪽
+  for (let i = 1; i < body.length - 1; i += 2){ const p = body[i], w = wOf(p.k); x.save(); x.globalCompositeOperation = 'lighter'; x.strokeStyle = 'rgba(120,200,255,.35)'; x.lineWidth = 1.2; x.beginPath(); x.moveTo(p.x - p.nx * w * .5, p.y - p.ny * w * .5); x.lineTo(p.x - p.nx * w * .15, p.y - p.ny * w * .15); x.stroke(); x.restore(); }
+  // 등 비늘: U자 비늘을 촘촘히
+  for (let i = 2; i < body.length - 2; i += 2){ const p = body[i], w = wOf(p.k); for (let r = -1; r <= 1; r++){ const cx = p.x + p.nx * w * .22 * r, cy = p.y + p.ny * w * .22 * r, an = Math.atan2(p.ty, p.tx);
+      x.save(); x.globalCompositeOperation = 'lighter'; x.translate(cx, cy); x.rotate(an); x.strokeStyle = `rgba(140,215,255,${.45 - Math.abs(r) * .12})`; x.lineWidth = 1.1; x.beginPath(); x.arc(0, 0, w * .16, -Math.PI / 2, Math.PI / 2); x.stroke(); x.restore(); } }
+  // 몸속 전류
+  x.save(); x.globalCompositeOperation = 'lighter'; x.strokeStyle = 'rgba(200,240,255,.5)'; x.lineWidth = 1.4; x.beginPath(); body.forEach((p, i) => { const j = Math.sin(i * 1.7 + S.real * 30) * wOf(p.k) * .15; i ? x.lineTo(p.x + p.nx * j, p.y + p.ny * j) : x.moveTo(p.x, p.y); }); x.stroke(); x.restore();
+  x.restore();
+  // 테두리
+  gl(() => L.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)), col, 1.8, .95);
+  gl(() => R.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)), col, 1.4, .8);
+  // 등 지느러미
+  for (let i = 5; i < body.length - 8; i += 4){ const p = body[i], w = wOf(p.k), sd = p.ny < 0 ? 1 : -1, nx2 = p.nx * sd, ny2 = p.ny * sd, bx = p.x + nx2 * w * .48, by = p.y + ny2 * w * .48, h = w * (.42 + .1 * Math.sin(i + S.real * 4));
+    const tipx = bx + nx2 * h + p.tx * h * .7, tipy = by + ny2 * h + p.ty * h * .7;
+    x.save(); x.fillStyle = dark; x.beginPath(); x.moveTo(bx - p.tx * w * .2, by - p.ty * w * .2); x.lineTo(tipx, tipy); x.lineTo(bx + p.tx * w * .25, by + p.ty * w * .25); x.fill(); x.restore();
+    gl(() => { x.moveTo(bx - p.tx * w * .2, by - p.ty * w * .2); x.lineTo(tipx, tipy); x.lineTo(bx + p.tx * w * .25, by + p.ty * w * .25); }, col, 1.2, .9); }
+  // 목 갈기: 번개처럼 일렁이는 털
+  for (let i = 1; i < Math.min(16, body.length); i++){ const p = body[i], w = wOf(p.k), L2 = w * (1.4 - i * .05), wv = Math.sin(S.real * 9 + i) * .6;
+    gl(() => { x.moveTo(p.x + p.nx * w * .45, p.y + p.ny * w * .45); x.quadraticCurveTo(p.x + (p.nx * .9 + p.tx * .6 + wv * p.tx * .3) * L2, p.y + (p.ny * .9 + p.ty * .6 + wv * p.ty * .3) * L2, p.x + (p.nx * .6 + p.tx * 1.5) * L2, p.y + (p.ny * .6 + p.ty * 1.5) * L2); }, i % 2 ? '#bfe9ff' : col, 1.2, .85); }
+  // 꼬리 술
+  const tl = body[body.length - 1]; for (let q = 0; q < 7; q++){ const an = Math.atan2(tl.ty, tl.tx) + Math.PI + (q - 3) * .25 + Math.sin(S.real * 6 + q) * .15, Lq = Wm * (1 + (q % 3) * .3); gl(() => { x.moveTo(tl.x, tl.y); x.quadraticCurveTo(tl.x + Math.cos(an) * Lq * .5, tl.y + Math.sin(an) * Lq * .5 + 6, tl.x + Math.cos(an) * Lq, tl.y + Math.sin(an) * Lq); }, col, 1.2, .8); }
+  // 몸에서 튀는 번개
+  for (let q = 0; q < 4; q++){ const p = body[(Math.random() * body.length) | 0]; const w = wOf(p.k), sd = Math.random() < .5 ? 1 : -1; bolt(p.x + p.nx * w * .5 * sd, p.y + p.ny * w * .5 * sd, p.x + p.nx * sd * rand(60, 140) + rand(-40, 40), p.y + p.ny * sd * rand(60, 140) + rand(-40, 40), 26, col, 1.3, .95, Math.random() * 1e6 | 0, 1, 5); }
+  // 2) 머리
+  const h = body[0]; let ang = Math.atan2(h.ty, h.tx); const Lh = Wm * 2.1, Hh = Wm * .9, jaw = D.jaw;
+  if (sh > 3.85 && sh < 4.06){ const ta = D.tx >= h.x - 20 ? .42 : Math.PI - .42, k = clamp((sh - 3.85) / .12); let dA = ta - ang; while (dA > Math.PI) dA -= TAU; while (dA < -Math.PI) dA += TAU; ang += dA * k; }
+  x.save(); x.translate(h.x, h.y); x.rotate(ang); if (Math.cos(ang) < 0) x.scale(1, -1);
+  halo(Lh * .3, 0, Lh * 1.5, col, .3 + D.roar * .4);
+  // 갈기 뒤쪽 가시
+  for (let i = 0; i < 7; i++){ const a0 = Math.PI * (.75 + i * .08), wv = Math.sin(S.real * 8 + i) * .12; gl(() => { x.moveTo(-Lh * .05, -Hh * .2); x.quadraticCurveTo(Math.cos(a0 + wv) * Lh * .7, Math.sin(a0 + wv) * Hh * 2.2, Math.cos(a0 + wv * 2) * Lh * 1.15, Math.sin(a0 + wv * 2) * Hh * 2.8 * (i % 2 ? 1 : -.7)); }, '#bfe9ff', 1.3, .8); }
+  // 가지뿔 두 개
+  const antler = sd => () => { x.moveTo(Lh * .05, -Hh * .75 * sd); x.bezierCurveTo(-Lh * .25, -Hh * 1.6 * sd, -Lh * .7, -Hh * 2.1 * sd, -Lh * 1.15, -Hh * 2.0 * sd);
+    x.moveTo(-Lh * .28, -Hh * 1.45 * sd); x.lineTo(-Lh * .2, -Hh * 2.3 * sd); x.moveTo(-Lh * .62, -Hh * 1.95 * sd); x.lineTo(-Lh * .55, -Hh * 2.7 * sd); x.moveTo(-Lh * .9, -Hh * 2.05 * sd); x.lineTo(-Lh * 1.05, -Hh * 2.6 * sd); };
+  [1, -1].forEach(sd => { x.save(); x.strokeStyle = dark; x.lineWidth = Wm * .14; x.lineCap = 'round'; x.beginPath(); antler(sd)(); x.stroke(); x.restore(); gl(antler(sd), '#e8f8ff', 1.6, 1); });
+  // 머리 옆모습: 눈두덩, 콧등, 뭉툭한 코, 벌어지는 턱
+  const upper = () => { x.moveTo(-Lh * .38, -Hh * .45); x.quadraticCurveTo(-Lh * .2, -Hh * 1.05, Lh * .1, -Hh * 1.0); x.quadraticCurveTo(Lh * .28, -Hh * 1.12, Lh * .36, -Hh * .72); x.quadraticCurveTo(Lh * .6, -Hh * .62, Lh * .78, -Hh * .78);
+    x.quadraticCurveTo(Lh * 1.02, -Hh * .9, Lh * 1.04, -Hh * .45); x.quadraticCurveTo(Lh * 1.06, -Hh * .1, Lh * .96, Hh * .02); x.lineTo(Lh * .14, Hh * .06); x.quadraticCurveTo(-Lh * .05, Hh * .42, -Lh * .36, Hh * .32); x.closePath(); };
+  const lower = () => { x.moveTo(Lh * .12, Hh * .08); x.lineTo(Lh * .86, Hh * .16); x.quadraticCurveTo(Lh * .9, Hh * .42, Lh * .7, Hh * .58); x.quadraticCurveTo(Lh * .3, Hh * .72, -Lh * .12, Hh * .55); x.closePath(); };
+  for (let i = 0; i < 5; i++){ const a0 = .9 + i * .18; gl(() => { x.moveTo(-Lh * .12, Hh * .25); x.lineTo(-Lh * .12 - Math.cos(a0) * Lh * (.45 + (i % 2) * .15), Hh * .25 + Math.sin(a0) * Hh * (.9 + (i % 2) * .3)); }, '#bfe9ff', 1.2, .85); }
+  x.save(); x.translate(Lh * .12, Hh * .08); x.rotate(jaw); x.translate(-Lh * .12, -Hh * .08); x.fillStyle = dark; x.beginPath(); lower(); x.fill(); gl(lower, col, 1.8, 1);
+  [[.78, .34], [.62, .2], [.48, .2], [.34, .26]].forEach(([u, hgt]) => gl(() => { x.moveTo(Lh * (u - .04), Hh * .16); x.lineTo(Lh * u, -Hh * hgt); x.lineTo(Lh * (u + .04), Hh * .16); }, '#ffffff', 1, 1));
+  for (let i = 0; i < 4; i++) gl(() => { x.moveTo(Lh * (.55 - i * .12), Hh * .66); x.quadraticCurveTo(Lh * (.5 - i * .12), Hh * 1.3, Lh * (.35 - i * .1) + Math.sin(S.real * 5 + i) * 6, Hh * (1.8 + i * .15)); }, '#bfe9ff', 1.1, .85);
+  x.restore();
+  if (jaw > .05){ halo(Lh * .7, Hh * .35, Lh * (.3 + jaw * .7), '#ffffff', jaw * .55); for (let q = 0; q < 2; q++) bolt(Lh * .85, Hh * .3, Lh * (1.4 + Math.random()), Hh * rand(-1, 2), 14, col, 1, jaw, Math.random() * 1e6 | 0, 0, 4); }
+  if (D.orb > 0){ halo(Lh * 1.05, Hh * .3, Wm * (1 + D.orb * 2.5), '#ffffff', 1); halo(Lh * 1.05, Hh * .3, Wm * (2 + D.orb * 5), col, .9); }
+  x.fillStyle = dark; x.beginPath(); upper(); x.fill(); gl(upper, col, 2.2, 1);
+  [[.82, .42], [.6, .26], [.4, .3]].forEach(([u, hgt]) => gl(() => { x.moveTo(Lh * (u - .045), Hh * .05); x.lineTo(Lh * u, Hh * hgt); x.lineTo(Lh * (u + .045), Hh * .05); }, '#ffffff', 1.1, 1));
+  gl(() => { x.moveTo(-Lh * .18, -Hh * .78); x.quadraticCurveTo(Lh * .1, -Hh * 1.12, Lh * .34, -Hh * .7); }, '#e8f8ff', 2, 1);
+  gl(() => { x.moveTo(Lh * .86, -Hh * .66); x.quadraticCurveTo(Lh * .96, -Hh * .58, Lh * .92, -Hh * .46); }, '#ffffff', 1.4, 1);
+  gl(() => { x.moveTo(Lh * .45, -Hh * .5); x.quadraticCurveTo(Lh * .6, -Hh * .45, Lh * .7, -Hh * .55); x.moveTo(-Lh * .05, -Hh * .2); x.quadraticCurveTo(Lh * .05, Hh * .0, Lh * .1, -Hh * .3); }, col, .9, .7);
+  // 눈: 눈두덩 아래에서 번뜩
+  x.save(); x.globalCompositeOperation = 'lighter'; x.fillStyle = '#ffffff'; x.beginPath(); x.moveTo(Lh * .02, -Hh * .58); x.quadraticCurveTo(Lh * .16, -Hh * .84, Lh * .3, -Hh * .6); x.quadraticCurveTo(Lh * .16, -Hh * .46, Lh * .02, -Hh * .58); x.fill(); x.restore();
+  x.fillStyle = '#04122a'; x.beginPath(); x.ellipse(Lh * .17, -Hh * .62, Lh * .022, Hh * .12, 0, 0, TAU); x.fill();
+  halo(Lh * .16, -Hh * .62, Wm * 1.2, '#cff2ff', 1); x.save(); x.globalCompositeOperation = 'lighter'; x.globalAlpha = .75; x.strokeStyle = '#e8f8ff'; x.lineWidth = 1.3; x.beginPath(); x.moveTo(Lh * .16 - Wm * 1.8, -Hh * .62); x.lineTo(Lh * .16 + Wm * 1.8, -Hh * .62); x.stroke(); x.restore();
+  // 수염 두 가닥
+  const wv = S.real * 6; [1, -1].forEach(sd => gl(() => { x.moveTo(Lh * 1.0, -Hh * .2); x.bezierCurveTo(Lh * .6, Hh * sd * (1.6 + Math.sin(wv) * .4), -Lh * .4, Hh * sd * (.8 + Math.cos(wv) * .8), -Lh * 1.9, Hh * sd * (2.4 + Math.sin(wv + 1) * .9)); }, '#cfefff', 1.3, .9));
+  x.restore();
+  D.head = [h.x, h.y];
 }
-const DT_THUNDER = [.7, 1.9, .55, 1.25, .24];
+
+const DT_THUNDER = [.9, 2.3, .6, 1.7, .24];
 function castThunder(){
   const f0 = FOES[0], [gx, gy] = tc(f0.c, f0.r), [mx, my] = tc(MAGE.c, MAGE.r), col = '#8fd8ff', D = DRAGON, skyY = gy - tw() * 2.5, skyR = tw() * 2.1;
   letterTo(1, .8); camTo(.8, W * .55, H * .36, 2.2); MAGE.glow = .9; SFX.drone(3.5, 55);
@@ -414,12 +463,14 @@ function castThunder(){
   at(3.3, () => { SFX.charge(1.9); camTo(.86, gx, H * .36, 1.8); FX(1.9, k => { sky.charge = k; sats.forEach(c => c.charge = k); self.charge = k; S.cloudFlash = Math.random() < .08 ? 1 : S.cloudFlash * .9; converge(sky, 4, col);
     if (Math.random() < .5){ const s1 = sats[(Math.random() * sats.length) | 0]; if (s1) bolt(s1.x, s1.y, sky.x + rand(-skyR, skyR) * .5, sky.y + rand(-10, 10), 30, col, 1.4, .9, Math.random() * 1e6 | 0, 1, 5); } S.trauma = Math.max(S.trauma, k * .12); }); });
   at(5.2, () => { duck(.12, .05); self.dissolveAt = S.T; FX(.6, k => { sky.charge = 1 + k * .6; }); });
-  const tD = 5.8; at(tD, () => { duck(1, .02); Object.assign(D, { on: true, t0: S.T, cx: sky.x, cy: sky.y, R: sky.r * .95, f: sky.flat, tx: gx, ty: gy - tw() * .2, jaw: 0, roar: 0 }); SFX.whoosh(.8, .6); tone('sawtooth', 90, 240, 1, .1); S.trauma += .3; camTo(.7, gx, skyY + tw() * .3, 1.4); });
+  at(5.5, () => { FX(.5, k => { halo(sky.x, sky.y, sky.r * .6 * eout(k), '#ffffff', 1); }); SFX.taiko(1); S.shocks.push({ x: sky.x, y: sky.y, t0: S.real, spd: H * 1.2, str: 1.2, life: .7 }); });
+  const tD = 5.8; at(tD, () => { duck(1, .02); Object.assign(D, { on: true, t0: S.T, cx: sky.x, cy: sky.y, R: sky.r * .95, f: sky.flat, tx: gx, ty: gy - tw() * .2, jaw: 0, roar: 0, orb: 0 }); SFX.whoosh(.9, .7); SFX.roar(); tone('sawtooth', 70, 240, 1.2, .12); S.trauma += .45; if (!S.calm){ S.flash = .6; S.flashCol = '#cfeeff'; } camTo(.68, gx, skyY + tw() * .3, 1.4);
+    FX(1.4, k => { halo(sky.x, sky.y, sky.r * .7 * (1 - k * .6), '#e8f8ff', (1 - k) * .9); }); });
   const tRoar = tD + DT_THUNDER[0] + DT_THUNDER[1] + DT_THUNDER[2] + .1;
-  at(tRoar, () => { SFX.roar(); setTimeout(SFX.roar, 380); camTo(.86, gx, skyY - tw() * .2, .5, eout); FX(1.1, k => { D.jaw = Math.sin(clamp(k * 1.15) * Math.PI) * .85; D.roar = 1 - k; S.trauma = Math.max(S.trauma, .45); S.chroma = Math.max(S.chroma, 5); S.cloudFlash = Math.random() < .3 ? 1 : S.cloudFlash; });
+  at(tRoar, () => { SFX.roar(); setTimeout(SFX.roar, 420); const hp = D.head || [gx, skyY]; camTo(1.25, hp[0], hp[1] + tw() * .3, .5, eout); at(.95, () => { SFX.charge(.6); FX(.7, k => { D.orb = eout(k); const hh = D.head || hp; for (let q = 0; q < 3; q++){ const a = rand(0, TAU), d = tw() * 1.6; P({ x: hh[0] + Math.cos(a) * d, y: hh[1] + Math.sin(a) * d, vx: -Math.cos(a) * d * 2.6, vy: -Math.sin(a) * d * 2.6, life: .38, r: 1.6, col: '#e8f8ff', kind: 'streak' }); } }); camTo(.95, gx, skyY + tw() * .6, .6); }); FX(1.6, k => { D.jaw = k < .6 ? Math.sin(clamp(k / .6) * Math.PI) * .9 : .35; D.roar = 1 - k; S.trauma = Math.max(S.trauma, .45); S.chroma = Math.max(S.chroma, 5); S.cloudFlash = Math.random() < .3 ? 1 : S.cloudFlash; });
     for (let i = 0; i < 5; i++) at(i * .2, () => { const [px, py] = dragonP(dragonS(S.T - D.t0)); S.shocks.push({ x: px, y: py, t0: S.real, spd: H * 1.1, str: .7, life: .6 }); }); });
   const tHit = tD + DT_THUNDER.reduce((a, b) => a + b, 0);
-  at(tHit - .3, () => { SFX.whoosh(.32, .7); camTo(1, gx, gy - tw() * .8, .3, ein); });
+  at(tHit - .3, () => { SFX.whoosh(.32, .8); D.orb = 0; camTo(1, gx, gy - tw() * .8, .3, ein); });
   at(tHit, () => { // 팡
     hit(f0, 'fin', col, { dir: [0, 1] }); FOES.slice(1).forEach(f => hit(f, 'heavy', col, { dir: [foeXY(f)[0] - gx, -.3], nonum: true, silent: true })); SFX.boom(); SFX.taiko(1); if (!S.calm){ S.flash = 1.2; S.flashCol = '#e8f6ff'; }
     S.slowUntil = S.real + 1.1; S.slowScale = .22;
