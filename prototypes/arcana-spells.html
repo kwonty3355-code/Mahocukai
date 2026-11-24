@@ -350,8 +350,8 @@ function drawTitle(){
 /* ================= 스킬 1: 천류뇌격 — 하늘 마법진에서 뇌룡이 나와 한 바퀴 돌고 포효, 내리꽂음 ================= */
 /* ================= 뇌룡: 번개 가닥이 꼬여 흐르는 몸, 굵직한 머리 실루엣, 곡선 비행 ================= */
 const DRAGON = { on: false, t0: 0, cx: 0, cy: 0, R: 0, f: .32, tx: 0, ty: 0, jaw: 0, roar: 0, orb: 0, hang: null };
-const DT_THUNDER = [.7, 2.4, .45, .3];
-const DSEG = [[0, 1, .7, eout], [1, 8, 2.4, t => clamp(t + .03 * Math.sin(t * TAU * 2))], [8, 9, .45, eout], [9, 10, .3, ein]];
+const DT_THUNDER = [.38, 2.3, .45, .28];
+const DSEG = [[0, 1, .38, t => t * t * .4 + t * .6], [1, 8, 2.3, t => clamp(t + .03 * Math.sin(t * TAU * 2))], [8, 9, .45, eout], [9, 10, .28, ein]];
 function dragonS(age){ let t = age; for (const [a, b, d, e] of DSEG){ if (t <= d) return a + (b - a) * e(clamp(t / d)); t -= d; } return 10; }
 function dragonCtrl(){ const D = DRAGON, C = [D.cx, D.cy], R = D.R, o = (u, v) => [C[0] + u * R, C[1] + v * R];
   return [C, o(-.22, .3), o(-1.05, .16), o(-.7, -.44), o(.4, -.52), o(1.1, -.02), o(.6, .42), o(-.08, .26), o(-.1, -.55), o(.02, -1.35), [D.tx, D.ty]]; }
@@ -403,6 +403,8 @@ function drawDragon(){
   const wv = S.real * 5; [1, -1].forEach(sd => gl(() => { x.moveTo(L * .95, -Hh * .1); x.bezierCurveTo(L * .5, Hh * sd * (1.5 + Math.sin(wv) * .5), -L * .4, Hh * sd * (.7 + Math.cos(wv) * .8), -L * 1.8, Hh * sd * (2.2 + Math.sin(wv + 1) * .9)); }, '#dff6ff', 1.2, .85));
   x.restore();
   D.head = [h.x, h.y]; S.ga = 1;
+  if (D.fade >= 1 && sh < 10){ D.trail = D.trail || []; D.trail.push({ x: h.x, y: h.y, t: S.real }); for (let q = 0; q < 7; q++){ const p = body[(Math.random() * body.length) | 0], sd = Math.random() < .5 ? 1 : -1, v = rand(80, 260); P({ x: p.x, y: p.y, vx: p.nx * sd * v + p.tx * rand(-60, 60), vy: p.ny * sd * v + p.ty * rand(-60, 60), g: 120, drag: 1.5, life: rand(.25, .55), r: rand(1, 2.2), col: Math.random() < .5 ? '#ffffff' : col, kind: 'streak' }); } }
+  if (D.trail){ D.trail = D.trail.filter(t => S.real - t.t < .28); x.save(); x.globalCompositeOperation = 'lighter'; D.trail.forEach((t, i) => { const a = 1 - (S.real - t.t) / .28; const g = x.createRadialGradient(t.x, t.y, 0, t.x, t.y, Wm * 1.3 * a + 2); g.addColorStop(0, `rgba(230,248,255,${.5 * a})`); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.beginPath(); x.arc(t.x, t.y, Wm * 1.3 * a + 2, 0, TAU); x.fill(); }); x.restore(); }
 }
 
 function castThunder(){
@@ -414,36 +416,53 @@ function castThunder(){
   at(1.2, () => { SFX.choir([110, 164.8, 220, 277.2], 4.2, .06); FX(2.4, k => { S.clouds = eio(k); S.dim = k * .35; }); });
   at(2.0, () => { S.tcard = { t0: S.T, big: '天流雷擊', small: '천류뇌격 · 제7위계', hold: 2.4, col: '#8fd8ff' }; });
   at(2.6, () => { FX(2.0, k => { S.rays = eio(k); S.ground = eio(k); lift(gx, gy, tw() * 2, 1); }); });
-  at(3.3, () => { SFX.charge(1.9); camTo(.86, gx, H * .36, 1.8); FX(1.9, k => { sky.charge = k; sats.forEach(c => c.charge = k); self.charge = k; S.cloudFlash = Math.random() < .08 ? 1 : S.cloudFlash * .9; converge(sky, 4, col);
+  at(2.7, () => { SFX.charge(1.2); camTo(.86, gx, H * .36, 1.2); FX(1.2, k => { sky.charge = k; sats.forEach(c => c.charge = k); self.charge = k; S.cloudFlash = Math.random() < .08 ? 1 : S.cloudFlash * .9; converge(sky, 4, col);
     if (Math.random() < .5){ const a1 = rand(0, TAU), a2 = a1 + rand(.5, 1.5); bolt(sky.x + Math.cos(a1) * skyR, sky.y + Math.sin(a1) * skyR * sky.flat, sky.x + Math.cos(a2) * skyR, sky.y + Math.sin(a2) * skyR * sky.flat, 30, col, 1.4, .9, Math.random() * 1e6 | 0, 1, 5); } S.trauma = Math.max(S.trauma, k * .12); }); });
-  at(5.2, () => { duck(.12, .05); self.dissolveAt = S.T; FX(.6, k => { sky.charge = 1 + k * .6; }); });
-  at(5.5, () => { FX(.5, k => { halo(sky.x, sky.y, sky.r * .6 * eout(k), '#ffffff', 1); }); SFX.taiko(1); S.shocks.push({ x: sky.x, y: sky.y, t0: S.real, spd: H * 1.2, str: 1.2, life: .7 }); });
-  const tD = 5.8; at(tD, () => { duck(1, .02); Object.assign(D, { on: true, t0: S.T, cx: sky.x, cy: sky.y, R: sky.r * .95, f: sky.flat, tx: gx, ty: gy - tw() * .2, jaw: 0, roar: 0, orb: 0, hang: null, fade: 1 }); SFX.whoosh(.9, .7); SFX.taiko(1); tone('sawtooth', 70, 240, 1.2, .12); S.trauma += .45; if (!S.calm){ S.flash = .5; S.flashCol = '#cfeeff'; } camTo(.66, gx, skyY + tw() * .2, 1.0); });
+  at(3.9, () => { self.dissolveAt = S.T; sky.charge = 1.6; });
+  at(3.85, () => { FX(.3, k => { halo(sky.x, sky.y, sky.r * .6 * eout(k), '#ffffff', 1); }); SFX.taiko(1); S.shocks.push({ x: sky.x, y: sky.y, t0: S.real, spd: H * 1.2, str: 1.2, life: .7 }); });
+  const tD = 4.0; at(tD, () => { duck(1, .02); Object.assign(D, { on: true, t0: S.T, cx: sky.x, cy: sky.y, R: sky.r * .95, f: sky.flat, tx: gx, ty: gy - tw() * .2, jaw: 0, roar: 0, orb: 0, hang: null, fade: 1 }); SFX.whoosh(.9, .7); SFX.taiko(1); tone('sawtooth', 70, 240, 1.2, .12); S.trauma += .45; if (!S.calm){ S.flash = .5; S.flashCol = '#cfeeff'; } camTo(.66, gx, skyY + tw() * .2, 1.0); });
+  const strike = (big) => { const tx2 = gx + rand(-tw() * 3, tw() * 3), ty2 = gy + rand(-tw() * .6, tw() * .8), sx2 = tx2 + rand(-80, 80), sd = Math.random() * 1e6 | 0;
+    FX(.22, k => { bolt(sx2, skyY - tw() * 3.4, tx2, ty2, 70, col, (big ? 4 : 2.4) * (1 - k) + 1, 1 - k, sd + ((S.real * 30) | 0), 3, 6); halo(tx2, ty2, tw() * .9, '#e8f8ff', 1 - k); });
+    S.cloudFlash = 1; hiss('highpass', 2500, 7000, .08, .45); tone('sine', 90, 40, .5, .35); hiss('lowpass', 1200, 80, .9, .25, .7, .05, .1); S.trauma = Math.max(S.trauma, .2); };
+  for (let i = 0; i < 9; i++) at(tD + .15 + i * .3 + rand(0, .12), () => strike(i % 3 === 0));
   const tRoar = tD + DT_THUNDER[0] + .9;
   at(tRoar, () => { SFX.roar(); setTimeout(SFX.roar, 360); FX(1.2, k => { D.jaw = Math.sin(clamp(k) * Math.PI) * .9; D.roar = 1 - k; S.trauma = Math.max(S.trauma, .42); S.chroma = Math.max(S.chroma, 5); S.cloudFlash = Math.random() < .3 ? 1 : S.cloudFlash; });
     for (let i = 0; i < 5; i++) at(i * .2, () => { const hp = D.head || [gx, skyY]; S.shocks.push({ x: hp[0], y: hp[1], t0: S.real, spd: H * 1.1, str: .7, life: .6 }); }); });
   const tRise = tD + DT_THUNDER[0] + DT_THUNDER[1];
-  at(tRise, () => { SFX.whoosh(.45, .7); tone('sawtooth', 120, 520, .45, .12); camTo(.55, gx, skyY - tw() * 1.15, .45, eout); FX(.45, k => { D.orb = eout(k); D.jaw = .5 * k; }); });
+  at(tRise, () => { SFX.whoosh(.45, .7); tone('sawtooth', 120, 520, .45, .12); SFX.charge(.45); camTo(.55, gx, skyY - tw() * 1.15, .45, eout); FX(.45, k => { D.orb = eout(k); D.jaw = .5 * k; const hp = D.head || [gx, skyY];
+      for (let r = 0; r < 3; r++){ const rr = tw() * (2.6 - ((k * 3 + r) % 1) * 2.4); x.save(); x.translate(hp[0], hp[1]); x.scale(1, .5); gl(() => x.arc(0, 0, Math.max(2, rr), 0, TAU), col, 2, .7 * (1 - ((k * 3 + r) % 1))); x.restore(); }
+      for (let q = 0; q < 5; q++){ const a = rand(0, TAU), d = tw() * 2.2; P({ x: hp[0] + Math.cos(a) * d, y: hp[1] + Math.sin(a) * d * .6, vx: -Math.cos(a) * d * 2.4, vy: -Math.sin(a) * d * 1.4, life: .4, r: 1.6, col: '#ffffff', kind: 'streak' }); } });
+    at(.4, () => { const hp = D.head || [gx, skyY]; S.shocks.push({ x: hp[0], y: hp[1], t0: S.real, spd: H * 1.4, str: 1.3, life: .6 }); SFX.taiko(.8); }); });
   const tHit = tRise + DT_THUNDER[2] + DT_THUNDER[3];
   at(tHit - DT_THUNDER[3], () => { SFX.whoosh(.3, .9); camTo(1, gx, gy - tw() * .8, .3, ein); });
   at(tHit, () => { // 팡
-    hit(f0, 'fin', col, { dir: [0, 1] }); FOES.slice(1).forEach(f => hit(f, 'heavy', col, { dir: [foeXY(f)[0] - gx, -.3], nonum: true, silent: true })); SFX.boom(); SFX.taiko(1); if (!S.calm){ S.flash = 1.2; S.flashCol = '#e8f6ff'; }
-    S.slowUntil = S.real + 1.1; S.slowScale = .22;
+    hit(f0, 'fin', col, { dir: [0, 1] }); FOES.slice(1).forEach((f, i) => hit(f, 'heavy', col, { dir: [foeXY(f)[0] - gx, -.3], silent: true, nx: (i - 1.5) * 10 })); SFX.boom(); SFX.taiko(1); if (!S.calm){ S.flash = 1.2; S.flashCol = '#e8f6ff'; }
+    S.slowUntil = S.real + 1.4; S.slowScale = .2;
     S.shocks.push({ x: gx, y: gy, t0: S.real, spd: H * 1.2, str: 2, life: 1 });
-    const seedA = Math.random() * 1e6 | 0; FX(.6, k => { bolt(sky.x, sky.y, gx, gy - 10, 90, col, 8 * (1 - k) + 2, 1 - k, seedA + ((S.real * 30) | 0), 5, 7); halo(gx, gy, tw() * 3, '#cfeeff', 1 - k); });
+    const seedA = Math.random() * 1e6 | 0; FX(1.0, k => { for (let b2 = 0; b2 < 5; b2++) bolt(sky.x + (b2 - 2) * tw() * .45, sky.y, gx + (b2 - 2) * tw() * .12, gy - 10, 90, col, (b2 === 2 ? 10 : 5) * (1 - k) + 1.5, 1 - k, seedA + b2 * 131 + ((S.real * 30) | 0), 4, 7); halo(gx, gy, tw() * 3.4, '#cfeeff', 1 - k); });
+    [0, .08, .18, .3, .45].forEach((d, i) => at(d, () => S.shocks.push({ x: gx, y: gy, t0: S.real, spd: H * (1 + i * .3), str: 2.2 - i * .35, life: 1.1 })));
+    hiss('highpass', 1800, 9000, .25, .9); tone('sine', 55, 20, 3.4, 1); hiss('lowpass', 900, 50, 3.6, .7, .5, .05, .05);
+    for (let i = 0; i < 70; i++){ const a = rand(-Math.PI, 0), v = rand(150, 520); P({ x: gx + rand(-14, 14), y: gy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 700, life: rand(.8, 1.6), r: rand(2, 5), col: '#2c2440', add: false, kind: 'rock', shrink: false, rot: rand(0, TAU) }); }
+    for (let i = 0; i < 260; i++){ const a = rand(0, TAU), v = rand(150, 700); P({ x: gx, y: gy - 8, vx: Math.cos(a) * v, vy: Math.sin(a) * v * .55 - 80, g: 300, drag: 1.6, life: rand(.5, 1.3), r: rand(1.2, 2.8), col: Math.random() < .5 ? '#ffffff' : col, kind: 'streak' }); }
+    const cracks = Array.from({ length: 16 }, (_, i) => { const a = i / 16 * TAU + rand(-.15, .15); let px = gx, py = gy; const pts = [[px, py]]; for (let j = 0; j < 7; j++){ px += Math.cos(a + rand(-.4, .4)) * tw() * .38; py += Math.sin(a + rand(-.4, .4)) * tw() * .19; pts.push([px, py]); } return pts; });
+    FX(2.6, k => { const a = k < .1 ? k / .1 : 1 - clamp((k - .55) / .45); cracks.forEach(c => gl(() => c.forEach(([px, py], i) => i ? x.lineTo(px, py) : x.moveTo(px, py)), col, 1.8, a)); x.save(); x.translate(gx, gy); x.scale(1, .5); gl(() => x.arc(0, 0, tw() * 3.6 * eout(clamp(k * 2.5)), 0, TAU), '#ffffff', 3 * (1 - k) + .5, (1 - k)); x.restore(); }, { under: true });
+    camTo(1.16, gx, gy - tw() * .6, .12, eout); at(.5, () => camTo(.85, gx, H * .4, 1.6));
     sky.charge = 1.8; D.orb = 0; D.jaw = .6;
     at(.9, () => FX(.9, k => { D.fade = 1 - k; })); at(1.85, () => { D.on = false; });
   });
   at(tHit + .2, () => { // 쩌저저저적
-    camTo(.85, gx, H * .4, 1.2); SFX.crackle(1.3, 70); const N = 13, arms = Array.from({ length: N }, (_, i) => ({ a: i / N * TAU + rand(-.2, .2), L: tw() * rand(2.4, 3.8) }));
-    FX(1.4, k => { const grow = eout(clamp(k * 1.5)), fade = 1 - clamp((k - .65) / .35); arms.forEach((ar, i) => bolt(gx, gy, gx + Math.cos(ar.a) * ar.L * grow, gy + Math.sin(ar.a) * ar.L * grow * .5, 30, col, 2.2, fade, i * 977 + ((S.real * 20) | 0), 2, 5)); S.trauma = Math.max(S.trauma, .3 * fade); S.cloudFlash = Math.random() < .15 ? 1 : S.cloudFlash; });
+    SFX.crackle(1.5, 110); const N = 24, arms = Array.from({ length: N }, (_, i) => ({ a: i / N * TAU + rand(-.2, .2), L: tw() * rand(2.4, 3.8) }));
+    FX(1.4, k => { const grow = eout(clamp(k * 1.5)), fade = 1 - clamp((k - .65) / .35); for (let q = 0; q < 2; q++){ const f1 = FOES[(Math.random() * 5) | 0], f2 = FOES[(Math.random() * 5) | 0]; if (f1 !== f2){ const p1 = foeXY(f1), p2 = foeXY(f2); bolt(p1[0], p1[1], p2[0], p2[1], 30, col, 1.6, fade, Math.random() * 1e6 | 0, 1, 5); } }
+    arms.forEach((ar, i) => bolt(gx, gy, gx + Math.cos(ar.a) * ar.L * grow, gy + Math.sin(ar.a) * ar.L * grow * .5, 30, col, 2.6, fade, i * 977 + ((S.real * 20) | 0), 2, 5)); S.trauma = Math.max(S.trauma, .3 * fade); S.cloudFlash = Math.random() < .15 ? 1 : S.cloudFlash; });
     for (let i = 0; i < 8; i++) at(.12 + i * .13, () => { const f = FOES[(i % 4) + 1]; hit(f, 'light', col, { dir: [rand(-1, 1), -1], pitch: i, silent: true, nx: rand(-12, 12) }); });
   });
   [[1, 4], [2, 7], [3, 10], [4, 12]].forEach(([fi, p], n) => at(tHit + 1.6 + n * .16, () => { // 파바방
     const f = FOES[fi], [hx, hy] = foeXY(f), sd = Math.random() * 1e6 | 0; hit(f, 'mid', col, { dir: [0, 1], pitch: p });
     FX(.4, k => { bolt(hx + rand(-6, 6), hy - tw() * 3, hx, hy, 50, col, 4 * (1 - k) + 1, 1 - k, sd, 2, 6); halo(hx, hy, tw() * 1.3, '#e0f6ff', 1 - k); }); S.shocks.push({ x: hx, y: hy, t0: S.real, spd: H * .9, str: .8, life: .5 }); }));
-  at(tHit + 2.5, () => { sky.dissolveAt = S.T; sky.dissolveLen = 1.4; camTo(1, null, null, 1.6); letterTo(0, 1.2); FX(1.6, k => { S.dim = lerp(.35, 0, k); S.clouds = 1 - k; S.rays = 1 - k; S.ground = 1 - k; }); for (let i = 0; i < 60; i++) P({ x: gx + rand(-tw() * 2.4, tw() * 2.4), y: gy + rand(-10, 10), vx: rand(-20, 20), vy: rand(-90, -30), g: 100, life: rand(.6, 1.4), r: 1.3, col }); });
-  return tHit + 4.3;
+  at(tHit + 2.35, () => { if (!S.calm){ S.flash = .9; S.flashCol = '#e0f2ff'; } S.cloudFlash = 1; hiss('highpass', 1500, 8000, .3, .7); tone('sine', 60, 25, 2, .8); S.trauma = Math.max(S.trauma, .5);
+    const web = Array.from({ length: 10 }, () => [rand(0, W), rand(0, H * .3)]); FX(.5, k => { for (let i = 0; i < web.length - 1; i++) bolt(web[i][0], web[i][1] + skyY * 0, web[i + 1][0], web[i + 1][1], 40, col, 2.4 * (1 - k) + .5, 1 - k, i * 71 + ((S.real * 20) | 0), 2, 5); for (let i = 0; i < 4; i++){ const f = FOES[i + 1], p = foeXY(f); bolt(web[i * 2][0], web[i * 2][1], p[0], p[1], 50, col, 3 * (1 - k) + .5, 1 - k, i * 33 + ((S.real * 20) | 0), 2, 6); } }); });
+  at(tHit + 2.9, () => { sky.dissolveAt = S.T; sky.dissolveLen = 1.4; camTo(1, null, null, 1.6); letterTo(0, 1.2); FX(1.6, k => { S.dim = lerp(.35, 0, k); S.clouds = 1 - k; S.rays = 1 - k; S.ground = 1 - k; }); for (let i = 0; i < 60; i++) P({ x: gx + rand(-tw() * 2.4, tw() * 2.4), y: gy + rand(-10, 10), vx: rand(-20, 20), vy: rand(-90, -30), g: 100, life: rand(.6, 1.4), r: 1.3, col }); });
+  return tHit + 4.6;
 }
 
 /* ================= 일도양단: 빛의 검이 솟고, 세상이 멈추고, 화면이 썰림 ================= */
